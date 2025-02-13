@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Readiness Assessment - Test Client</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .chat-container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 250px);
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .messages-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Start from bottom */
+            min-height: 100%;
+            padding-right: 10px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 70%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in-out;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .message:hover {
+            cursor: pointer;
+            background-color: #f8f9fa;
+        }
+        .scroll-button {
+            position: fixed;
+            right: 30px;
+            bottom: 100px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .scroll-button.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .scroll-button:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        .scroll-icon {
+            width: 20px;
+            height: 20px;
+            fill: #666;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .bot-message {
+            background-color: #f5f5f5;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            position: sticky;
+            bottom: 0;
+        }
+        .chat-controls {
+            display: none; /* Hide chat controls initially */
+            width: 100%;
+        }
+        .message-input-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 5px 15px;
+        }
+        #message-input {
+            border: none;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            outline: none;
+            background: transparent;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #1976d2;
+        }
+        .status {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            display: none; /* Hide status initially */
+        }
+        .error-message {
+            margin: 20px;
+            padding: 15px;
+            background-color: #ffebee;
+            border-radius: 5px;
+            color: #c62828;
+            display: none;
+        }
+        .progress-container {
+            margin-top: 10px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #4caf50;
+            transition: width 0.3s ease-in-out;
+        }
+        .welcome-screen {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .welcome-screen h2 {
+            margin-bottom: 20px;
+        }
+        #start-assessment {
+            font-size: 1.2em;
+            padding: 15px 30px;
+        }
+        #send-button {
+            width: 44px;
+            height: 44px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .send-icon {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Export Readiness Assessment</h1>
+    
+    <div class="welcome-screen" id="welcome-screen">
+        <h2>Welcome to Your Export Journey</h2>
+        <p>This assessment will help evaluate your business's export readiness and provide personalized recommendations.</p>
+        <button id="start-assessment">Begin Assessment</button>
+    </div>
+
+    <div class="error-message" id="error-message"></div>
+
+    <div class="status" id="status">
+        Stage: <span id="current-stage">Not started</span>
+        <br>
+        Progress: <span id="progress">0%</span>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+        </div>
+    </div>
+    
+    <div class="chat-container" id="chat-container">
+        <div class="messages-wrapper" id="messages-wrapper"></div>
+    </div>
+    
+    <button class="scroll-button" id="scroll-button">
+        <svg class="scroll-icon" viewBox="0 0 24 24">
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
+        </svg>
+    </button>
+
+    <div class="input-container chat-controls" id="chat-controls">
+        <div class="message-input-wrapper">
+            <input type="text" id="message-input" placeholder="Type your message...">
+        </div>
+        <button id="send-button">
+            <svg class="send-icon" viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        const SESSION_ID = 'test_session_' + Math.random().toString(36).substr(2, 9);
+        const API_BASE_URL = 'http://127.0.0.1:5001/api';
+        
+        function addMessage(message, isUser) {
+            const messageDiv = $('<div class="message"></div>')
+                .addClass(isUser ? 'user-message' : 'bot-message')
+                .text(message);
+            
+            $('#messages-wrapper').append(messageDiv);
+            scrollToBottom();
+            updateScrollButton();
+        }
+
+        function showError(message) {
+            $('#error-message').text(message).show();
+            setTimeout(() => $('#error-message').fadeOut(), 5000);
+        }
+        
+        function checkLLMHealth() {
+            return $.ajax({
+                url: `${API_BASE_URL}/health`,
+                method: 'GET'
+            });
+        }
+
+        function startAssessment() {
+            $('#welcome-screen').hide();
+            
+            checkLLMHealth()
+                .then(response => {
+                    if (response.status === 'healthy') {
+                        $('#chat-container, #chat-controls, #status').show();
+                        
+                        return $.ajax({
+                            url: `${API_BASE_URL}/start`,
+                            method: 'POST',
+                            headers: {
+                                'X-Session-ID': SESSION_ID
+                            }
+                        });
+                    } else {
+                        throw new Error(response.message);
+                    }
+                })
+                .then(response => {
+                    addMessage(response.question, false);
+                    $('#message-input').focus();
+                })
+                .catch(error => {
+                    console.error('Error starting assessment:', error);
+                    $('#welcome-screen').show();
+                    showError('Unable to start assessment. Please try again later.');
+                });
+        }
+
+        function sendMessage() {
+            const message = $('#message-input').val().trim();
+            if (message) {
+                addMessage(message, true);
+                $('#message-input').val('');
+
+                checkLLMHealth()
+                    .then(response => {
+                        if (response.status === 'healthy') {
+                            return $.ajax({
+                                url: `${API_BASE_URL}/respond`,
+                                method: 'POST',
+                                headers: {
+                                    'X-Session-ID': SESSION_ID
+                                },
+                                contentType: 'application/json',
+                                data: JSON.stringify({ message: message })
+                            });
+                        } else {
+                            throw new Error(response.message);
+                        }
+                    })
+                    .then(response => {
+                        addMessage(response.message, false);
+                        if (response.progress) {
+                            const progress = response.progress.toFixed(1);
+                            $('#progress').text(progress + '%');
+                            $('#progress-bar').css('width', progress + '%');
+                        }
+                        $('#message-input').focus();
+                    })
+                    .catch(error => {
+                        console.error('Error sending message:', error);
+                        showError('Unable to process response. Please try again.');
+                    });
+            }
+        }
+
+        function scrollToBottom() {
+            const container = $('#chat-container');
+            container.scrollTop(container[0].scrollHeight);
+        }
+
+        function updateScrollButton() {
+            const container = $('#chat-container');
+            const scrollButton = $('#scroll-button');
+            
+            if (container.scrollTop() < container[0].scrollHeight - container.height() - 100) {
+                scrollButton.addClass('visible');
+            } else {
+                scrollButton.removeClass('visible');
+            }
+        }
+
+        $('#start-assessment').click(startAssessment);
+        $('#send-button').click(sendMessage);
+        $('#message-input').keypress(function(e) {
+            if (e.which == 13 && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-resize input field as user types
+        $('#message-input').on('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        $(document).ready(function() {
+            $('#scroll-button').click(function() {
+                scrollToBottom();
+            });
+
+            $('#chat-container').on('scroll', function() {
+                updateScrollButton();
+            });
+
+            // Make messages clickable to scroll to them
+            $(document).on('click', '.message', function() {
+                const container = $('#chat-container');
+                const messageTop = $(this).position().top;
+                container.scrollTop(container.scrollTop() + messageTop - 20);
+            });
+        });
+    </script>
+</body>
+</html> 
