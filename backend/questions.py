@@ -1,271 +1,162 @@
-"""
-Defines the assessment questions and their structure.
-Each question has:
-- id: unique identifier
-- text: what to ask the user
-- extract_key: what type of information to extract
-- store_as: where to store the answer in context
-- question_type: category of question for consistent handling
-"""
-from typing import Dict, Any, Optional
-
-# Question type categories for consistent handling
-QUESTION_TYPES = {
-    'IDENTIFICATION': ['name', 'business_details'],
-    'NUMERIC': ['current_volume', 'scale_capacity', 'largest_order'],
-    'TIMELINE': ['business_age', 'order_capacity', 'timeline'],
-    'DESCRIPTIVE': ['main_product', 'product_adaptation', 'market_research', 'challenges'],
-    'CHECKLIST': ['business_registration', 'export_permits', 'product_documentation', 'quality_compliance'],
-    'BOOLEAN': ['manufacturing', 'export_restrictions', 'international_interest'],
-    'RESOURCE': ['team_dedication', 'resources'],
-    'LOCATION': ['target_countries'],
-    'INFORMATIONAL': ['technical_intro', 'final_summary']
-}
-
-def get_question_type(question_id: str) -> str:
-    """Determine the type of question based on its ID"""
-    for qtype, ids in QUESTION_TYPES.items():
-        if question_id in ids:
-            return qtype
-    return 'DESCRIPTIVE'  # Default to descriptive if no specific type found
+"""Question definitions for the assessment system."""
 
 QUESTIONS = [
     # Initial Connection Stage
     {
-        'id': 'name',
-        'text': "Hi there! I'm Sarah, your export readiness consultant. I'm here to help evaluate your business's export potential. To get started, could you please tell me your name?",
-        'extract_key': 'name',
-        'store_as': ['first_name', 'full_name'],
-        'question_type': 'IDENTIFICATION'
+        'id': 'user_details',
+        'text': "Hi there! I'm Sarah, your export readiness consultant. I'm here to help evaluate your business's export potential. To get started, could you please tell me your name, your role, and the name of your business?",
+        'extract': ['first_name', 'last_name', 'full_name', 'role', 'business_name']
     },
     {
-        'id': 'business_details',
-        'text': "Great to meet you {first_name}! What's the name of your business, and could you share your website url where we can learn more about what you do?",
-        'extract_key': 'business_details',
-        'store_as': 'business_info',
-        'question_type': 'IDENTIFICATION'
+        'id': 'website',
+        'text': "Great to meet you {first_name}! Could you share your website url where we can learn more about what you do?",
+        'extract': ['website_url']
     },
     {
         'id': 'business_age',
         'text': "How long has {business_name} been operating?",
-        'extract_key': 'business_age',
-        'store_as': 'business_age',
-        'question_type': 'TIMELINE'
+        'extract': ['business_age']
     },
     
     # Product Production Stage
     {
         'id': 'main_product',
         'text': "Fantastic, now please tell me about the main product you want to export - what exactly is it?",
-        'extract_key': 'product_info',
-        'store_as': 'main_product',
-        'question_type': 'DESCRIPTIVE'
+        'extract': ['product_info']
     },
     {
         'id': 'current_volume',
         'text': "What's your current monthly unit production volume for this product?",
-        'extract_key': 'volume',
-        'store_as': 'production_volume',
-        'question_type': 'NUMERIC'
+        'extract': ['volume']
     },
     {
         'id': 'scale_capacity',
         'text': "Could you scale up production if you received large international orders? What is your maximum unit production capacity per month for your main product?",
-        'extract_key': 'capacity',
-        'store_as': 'max_capacity',
-        'question_type': 'NUMERIC'
+        'extract': ['capacity']
     },
     {
         'id': 'manufacturing',
         'text': "Do you manufacture this product yourself or do you outsource production?",
-        'extract_key': 'manufacturing_type',
-        'store_as': 'manufacturing_method',
-        'question_type': 'BOOLEAN'
+        'extract': ['manufacturing_type']
     },
     {
         'id': 'export_restrictions',
         'text': "Are any of your product's ingredients or components subject to export restrictions or require special permits for your target markets?",
-        'extract_key': 'restrictions',
-        'store_as': 'export_restrictions',
-        'question_type': 'BOOLEAN'
+        'extract': ['restrictions']
     },
     
     # Business Operations Stage
     {
         'id': 'largest_order',
         'text': "What unit quantity does your largest customer purchase from you monthly?",
-        'extract_key': 'order_size',
-        'store_as': 'largest_order_size',
-        'question_type': 'NUMERIC'
+        'extract': ['order_size']
     },
     {
         'id': 'order_capacity',
         'text': "If you received an international order today that's 3 times your typical volume to your largest customer, how long would it take you to have the goods ready for distribution, while not impacting your existing business?",
-        'extract_key': 'timeline',
-        'store_as': 'order_fulfillment_time',
-        'question_type': 'TIMELINE'
+        'extract': ['timeline']
     },
     {
         'id': 'product_adaptation',
         'text': "Have you had to adapt your product for different customers? Tell me about that experience.",
-        'extract_key': 'adaptation_info',
-        'store_as': 'product_adaptability',
-        'question_type': 'DESCRIPTIVE'
+        'extract': ['adaptation_info']
     },
     {
         'id': 'special_handling',
         'text': "Do your products require special handling requirements (eg. Temperature control)? If so what are the special handling requirements?",
-        'extract_key': 'handling_reqs',
-        'store_as': 'handling_requirements',
-        'question_type': 'DESCRIPTIVE'
+        'extract': ['handling_reqs']
     },
     
     # Market Understanding Stage
     {
         'id': 'target_countries',
-        'text': "Which specific countries are you looking to export to first, and why?",
-        'extract_key': 'countries',
-        'store_as': 'target_markets',
-        'question_type': 'LOCATION'
+        'text': "Which specific countries are you looking to export to first?",
+        'extract': ['target_countries']
     },
     {
         'id': 'market_research',
         'text': "Have you researched the market opportunities in these markets for your main product?",
-        'extract_key': 'research_info',
-        'store_as': 'market_research',
-        'question_type': 'DESCRIPTIVE'
+        'extract': ['research_info']
     },
     {
         'id': 'international_interest',
         'text': "Have you received any international inquiries or interest already?",
-        'extract_key': 'interest_info',
-        'store_as': 'international_interest',
-        'question_type': 'BOOLEAN'
+        'extract': ['interest_info']
     },
     {
         'id': 'competitors',
         'text': "Who do you see as your main competitors in these markets?",
-        'extract_key': 'competitor_info',
-        'store_as': 'competitors',
-        'question_type': 'DESCRIPTIVE'
+        'extract': ['competitor_info']
     },
     
     # Practical Readiness Stage
     {
         'id': 'team_dedication',
         'text': "Do you have team members who can dedicate time to developing export markets?",
-        'extract_key': 'team_info',
-        'store_as': 'team_dedication',
-        'question_type': 'RESOURCE'
+        'extract': ['team_info']
     },
     {
         'id': 'timeline',
         'text': "What's your timeline for starting exports?",
-        'extract_key': 'timeline_info',
-        'store_as': 'export_timeline',
-        'question_type': 'TIMELINE'
+        'extract': ['timeline_info']
     },
     {
         'id': 'resources',
         'text': "What financial resources have you set aside for market development?",
-        'extract_key': 'resource_info',
-        'store_as': 'financial_resources',
-        'question_type': 'RESOURCE'
+        'extract': ['resource_info']
     },
     {
         'id': 'challenges',
         'text': "What do you see as your biggest challenge in going global?",
-        'extract_key': 'challenge_info',
-        'store_as': 'main_challenges',
-        'question_type': 'DESCRIPTIVE'
+        'extract': ['challenge_info']
     },
     
     # Technical Requirements Stage
     {
         'id': 'technical_intro',
         'text': "Now let's review your technical requirements. I'll help you track these important items:",
-        'extract_key': 'none',
-        'store_as': 'none',
-        'question_type': 'INFORMATIONAL'
+        'extract': []
     },
-    # Business Registration
     {
         'id': 'business_registration',
         'text': "First, let's check your business registration and core documents. Do you have: 1) CIPC Registration, 2) Tax Clearance Certificate, 3) Business Bank Account?",
-        'extract_key': 'checklist_response',
-        'store_as': 'business_registration_status',
-        'question_type': 'CHECKLIST'
+        'extract': ['registration_status', 'missing_items']
     },
-    # Export Registration
     {
         'id': 'export_permits',
         'text': "For export registration, do you have: 1) SARS Exporter Number, 2) SARS Customs Code, 3) ITAC Registration?",
-        'extract_key': 'checklist_response',
-        'store_as': 'export_registration_status',
-        'question_type': 'CHECKLIST'
+        'extract': ['permit_status', 'missing_permits']
     },
-    # Product Documentation
     {
         'id': 'product_documentation',
         'text': "Regarding product documentation, do you have: 1) Technical Specifications, 2) Safety Documentation, 3) Quality Certifications?",
-        'extract_key': 'checklist_response',
-        'store_as': 'product_documentation_status',
-        'question_type': 'CHECKLIST'
+        'extract': ['documentation_status', 'missing_docs']
     },
-    # Quality Compliance
     {
         'id': 'quality_compliance',
         'text': "For quality and compliance, do you have: 1) Quality Management System, 2) Product Testing Process?",
-        'extract_key': 'checklist_response',
-        'store_as': 'quality_compliance_status',
-        'question_type': 'CHECKLIST'
+        'extract': ['compliance_status', 'missing_compliance']
     },
-    # Market-Specific Requirements
     {
         'id': 'market_requirements',
         'text': "Based on your target markets ({target_markets}), do you have the required certifications and registrations?",
-        'extract_key': 'checklist_response',
-        'store_as': 'market_requirements_status',
-        'question_type': 'CHECKLIST'
+        'extract': ['market_cert_status', 'missing_certs']
     },
-    # Financial Setup
     {
         'id': 'financial_readiness',
         'text': "Finally, for financial setup, do you have: 1) Export Finance, 2) Credit Insurance, 3) Forex Account?",
-        'extract_key': 'checklist_response',
-        'store_as': 'financial_readiness_status',
-        'question_type': 'CHECKLIST'
+        'extract': ['financial_status', 'missing_financial']
     },
     
     # Final Summary
     {
         'id': 'final_summary',
         'text': "Thank you for completing the assessment. I'll now analyze your responses and provide a comprehensive evaluation of your export readiness, along with specific recommendations for your next steps.",
-        'extract_key': 'none',
-        'store_as': 'none',
-        'question_type': 'INFORMATIONAL'
+        'extract': []
     }
 ]
 
-def get_question(index: int) -> Optional[Dict[str, Any]]:
-    """Get question at specified index"""
-    if 0 <= index < len(QUESTIONS):
-        return QUESTIONS[index]
-    return None
-
-def format_question(question: Dict[str, Any], context: Dict[str, Any]) -> str:
-    """Format question text with context variables"""
-    try:
-        return question['text'].format(**context)
-    except KeyError as e:
-        print(f"Missing context variable: {str(e)}")
-        return question['text']
-
-def get_checklist_category(category: str) -> Optional[Dict[str, Any]]:
-    """Get a specific checklist category and its items"""
-    return CHECKLIST_CATEGORIES.get(category)
-
-# Technical requirements checklist structure - Moved to end to match question flow
+# Technical requirements checklist structure
 CHECKLIST_CATEGORIES = {
     'business_registration': {
         'title': 'Business Registration and Core Documents',
@@ -335,4 +226,15 @@ CHECKLIST_CATEGORIES = {
             'payment_terms': {'priority': 'Medium', 'required': True, 'description': 'Payment Terms'}
         }
     }
-} 
+}
+
+def format_question(question: dict, context: dict) -> str:
+    """Format a question with context variables."""
+    try:
+        return question['text'].format(**context)
+    except KeyError:
+        return question['text']
+
+def get_checklist_category(category: str) -> dict:
+    """Get a specific checklist category and its items."""
+    return CHECKLIST_CATEGORIES.get(category, {}) 
