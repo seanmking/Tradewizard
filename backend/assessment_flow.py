@@ -1,9 +1,38 @@
 """Simplified assessment flow implementation."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 from llm_service import LLMService
 from questions import QUESTIONS, format_question
+
+@dataclass
+class BusinessInfo:
+    """Stores and validates business information."""
+    company_name: Optional[str] = None
+    registration_number: Optional[str] = None
+    tax_number: Optional[str] = None
+    contact_details: Dict[str, str] = field(default_factory=dict)
+    validation_status: Dict[str, bool] = field(default_factory=dict)
+    validation_errors: Dict[str, List[str]] = field(default_factory=dict)
+
+    def validate_field(self, field_name: str, value: str) -> bool:
+        """Validate a single field and update validation status."""
+        # Basic validation rules - to be enhanced with actual API calls
+        validation_rules = {
+            'company_name': lambda x: x and len(x) >= 2,
+            'registration_number': lambda x: x and len(x) >= 5,
+            'tax_number': lambda x: x and len(x) >= 8,
+            'contact_details': lambda x: isinstance(x, dict) and 'email' in x
+        }
+        
+        is_valid = validation_rules.get(field_name, lambda x: True)(value)
+        self.validation_status[field_name] = is_valid
+        return is_valid
+
+    def update_field(self, field_name: str, value: str) -> None:
+        """Update a field and its validation status."""
+        setattr(self, field_name, value)
+        self.validate_field(field_name, value)
 
 @dataclass
 class AssessmentContext:
@@ -11,6 +40,22 @@ class AssessmentContext:
     current_question_index: int
     extracted_info: Dict[str, str]
     conversation_history: List[Dict]
+    business_info: BusinessInfo = field(default_factory=BusinessInfo)
+
+    def update_business_info(self, field_name: str, value: str) -> bool:
+        """Update business information and validate it."""
+        if hasattr(self.business_info, field_name):
+            self.business_info.update_field(field_name, value)
+            return self.business_info.validation_status.get(field_name, False)
+        return False
+
+    def get_validation_status(self) -> Dict[str, bool]:
+        """Get the current validation status of all business fields."""
+        return self.business_info.validation_status
+
+    def get_validation_errors(self) -> Dict[str, List[str]]:
+        """Get any validation errors for business fields."""
+        return self.business_info.validation_errors
 
 class AssessmentFlow:
     """Manages the simplified assessment flow and LLM interactions."""

@@ -1,15 +1,15 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
-console.log('API URL:', API_URL); // Debug log
+const API_URL = 'http://localhost:5001';
 
-// Create axios instance with default config
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 });
+
+console.log('API URL:', API_URL);
 
 // Add request interceptor for debugging
 api.interceptors.request.use(
@@ -58,7 +58,46 @@ export const assessmentApi = {
     }
   },
 
-  sendMessage: async (message) => {
+  startQuestions: async () => {
+    const sessionId = localStorage.getItem('assessmentSessionId');
+    if (!sessionId) {
+      throw new Error('No active session');
+    }
+
+    try {
+      const response = await api.post('/api/start_questions', null, {
+        headers: { 'X-Session-ID': sessionId }
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data.error || 'Invalid request');
+      }
+      throw error;
+    }
+  },
+
+  startAssessment: async (businessData) => {
+    const sessionId = localStorage.getItem('assessmentSessionId');
+    if (!sessionId) {
+      throw new Error('No active session');
+    }
+
+    try {
+      const response = await api.post('/api/start_assessment', 
+        { business_data: businessData },
+        { headers: { 'X-Session-ID': sessionId } }
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data.error || 'Invalid request');
+      }
+      throw error;
+    }
+  },
+
+  sendMessage: async (message, businessData = null) => {
     if (!message || !message.trim()) {
       throw new Error('Message cannot be empty');
     }
@@ -69,7 +108,33 @@ export const assessmentApi = {
     }
 
     try {
-      const response = await api.post('/api/respond', { message: message.trim() });
+      const response = await api.post('/api/respond', 
+        { 
+          message: message.trim(),
+          business_data: businessData  // Send business data if available
+        },
+        { headers: { 'X-Session-ID': sessionId } }
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data.error || 'Invalid request');
+      }
+      throw error;
+    }
+  },
+
+  validateBusiness: async (field, value) => {
+    const sessionId = localStorage.getItem('assessmentSessionId');
+    if (!sessionId) {
+      throw new Error('No active session');
+    }
+
+    try {
+      const response = await api.post('/api/validate/business',
+        { field, value },
+        { headers: { 'X-Session-ID': sessionId } }
+      );
       return response.data;
     } catch (error) {
       if (error.response?.status === 400) {

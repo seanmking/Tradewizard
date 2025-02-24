@@ -103,7 +103,7 @@ export const BusinessValidationForm: React.FC<BusinessValidationFormProps> = ({ 
   const [selectedEntityType, setSelectedEntityType] = useState<string>('');
   const [selectedSector, setSelectedSector] = useState<string>('Food Products');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
-  const { validateBusiness, businessData } = useAssessmentContext();
+  const { validateBusiness, businessData, setBusinessData } = useAssessmentContext();
   const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Initialize form with business data from context
@@ -324,10 +324,16 @@ export const BusinessValidationForm: React.FC<BusinessValidationFormProps> = ({ 
         ...formData,
         sector: selectedSector,
         subcategory: selectedSubcategory,
-        entityType: selectedEntityType
+        entityType: selectedEntityType,
+        company_name: formData.company_name || '',
+        registration_number: formData.registration_number || '',
+        tax_number: formData.tax_number || ''
       };
-      // You might want to store this data in your context or state management
-      console.log('Validated business data:', validatedData);
+      
+      // Update business data in context
+      setBusinessData(validatedData);
+      
+      // Call the completion handler which will handle the transition
       onValidationComplete();
     }
   };

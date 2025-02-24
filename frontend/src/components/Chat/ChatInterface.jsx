@@ -184,11 +184,19 @@ function ChatInterface() {
   const handleStartAssessment = async () => {
     try {
       setIsLoading(true);
+      // Remove the initial greeting message
+      setMessages([]);
       const response = await assessmentApi.startQuestions();
       setMessages(prev => [...prev, { role: 'assistant', content: response.message }]);
       setLastResponse(response);
       setRequiresAction(false);
       setActionType(null);
+      // Focus the input field after starting
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 100); // Small delay to ensure DOM is updated
     } catch (error) {
       console.error('Failed to start assessment:', error);
       setMessages(prev => [...prev, { 
@@ -347,21 +355,20 @@ function ChatInterface() {
         }
       }
 
+      // Focus the input field after response
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+
       // Handle transition to validation form
-      if (lastResponse?.message === 'No more questions.') {
+      if (response?.message === 'No more questions.') {
         setRequiresAction(false);
         setActionType(null);
       }
 
-      // Handle checklist questions
-      if (lastResponse?.message && isChecklistQuestion(lastResponse.message)) {
-        if (lastResponse.message.toLowerCase().includes('business registration') || 
-            lastResponse.message.toLowerCase().includes('export registration')) {
-          setCurrentChecklist('registration_and_permits');
-        } else if (lastResponse.message.toLowerCase().includes('documentation') || 
-                   lastResponse.message.toLowerCase().includes('quality')) {
-          setCurrentChecklist('documentation_and_compliance');
-        }
+      // Scroll to bottom after new messages
+      if (messagesContainerRef.current) {
+        messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -375,18 +382,44 @@ function ChatInterface() {
   };
 
   // Handle validation form completion
-  const handleValidationComplete = (validatedData) => {
+  const handleValidationComplete = async (validatedData) => {
     console.log('Validation complete with data:', validatedData);
     setShowValidationForm(false);
     setAssessmentComplete(true);
-    // Add completion message
-    setMessages(prev => [...prev, {
-      role: 'assistant',
-      content: 'Great! Your business details have been validated. Let\'s proceed with the assessment.'
-    }]);
+    
+    try {
+      // Add completion message
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Great! Your business details have been validated. Starting the export readiness assessment...'
+      }]);
+
+      // Start the actual assessment
+      const response = await assessmentApi.startAssessment(validatedData);
+      
+      // Add the first assessment question
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: response.message
+      }]);
+
+      // Focus the input field for the first assessment question
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Error starting assessment:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error starting the assessment. Please try again.'
+      }]);
+    }
   };
 
   const isIndustrySectorQuestion = (message) => {
+    if (!message) return false;
     return message.toLowerCase().includes('industry sector') || 
            message.toLowerCase().includes('what industry');
   };
@@ -440,26 +473,30 @@ function ChatInterface() {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="p-4 border-t">
-              <div className="flex space-x-4">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={isLoading || currentChecklist || showValidationForm}
-                />
-                <button
-                  type="submit"
-                  disabled={isLoading || !input.trim() || currentChecklist || showValidationForm}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
-                >
-                  Send
-                </button>
-              </div>
-            </form>
+            <>
+              {!currentChecklist && !isIndustrySectorQuestion(lastResponse?.message) && (
+                <form onSubmit={handleSubmit} className="p-4 border-t">
+                  <div className="flex space-x-4">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Type your message..."
+                      className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={isLoading || currentChecklist || showValidationForm}
+                    />
+                    <button
+                      type="submit"
+                      disabled={isLoading || !input.trim() || currentChecklist || showValidationForm}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    >
+                      Send
+                    </button>
+                  </div>
+                </form>
+              )}
+            </>
           )}
         </>
       )}
