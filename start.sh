@@ -3,17 +3,6 @@
 # Set working directory to script location
 cd "$(dirname "$0")"
 
-# Check if running on Windows and adjust commands accordingly
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    # Windows with Git Bash or similar
-    PYTHON_CMD="python"
-    FRONTEND_CMD="npm.cmd"
-else
-    # Linux/macOS
-    PYTHON_CMD="python3"
-    FRONTEND_CMD="npm"
-fi
-
 # Function to display messages
 function echo_info() {
     echo -e "\033[1;34m$1\033[0m"
@@ -27,6 +16,58 @@ function echo_error() {
     echo -e "\033[1;31m$1\033[0m"
 }
 
+# Cleanup function
+function cleanup_processes() {
+    echo_info "Cleaning up existing processes..."
+    
+    # Kill any existing Node.js processes on port 3000
+    lsof -ti:3000 | xargs kill -9 2>/dev/null
+    
+    # Kill any existing Python processes on port 5002
+    lsof -ti:5002 | xargs kill -9 2>/dev/null
+    
+    echo_success "Process cleanup completed"
+}
+
+# Start Ollama function
+function start_ollama() {
+    echo_info "Starting Ollama..."
+    
+    # Check if Ollama is already running
+    if ! pgrep -x "ollama" > /dev/null; then
+        # Start Ollama in the background
+        ollama serve &
+        OLLAMA_PID=$!
+        sleep 2
+        
+        # Check if Ollama started successfully
+        if ! kill -0 $OLLAMA_PID 2>/dev/null; then
+            echo_error "Failed to start Ollama"
+            exit 1
+        fi
+        echo_success "Ollama started successfully"
+    else
+        echo_info "Ollama is already running"
+    fi
+}
+
+# Check if running on Windows and adjust commands accordingly
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+    # Windows with Git Bash or similar
+    PYTHON_CMD="python"
+    FRONTEND_CMD="npm.cmd"
+else
+    # Linux/macOS
+    PYTHON_CMD="python3"
+    FRONTEND_CMD="npm"
+fi
+
+# Run cleanup
+cleanup_processes
+
+# Start Ollama
+start_ollama
+
 # Check if backend dependencies are installed
 echo_info "Checking backend dependencies..."
 if ! command -v $PYTHON_CMD &> /dev/null; then
@@ -35,7 +76,7 @@ if ! command -v $PYTHON_CMD &> /dev/null; then
 fi
 
 # Go to backend directory and set up Python environment
-cd new/backend
+cd tradewizard/backend
 
 # Check for virtual environment and create if it doesn't exist
 if [ ! -d "venv" ]; then
@@ -110,7 +151,7 @@ fi
 
 # Start the frontend in the background
 echo_info "Starting frontend development server..."
-$FRONTEND_CMD start &
+BROWSER=none $FRONTEND_CMD start &
 FRONTEND_PID=$!
 
 # Wait a bit for the frontend to start
@@ -118,10 +159,31 @@ sleep 5
 
 echo_success "Frontend server started successfully (PID: $FRONTEND_PID)"
 echo_success "TradeWizard is now running!"
+echo_info "Services are available at:"
 echo_info "Backend: http://localhost:5002"
 echo_info "Frontend: http://localhost:3000"
-echo_info "Press Ctrl+C to stop both servers"
+echo_info "Press Ctrl+C to stop all servers"
 
-# Wait for user to press Ctrl+C
-trap "kill $BACKEND_PID $FRONTEND_PID; echo_info 'Shutting down...'; exit 0" INT
+# Function to handle cleanup on exit
+function cleanup_on_exit() {
+    echo_info "Shutting down..."
+    
+    # Kill the backend and frontend servers
+    kill $BACKEND_PID $FRONTEND_PID 2>/dev/null
+    
+    # Cleanup any remaining processes on the ports
+    cleanup_processes
+    
+    # Stop Ollama if we started it
+    if [ ! -z "$OLLAMA_PID" ]; then
+        kill $OLLAMA_PID 2>/dev/null
+    fi
+    
+    exit 0
+}
+
+# Set up trap for cleanup
+trap cleanup_on_exit INT
+
+# Wait for processes
 wait 

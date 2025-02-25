@@ -18,7 +18,7 @@ The project is organized into backend and frontend components:
 TradeWizard/
 ├── archive/                  # Previous implementation (for reference)
 │   └── old_version/
-├── new/                      # Current implementation
+├── tradewizard/                      # Current implementation
 │   ├── backend/              # Python Flask API
 │   │   ├── app.py            # Main Flask application
 │   │   ├── requirements.txt  # Python dependencies
@@ -64,7 +64,7 @@ If you prefer to set up the application manually:
 
 ```bash
 # Navigate to the backend directory
-cd new/backend
+cd tradewizard/backend
 
 # Create a virtual environment
 python -m venv venv
@@ -86,7 +86,7 @@ python app.py
 
 ```bash
 # Navigate to the frontend directory
-cd new/frontend
+cd tradewizard/frontend
 
 # Install dependencies
 npm install
