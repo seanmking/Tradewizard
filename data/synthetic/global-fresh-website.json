@@ -1,0 +1,206 @@
+{
+  "companyInfo": {
+    "name": "Global Fresh SA",
+    "founded": 2018,
+    "location": "Unit 12, Techno Park Industrial Estate, Stellenbosch, 7600",
+    "description": "Specializing in premium dried fruits and nuts that showcase South Africa's unique flavors and agricultural heritage.",
+    "contact": {
+      "phone": "+27 (0)21 555 1234",
+      "email": "info@globalfreshsa.co.za",
+      "businessHours": "Monday-Friday: 8:30am-5:00pm",
+      "social": {
+        "instagram": "@globalfreshsa",
+        "facebook": "Global Fresh SA",
+        "linkedin": "Global Fresh SA"
+      }
+    },
+    "registrationDetails": {
+      "regNumber": "2018/123456/07",
+      "vat": "4480123456",
+      "beeLevel": "2"
+    }
+  },
+  "team": [
+    {
+      "name": "Thandi Nkosi",
+      "role": "CEO",
+      "background": "Background in agricultural development with years working with farming communities in the Western Cape",
+      "description": "Thandi oversees our company vision and growth strategy. With a background in agricultural development and a passion for creating sustainable food systems, she ensures we maintain strong relationships with our farming partners."
+    },
+    {
+      "name": "Sean King",
+      "role": "COO",
+      "background": "Food technologist with experience at leading South African food companies",
+      "description": "Sean manages our day-to-day operations and product development. With his food technology background and previous experience at major food producers, he ensures our products meet the highest quality standards."
+    },
+    {
+      "name": "Hendrik Venter",
+      "role": "Non-Executive Director",
+      "background": "25 years in the food export sector",
+      "description": "Hendrik joined our board in 2021, bringing valuable experience from his 25 years in the food export sector. He advises on our growth strategy and international expansion plans."
+    }
+  ],
+  "products": {
+    "categories": [
+      {
+        "name": "Cape Harvest Dried Fruit Line",
+        "description": "Our Cape Harvest line features premium dried fruits, carefully selected and naturally preserved to maintain maximum flavor and nutritional value.",
+        "items": [
+          {
+            "name": "Premium Mango Slices",
+            "sizes": ["200g", "500g"],
+            "prices": [65, 140],
+            "description": "Succulent mango slices sourced from Limpopo farms, naturally dried to preserve flavor",
+            "ingredients": ["100% Mango"],
+            "shelfLife": "12 months"
+          },
+          {
+            "name": "Golden Apricot Selection",
+            "sizes": ["250g"],
+            "prices": [75],
+            "description": "Sweet, tender apricots from the Robertson Valley, delicately dried to perfection",
+            "ingredients": ["100% Apricots"],
+            "shelfLife": "12 months"
+          },
+          {
+            "name": "Cape Mixed Fruit Medley",
+            "sizes": ["300g"],
+            "prices": [85],
+            "description": "A colorful blend of mango, apricot, apple, and peach",
+            "ingredients": ["Mango", "Apricot", "Apple", "Peach"],
+            "shelfLife": "12 months"
+          },
+          {
+            "name": "Superfood Berry Mix",
+            "sizes": ["150g"],
+            "prices": [95],
+            "description": "Nutrient-rich blend featuring goji berries, cranberries, and mulberries",
+            "ingredients": ["Goji berries", "Cranberries", "Mulberries", "Golden berries"],
+            "shelfLife": "9 months"
+          }
+        ]
+      },
+      {
+        "name": "Safari Blend Nut Selections",
+        "description": "Our Safari Blend nut selections feature premium nuts paired with uniquely South African flavors and spices.",
+        "items": [
+          {
+            "name": "Kalahari Salt & Herb Mix",
+            "sizes": ["200g", "400g"],
+            "prices": [70, 125],
+            "description": "Roasted almonds, cashews and pecans seasoned with herb-infused Kalahari salt",
+            "ingredients": ["Almonds", "Cashews", "Pecans", "Kalahari salt", "Herbs"],
+            "shelfLife": "9 months"
+          },
+          {
+            "name": "Rooibos Infused Almond Mix",
+            "sizes": ["200g"],
+            "prices": [80],
+            "description": "Almonds gently roasted with organic rooibos tea for a uniquely South African flavor",
+            "ingredients": ["Almonds", "Rooibos tea", "Honey", "Sea salt"],
+            "shelfLife": "9 months"
+          }
+        ]
+      }
+    ]
+  },
+  "facilities": {
+    "mainFacility": {
+      "size": "750m²",
+      "location": "Stellenbosch",
+      "features": [
+        "State-of-the-art dehydration equipment",
+        "Packaging systems",
+        "Quality control lab"
+      ],
+      "capacity": "6,000 units monthly",
+      "certifications": [
+        "HACCP Level 1 Certified",
+        "SABS Food Safety Certified",
+        "Department of Health Compliant"
+      ],
+      "upcomingCertifications": ["ISO 22000 (expected 2024)"]
+    }
+  },
+  "distribution": {
+    "retailLocations": {
+      "Western Cape": {
+        "Woolworths": [
+          "V&A Waterfront",
+          "Canal Walk",
+          "Stellenbosch",
+          "Constantia",
+          "Gardens"
+        ],
+        "SPAR": [
+          "Gardens",
+          "Newlands",
+          "Constantia",
+          "Camps Bay"
+        ]
+      },
+      "Gauteng": {
+        "Woolworths": [
+          "Sandton City",
+          "Rosebank",
+          "Hyde Park"
+        ],
+        "SPAR": [
+          "Parktown North",
+          "Craighall",
+          "Greenside",
+          "Linden",
+          "Bryanston"
+        ]
+      }
+    },
+    "markets": [
+      "Stellenbosch Slow Food Market",
+      "Franschhoek Village Market",
+      "Oranjezicht City Farm Market"
+    ],
+    "onlinePlatforms": [
+      "Own Website",
+      "Takealot.com",
+      "Faithful-to-Nature.co.za"
+    ]
+  },
+  "blogPosts": [
+    {
+      "title": "Global Fresh SA Exploring Export Opportunities",
+      "date": "March 2024",
+      "content": "We're excited to announce that Global Fresh SA is exploring opportunities to export our products to neighboring countries. After receiving interest from distributors in Namibia and Botswana, we're currently researching the requirements for taking our uniquely South African products to new markets."
+    },
+    {
+      "title": "New Product Launch: Superfood Berry Mix",
+      "date": "February 2024",
+      "content": "This month, we're delighted to introduce the newest addition to our Cape Harvest range: Superfood Berry Mix. This nutrient-packed blend features goji berries, cranberries, mulberries, and golden berries, offering a perfect balance of sweet and tart flavors along with exceptional health benefits."
+    },
+    {
+      "title": "Global Fresh SA Products Now at Select Woolworths Stores",
+      "date": "November 2023",
+      "content": "We're proud to announce that Global Fresh SA products are now available at select Woolworths stores across the Western Cape and Gauteng. This exciting development marks a significant milestone in our growth journey since founding the company in 2018."
+    }
+  ],
+  "sustainability": {
+    "initiatives": [
+      {
+        "name": "Packaging",
+        "description": "Transitioning to fully compostable packaging across our product range by the end of 2024"
+      },
+      {
+        "name": "Waste Reduction",
+        "description": "Production processes achieve 82% utilization of raw materials, with fruit byproducts donated to local composting programs"
+      },
+      {
+        "name": "Local Sourcing",
+        "description": "Work with small-scale farmers within 200km of our facility wherever possible, reducing transport emissions and supporting local agriculture"
+      }
+    ],
+    "futurePlans": [
+      "Installation of solar panels at Stellenbosch facility (Q4 2024)",
+      "Water conservation system implementation",
+      "Electric delivery vehicle for local distribution routes"
+    ]
+  }
+} 

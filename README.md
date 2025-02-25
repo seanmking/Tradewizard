@@ -1,165 +1,105 @@
-# TradeKing Business Assessment
+# TradeWizard Export Assessment
 
-A modern web application for validating and assessing business information using AI-powered validation.
+TradeWizard is a conversational platform designed to help South African businesses assess their readiness for exporting products to international markets. It provides personalized guidance and actionable insights to help businesses navigate the complexities of international trade.
 
-## Features
+## Key Features
 
-- Multi-step business assessment form
-- Real-time field validation
-- AI-powered business information validation
-- Session management
-- Modern, responsive UI
-- Type-safe frontend and backend
+- Conversational assessment interface with natural language processing
+- Intelligent extraction of business information
+- Stage-based assessment flow covering key export readiness areas
+- Progress tracking and reporting
+- Personalized guidance and recommendations
 
-## Tech Stack
+## Project Structure
 
-### Frontend
-- React 18 with TypeScript
-- React Router for navigation
-- Axios for API requests
-- TailwindCSS for styling
-- Framer Motion for animations
-- Vite for development and building
+The project is organized into backend and frontend components:
 
-### Backend
-- Flask for the web framework
-- Flask-CORS for cross-origin resource sharing
-- Flask-Session for session management
-- Python 3.12+ for modern language features
-- Pytest for testing
+```
+TradeWizard/
+├── archive/                  # Previous implementation (for reference)
+│   └── old_version/
+├── new/                      # Current implementation
+│   ├── backend/              # Python Flask API
+│   │   ├── app.py            # Main Flask application
+│   │   ├── requirements.txt  # Python dependencies
+│   │   ├── services/         # Core services
+│   │   └── mock_data/        # Mock data for testing
+│   └── frontend/             # React frontend
+│       └── src/              # React source code
+└── start.sh                  # Start script
+```
 
 ## Getting Started
 
 ### Prerequisites
-- Python 3.12 or higher
-- Node.js 18 or higher
+
+- Python 3.8 or higher
+- Node.js 14 or higher
 - npm or yarn
 
-### Backend Setup
+### Running the Application
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
+The easiest way to run the application is using the start script:
 
-2. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+```bash
+# Make the script executable (Unix-like systems)
+chmod +x start.sh
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Install the package in development mode:
-   ```bash
-   pip install -e .
-   ```
-
-5. Run the development server:
-   ```bash
-   python wsgi.py
-   ```
-
-The backend will be available at `http://localhost:5000`.
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
-
-The frontend will be available at `http://localhost:3000`.
-
-## Development
-
-### Backend Development
-
-- Run tests:
-  ```bash
-  cd backend
-  pytest
-  ```
-
-- Run tests with coverage:
-  ```bash
-  pytest --cov=app tests/
-  ```
-
-### Frontend Development
-
-- Run linter:
-  ```bash
-  npm run lint
-  # or
-  yarn lint
-  ```
-
-- Run tests:
-  ```bash
-  npm test
-  # or
-  yarn test
-  ```
-
-## Project Structure
-
-```
-.
-├── backend/
-│   ├── app/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   └── __init__.py
-│   ├── tests/
-│   ├── requirements.txt
-│   └── wsgi.py
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── contexts/
-│   │   ├── services/
-│   │   └── App.tsx
-│   ├── package.json
-│   └── vite.config.ts
-└── README.md
+# Run the application
+./start.sh
 ```
 
-## Environment Variables
+This script will:
+1. Set up the Python virtual environment
+2. Install backend dependencies
+3. Start the Flask backend server
+4. Install frontend dependencies (if needed)
+5. Start the React development server
 
-### Backend
-- `SECRET_KEY`: Flask secret key for session encryption
-- `FLASK_ENV`: Development or production environment
-- `FLASK_DEBUG`: Enable debug mode
+### Manual Setup
 
-### Frontend
-- `VITE_API_BASE_URL`: Backend API URL
+If you prefer to set up the application manually:
 
-## Contributing
+#### Backend Setup
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+```bash
+# Navigate to the backend directory
+cd new/backend
 
-## License
+# Create a virtual environment
+python -m venv venv
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+# Activate the virtual environment
+# Windows
+venv\Scripts\activate
+# Unix/MacOS
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the backend
+python app.py
+```
+
+#### Frontend Setup
+
+```bash
+# Navigate to the frontend directory
+cd new/frontend
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
+```
+
+## API Endpoints
+
+The backend provides the following API endpoints:
+
+- `POST /api/chat/start` - Start a new chat session
+- `POST /api/chat/message` - Send a message in a chat session
+- `GET /api/chat/history/{chat_id}` - Get the history of a chat session
+- `GET /api/health` - Health check endpoint 

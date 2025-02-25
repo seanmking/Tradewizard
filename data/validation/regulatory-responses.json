@@ -1,0 +1,140 @@
+{
+  "cipc": {
+    "companyRegistration": {
+      "status": "ACTIVE",
+      "registrationNumber": "2018/123456/07",
+      "registrationDate": "2018-03-15",
+      "companyName": "Global Fresh SA (Pty) Ltd",
+      "companyType": "Private Company",
+      "registeredAddress": "Unit 12, Techno Park Industrial Estate, Stellenbosch, 7600",
+      "directors": [
+        {
+          "name": "Thandi Nkosi",
+          "idNumber": "8501155XXXX08X",
+          "role": "Director",
+          "appointmentDate": "2018-03-15",
+          "status": "Active"
+        },
+        {
+          "name": "Sean King",
+          "idNumber": "8203125XXXX08X",
+          "role": "Director",
+          "appointmentDate": "2018-03-15",
+          "status": "Active"
+        },
+        {
+          "name": "Hendrik Venter",
+          "idNumber": "7005155XXXX08X",
+          "role": "Non-Executive Director",
+          "appointmentDate": "2021-06-01",
+          "status": "Active"
+        }
+      ],
+      "annualReturns": {
+        "lastFiled": "2023-12-15",
+        "status": "Compliant",
+        "nextDue": "2024-12-15"
+      }
+    }
+  },
+  "sars": {
+    "taxRegistration": {
+      "vatNumber": "4480123456",
+      "registrationDate": "2018-04-01",
+      "status": "Active",
+      "complianceStatus": "Compliant",
+      "lastFilingPeriod": "2024-02",
+      "taxClearance": {
+        "status": "Valid",
+        "expiryDate": "2024-12-31",
+        "reference": "TCP2024/XXXX/XXXX/XXXX"
+      }
+    },
+    "employerRegistration": {
+      "payeNumber": "7160123456",
+      "status": "Active",
+      "employeeCount": 25,
+      "lastUIFSubmission": "2024-02-28",
+      "workmenCompensation": {
+        "registrationNumber": "990123456",
+        "status": "Compliant",
+        "lastAssessment": "2023-12-31"
+      }
+    }
+  },
+  "dtic": {
+    "exportRegistration": {
+      "registrationNumber": "EXP2018/123456",
+      "status": "Active",
+      "registrationDate": "2018-06-15",
+      "exportCategories": [
+        "Processed Foods",
+        "Dried Fruits",
+        "Nuts"
+      ],
+      "permissions": [
+        {
+          "type": "SADC Export",
+          "status": "Approved",
+          "expiryDate": "2025-06-14"
+        },
+        {
+          "type": "General Export",
+          "status": "Approved",
+          "expiryDate": "2025-06-14"
+        }
+      ]
+    }
+  },
+  "fsqa": {
+    "foodSafety": {
+      "registrationNumber": "FSC2018/123456",
+      "status": "Compliant",
+      "lastInspection": "2023-11-15",
+      "nextInspection": "2024-11-15",
+      "certifications": [
+        {
+          "type": "HACCP Level 1",
+          "certificationBody": "SABS",
+          "certificateNumber": "HACCP2023/123456",
+          "issueDate": "2023-01-15",
+          "expiryDate": "2024-01-14"
+        },
+        {
+          "type": "Food Safety Management",
+          "certificationBody": "Department of Health",
+          "certificateNumber": "FSM2023/123456",
+          "issueDate": "2023-03-01",
+          "expiryDate": "2024-02-29"
+        }
+      ],
+      "facilities": [
+        {
+          "address": "Unit 12, Techno Park Industrial Estate, Stellenbosch",
+          "type": "Production Facility",
+          "status": "Approved",
+          "lastInspection": "2023-11-15",
+          "inspectionScore": 92
+        }
+      ]
+    }
+  },
+  "bee": {
+    "beeVerification": {
+      "level": 2,
+      "scorecard": {
+        "ownership": 25,
+        "management": 15,
+        "employmentEquity": 18,
+        "skillsDevelopment": 20,
+        "preferentialProcurement": 22,
+        "enterpriseDevelopment": 15,
+        "socioEconomicDevelopment": 5
+      },
+      "certificateNumber": "BEE2023/123456",
+      "verificationAgency": "EmpowerLogic",
+      "issueDate": "2023-07-01",
+      "expiryDate": "2024-06-30"
+    }
+  }
+} 

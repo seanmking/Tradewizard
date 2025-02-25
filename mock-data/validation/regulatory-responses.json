@@ -1,0 +1,64 @@
+{
+  "cipc": {
+    "2018/123456/07": {
+      "isRegistered": true,
+      "companyName": "Global Fresh SA",
+      "registrationType": "Proprietary Limited",
+      "registrationDate": "2018-05-12",
+      "status": "In Business",
+      "directors": [
+        {"name": "Sean King", "id": "7203155082087"},
+        {"name": "Thandi Nkosi", "id": "7601230093085"},
+        {"name": "Hendrik Venter", "role": "Non-executive", "appointmentDate": "2021"}
+      ]
+    }
+  },
+  "sars": {
+    "9876543210": {
+      "isRegistered": true,
+      "taxCompliant": true,
+      "taxClearanceStatus": "Good Standing"
+    },
+    "4480123456": {
+      "vatRegistered": true,
+      "lastFilingDate": "2023-12-31",
+      "status": "Compliant"
+    }
+  },
+  "financialVerification": {
+    "bankAccount": {
+      "62453098761": {
+        "accountExists": true,
+        "accountHolder": "Global Fresh SA",
+        "accountType": "Business",
+        "bankName": "First National Bank"
+      }
+    },
+    "financialHealth": {
+      "annualRevenue": "R8.5 million",
+      "profitMargin": "14% EBITDA",
+      "growthRate": "27% year-over-year"
+    }
+  },
+  "productionCapacity": {
+    "currentCapacity": "6,000 units monthly",
+    "utilizationRate": "65%",
+    "maximumCapacity": "9,200 units monthly"
+  },
+  "certifications": {
+    "haccp": {
+      "status": "Valid",
+      "issueDate": "2020",
+      "renewalDate": "2023",
+      "nextRenewal": "2026"
+    },
+    "sabs": {
+      "status": "Valid",
+      "certificateNumber": "SABS-FS-2022-1234"
+    },
+    "iso22000": {
+      "status": "In Progress",
+      "expectedCompletion": "November 2024"
+    }
+  }
+} 
