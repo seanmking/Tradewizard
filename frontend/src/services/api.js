@@ -1,15 +1,19 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001';
+// Base URL will always be relative in development
+const API_URL = '/api';
+console.log('API URL:', API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+  },
+  // Don't throw on non-2xx responses
+  validateStatus: function (status) {
+    return status < 500;
   }
 });
-
-console.log('API URL:', API_URL);
 
 // Add request interceptor for debugging
 api.interceptors.request.use(
@@ -30,6 +34,10 @@ api.interceptors.request.use(
 // Add response interceptor for debugging
 api.interceptors.response.use(
   response => {
+    if (response.status >= 400) {
+      console.warn('Response error:', response.data);
+      return Promise.reject(response);
+    }
     console.log('Response:', response.data);
     return response;
   },
@@ -42,40 +50,82 @@ api.interceptors.response.use(
   }
 );
 
+const makeRequest = async (method, endpoint, data = null) => {
+  try {
+    const sessionId = localStorage.getItem('assessmentSessionId');
+    const config = {
+      method,
+      url: endpoint,
+      data,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(sessionId ? { 'X-Session-ID': sessionId } : {})
+      }
+    };
+
+    const response = await api.request(config);
+    
+    if (response.status >= 400) {
+      throw new Error(response.data?.error || 'Request failed');
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('API Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      config: error.config
+    });
+    
+    // If we get a 500 error during session start, create a mock session
+    if (endpoint === '/start' && error.response?.status === 500) {
+      console.log('Creating mock session due to server error');
+      return {
+        sessionId: `mock_${Date.now()}`,
+        status: 'mock'
+      };
+    }
+    
+    throw error;
+  }
+};
+
 export const assessmentApi = {
   startSession: async () => {
-    const sessionId = `session_${Date.now()}`;
-    localStorage.setItem('assessmentSessionId', sessionId);
-    
     try {
-      const response = await api.post('/api/start', null, {
-        headers: { 'X-Session-ID': sessionId }
-      });
-      return response.data;
+      // Generate a new session ID if one doesn't exist
+      const sessionId = localStorage.getItem('assessmentSessionId') || `session_${Date.now()}`;
+      localStorage.setItem('assessmentSessionId', sessionId);
+      
+      const result = await makeRequest('POST', '/start');
+      return result;
     } catch (error) {
-      localStorage.removeItem('assessmentSessionId');
-      throw error;
-    }
-  },
-
-  startQuestions: async () => {
-    const sessionId = localStorage.getItem('assessmentSessionId');
-    if (!sessionId) {
-      throw new Error('No active session');
-    }
-
-    try {
-      const response = await api.post('/api/start_questions', null, {
-        headers: { 'X-Session-ID': sessionId }
-      });
-      return response.data;
-    } catch (error) {
-      if (error.response?.status === 400) {
-        throw new Error(error.response.data.error || 'Invalid request');
+      // If server error, create mock session
+      if (error.response?.status === 500) {
+        const mockSessionId = `mock_${Date.now()}`;
+        localStorage.setItem('assessmentSessionId', mockSessionId);
+        return {
+          sessionId: mockSessionId,
+          status: 'mock'
+        };
       }
       throw error;
     }
   },
+  
+  startQuestions: () => makeRequest('POST', '/start_questions'),
+  
+  respond: (data) => makeRequest('POST', '/respond', data),
+  
+  validateBusiness: (registrationNumber) =>
+    makeRequest('POST', '/validate/business', { registrationNumber }),
+  
+  validateTax: (taxNumber) =>
+    makeRequest('POST', '/validate/tax', { taxNumber }),
+    
+  extractWebsiteInfo: (url) =>
+    makeRequest('POST', '/extract_website_info', { url }),
 
   startAssessment: async (businessData) => {
     const sessionId = localStorage.getItem('assessmentSessionId');
@@ -84,58 +134,7 @@ export const assessmentApi = {
     }
 
     try {
-      const response = await api.post('/api/start_assessment', 
-        { business_data: businessData },
-        { headers: { 'X-Session-ID': sessionId } }
-      );
-      return response.data;
-    } catch (error) {
-      if (error.response?.status === 400) {
-        throw new Error(error.response.data.error || 'Invalid request');
-      }
-      throw error;
-    }
-  },
-
-  sendMessage: async (message, businessData = null) => {
-    if (!message || !message.trim()) {
-      throw new Error('Message cannot be empty');
-    }
-
-    const sessionId = localStorage.getItem('assessmentSessionId');
-    if (!sessionId) {
-      throw new Error('No active session');
-    }
-
-    try {
-      const response = await api.post('/api/respond', 
-        { 
-          message: message.trim(),
-          business_data: businessData  // Send business data if available
-        },
-        { headers: { 'X-Session-ID': sessionId } }
-      );
-      return response.data;
-    } catch (error) {
-      if (error.response?.status === 400) {
-        throw new Error(error.response.data.error || 'Invalid request');
-      }
-      throw error;
-    }
-  },
-
-  validateBusiness: async (field, value) => {
-    const sessionId = localStorage.getItem('assessmentSessionId');
-    if (!sessionId) {
-      throw new Error('No active session');
-    }
-
-    try {
-      const response = await api.post('/api/validate/business',
-        { field, value },
-        { headers: { 'X-Session-ID': sessionId } }
-      );
-      return response.data;
+      return await makeRequest('POST', '/start_assessment', { business_data: businessData });
     } catch (error) {
       if (error.response?.status === 400) {
         throw new Error(error.response.data.error || 'Invalid request');

@@ -5,11 +5,6 @@ import ChecklistQuestion from './ChecklistQuestion';
 import { BusinessValidationForm } from '../BusinessValidation/BusinessValidationForm';
 import { useAssessmentContext } from '../../contexts/AssessmentContext';
 
-const INITIAL_GREETING = {
-  role: 'assistant',
-  content: 'Hi there! I\'m Sarah, your export readiness consultant. I\'m here to help evaluate your business\'s export potential. First, let\'s verify your business details.'
-};
-
 // Technical checklist categories
 const CHECKLIST_CATEGORIES = {
   'registration_and_permits': {
@@ -149,11 +144,32 @@ function ChatInterface() {
   const [requiresAction, setRequiresAction] = useState(false);
   const [actionType, setActionType] = useState(null);
   const [lastResponse, setLastResponse] = useState(null);
+  const [businessContext, setBusinessContext] = useState({});
+  const [currentChecklist, setCurrentChecklist] = useState(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
-  const [currentChecklist, setCurrentChecklist] = useState(null);
   const { isAssessmentComplete, setAssessmentComplete, setBusinessData } = useAssessmentContext();
   const [selectedMainSector, setSelectedMainSector] = useState(null);
+
+  // Handle the transition to business validation
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.role === 'assistant' && lastMessage?.content && 
+          (lastMessage.content === 'No more questions.' || 
+           lastMessage.content.includes('Thank you for completing the initial assessment'))) {
+        // Replace with transition message
+        setMessages(messages => [
+          ...messages.slice(0, -1),
+          {
+            role: 'assistant',
+            content: 'Thank you for providing those details. Now, let\'s validate your business information to proceed with the assessment.'
+          }
+        ]);
+        setShowValidationForm(true);
+      }
+    }
+  }, [messages]);
 
   // Initialize session on component mount
   useEffect(() => {
@@ -161,12 +177,19 @@ function ChatInterface() {
       try {
         setIsLoading(true);
         const response = await assessmentApi.startSession();
-        console.log('Session initialized:', response);
+        if (response.error) {
+          setMessages([{ 
+            role: 'assistant', 
+            content: 'Sorry, there was an error starting the session. Please refresh the page to try again.' 
+          }]);
+          return;
+        }
         setMessages([{ role: 'assistant', content: response.message }]);
         setLastResponse(response);
-        setRequiresAction(response.requires_action);
-        setActionType(response.action_type);
         setIsInitialized(true);
+        // Set action requirements from response
+        setRequiresAction(response.requires_action || false);
+        setActionType(response.action_type || null);
       } catch (error) {
         console.error('Failed to initialize session:', error);
         setMessages([{ 
@@ -184,22 +207,21 @@ function ChatInterface() {
   const handleStartAssessment = async () => {
     try {
       setIsLoading(true);
-      // Remove the initial greeting message
-      setMessages([]);
       const response = await assessmentApi.startQuestions();
-      setMessages(prev => [...prev, { role: 'assistant', content: response.message }]);
+      setMessages([{ role: 'assistant', content: response.message }]);
       setLastResponse(response);
       setRequiresAction(false);
       setActionType(null);
+      
       // Focus the input field after starting
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
         }
-      }, 100); // Small delay to ensure DOM is updated
+      }, 100);
     } catch (error) {
       console.error('Failed to start assessment:', error);
-      setMessages(prev => [...prev, { 
+      setMessages([{ 
         role: 'assistant', 
         content: 'Sorry, I encountered an error starting the assessment. Please try again.' 
       }]);
@@ -222,23 +244,12 @@ function ChatInterface() {
     await handleSubmit(null, response);
   };
 
-  // Handle the transition to business validation
+  // Add effect for input focus
   useEffect(() => {
-    if (messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === 'assistant' && lastMessage.content === 'No more questions.') {
-        // Replace "No more questions" with a transition message
-        setMessages(messages => [
-          ...messages.slice(0, -1),
-          {
-            role: 'assistant',
-            content: 'Thank you for providing those details. Now, let\'s validate your business information to proceed with the assessment.'
-          }
-        ]);
-        setShowValidationForm(true);
-      }
+    if (inputRef.current && !showValidationForm && !requiresAction) {
+      inputRef.current.focus();
     }
-  }, [messages]);
+  }, [messages, showValidationForm, requiresAction]);
 
   // Update the handleIndustrySectorSelect to handle both sector and subsector
   const handleIndustrySectorSelect = async (mainSector, subSector) => {
@@ -280,105 +291,78 @@ function ChatInterface() {
     }
   };
 
-  const handleSubmit = async (e, checklistResponse = null) => {
-    if (e) e.preventDefault();
-    if ((!input.trim() && !checklistResponse) || isLoading || !isInitialized) return;
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    const userMessage = { 
-      role: 'user', 
-      content: checklistResponse || input.trim() 
-    };
-    setMessages(prev => [...prev, userMessage]);
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!input.trim() && !e?.skipInputCheck) return;
+
+    const userMessage = input;
     setInput('');
     setIsLoading(true);
 
+    // Add user message to chat
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+
     try {
-      let response;
-      // Check if this message contains business name
-      const businessNameMatch = userMessage.content.match(/.*COO of (.*)/i);
-      
-      if (businessNameMatch) {
-        const companyName = businessNameMatch[1].trim();
-        
-        // Check for entity type in the business name
-        const detectedEntityType = Object.entries(ENTITY_TYPE_PATTERNS).find(([_, pattern]) => 
-          pattern.test(companyName)
-        )?.[0];
+      // Add a natural delay (1-2 seconds)
+      await delay(Math.random() * 1000 + 1000);
 
-        // Store company name and entity type
-        const businessData = {
-          company_name: companyName,
-          entityType: detectedEntityType || null
+      // Handle normal response
+      const response = await assessmentApi.respond({
+        message: userMessage,
+        context: businessContext
+      });
+
+      if (response.error) {
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: 'Sorry, there was an error processing your message. Please refresh the page to start a new session.' 
+        }]);
+        return;
+      }
+
+      // Update business context with extracted information
+      if (response.extracted_info) {
+        const newContext = {
+          ...businessContext,
+          ...response.extracted_info
         };
+        setBusinessContext(newContext);
         
-        setBusinessData(businessData);
-
-        // First get the initial response
-        response = await assessmentApi.sendMessage(userMessage.content, businessData);
-        setLastResponse(response);
-        
-        // Add the initial response
-        setMessages(prev => [...prev, { role: 'assistant', content: response.message }]);
-
-        // If we detected an entity type and the next question is about entity type
-        if (detectedEntityType && response.message.toLowerCase().includes('what type of business entity')) {
-          try {
-            // Add a slight delay to ensure messages are processed in order
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Format entity type for display (e.g., "PTY_LTD" -> "Pty Ltd")
-            const displayEntityType = detectedEntityType.split('_')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-              .join(' ');
-            
-            // Send the entity type as an automatic response
-            setMessages(prev => [...prev, { role: 'user', content: displayEntityType }]);
-            
-            response = await assessmentApi.sendMessage(detectedEntityType, businessData);
-            setLastResponse(response);
-            setMessages(prev => [...prev, { role: 'assistant', content: response.message }]);
-          } catch (entityError) {
-            console.error('Error handling entity type:', entityError);
-            // If entity type handling fails, let the user answer manually
-            setMessages(prev => [...prev, { 
-              role: 'assistant', 
-              content: 'I encountered an error processing the business type. Please specify your business type manually.' 
-            }]);
-          }
-        }
-      } else {
-        // Regular message handling
-        response = await assessmentApi.sendMessage(userMessage.content);
-        setLastResponse(response);
-        if (response?.message) {
-          setMessages(prev => [...prev, { role: 'assistant', content: response.message }]);
+        // If we have export goals, prepare for validation with a proper transition
+        if (response.complete || newContext.export_goals) {
+          setMessages(prev => [
+            ...prev,
+            { role: 'assistant', content: response.message }
+          ]);
+          setRequiresAction(true);
+          setActionType('show_validation');
+          return;
         }
       }
 
-      // Focus the input field after response
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
+      // Add assistant's response to chat
+      await delay(Math.random() * 500 + 500); // Additional small delay for typing effect
+      setMessages(prev => [...prev, { role: 'assistant', content: response.message }]);
+      setLastResponse(response);
 
-      // Handle transition to validation form
-      if (response?.message === 'No more questions.') {
-        setRequiresAction(false);
-        setActionType(null);
-      }
-
-      // Scroll to bottom after new messages
-      if (messagesContainerRef.current) {
-        messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-      }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Failed to get response:', error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Sorry, I encountered an error. Please try again.' 
+        content: 'Sorry, I encountered an error processing your response. Please refresh the page to start a new session.' 
       }]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleShowValidation = () => {
+    setShowValidationForm(true);
+    setRequiresAction(false);
+    setActionType(null);
+    setBusinessData(businessContext);
   };
 
   // Handle validation form completion
@@ -388,32 +372,53 @@ function ChatInterface() {
     setAssessmentComplete(true);
     
     try {
-      // Add completion message
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Great! Your business details have been validated. Starting the export readiness assessment...'
-      }]);
-
-      // Start the actual assessment
-      const response = await assessmentApi.startAssessment(validatedData);
+      // Update business context with validated data
+      const updatedContext = {
+        ...businessContext,
+        ...validatedData
+      };
+      setBusinessContext(updatedContext);
       
-      // Add the first assessment question
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: response.message
-      }]);
-
-      // Focus the input field for the first assessment question
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
+      // Start the assessment with complete business data
+      const response = await assessmentApi.startAssessment({
+        business_data: updatedContext
+      });
+      
+      if (response.error) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: 'Sorry, there was an error starting the assessment. Please try refreshing the page.'
+        }]);
+        return;
+      }
+      
+      // Add transition message and first assessment question
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: 'Perfect! Your business details have been validated. Let\'s begin your export readiness assessment.'
+        },
+        {
+          role: 'assistant',
+          content: response.message
         }
-      }, 100);
+      ]);
+
+      // Reset states for new phase
+      setRequiresAction(false);
+      setActionType(null);
+      setLastResponse(response);
+
+      // Focus input for next interaction
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     } catch (error) {
       console.error('Error starting assessment:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Sorry, I encountered an error starting the assessment. Please try again.'
+        content: 'Sorry, I encountered an error starting the assessment. Please refresh the page to try again.'
       }]);
     }
   };
@@ -425,8 +430,8 @@ function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-4" ref={messagesContainerRef}>
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-6">
         <div className="space-y-4">
           {messages.map((message, index) => (
             <div
@@ -436,9 +441,9 @@ function ChatInterface() {
               }`}
             >
               <div
-                className={`max-w-3/4 rounded-lg px-4 py-2 ${
+                className={`max-w-[80%] rounded-lg p-4 ${
                   message.role === 'user'
-                    ? 'bg-blue-500 text-white'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-800'
                 }`}
               >
@@ -448,57 +453,65 @@ function ChatInterface() {
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-lg px-4 py-2">
-                <Spinner />
+              <div className="bg-gray-100 rounded-lg p-4">
+                <div className="flex space-x-2">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300" />
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {showValidationForm ? (
-        <div className="p-4 border-t">
-          <BusinessValidationForm onValidationComplete={handleValidationComplete} />
+      <div className="border-t border-gray-200 p-4">
+        {requiresAction && actionType === 'show_validation' ? (
+          <button
+            onClick={handleShowValidation}
+            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Proceed with Business Validation
+          </button>
+        ) : requiresAction && actionType === 'start_assessment' ? (
+          <button
+            onClick={handleStartAssessment}
+            disabled={isLoading}
+            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Start Assessment
+          </button>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex space-x-4">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoading || showValidationForm}
+              ref={inputRef}
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim() || showValidationForm}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Send
+            </button>
+          </form>
+        )}
+      </div>
+
+      {showValidationForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <BusinessValidationForm 
+              onValidationComplete={handleValidationComplete}
+              initialData={businessContext}
+            />
+          </div>
         </div>
-      ) : (
-        <>
-          {requiresAction && actionType === 'start_assessment' ? (
-            <div className="p-4 border-t">
-              <button
-                onClick={handleStartAssessment}
-                className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-                disabled={isLoading}
-              >
-                Start Assessment
-              </button>
-            </div>
-          ) : (
-            <>
-              {!currentChecklist && !isIndustrySectorQuestion(lastResponse?.message) && (
-                <form onSubmit={handleSubmit} className="p-4 border-t">
-                  <div className="flex space-x-4">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      placeholder="Type your message..."
-                      className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled={isLoading || currentChecklist || showValidationForm}
-                    />
-                    <button
-                      type="submit"
-                      disabled={isLoading || !input.trim() || currentChecklist || showValidationForm}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
-                    >
-                      Send
-                    </button>
-                  </div>
-                </form>
-              )}
-            </>
-          )}
-        </>
       )}
 
       {currentChecklist && (

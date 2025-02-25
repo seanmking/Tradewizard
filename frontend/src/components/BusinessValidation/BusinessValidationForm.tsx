@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useAssessmentContext } from '../../contexts/AssessmentContext';
 import { Spinner } from '../common/Spinner';
+import { verificationService, ServiceValidationResult } from '../../services/verificationService';
 
 // Industry sectors configuration
 const INDUSTRY_SECTORS = {
@@ -59,7 +60,23 @@ interface ValidationField {
 }
 
 interface BusinessValidationFormProps {
-  onValidationComplete?: () => void;
+  onValidationComplete: (data: any) => void;
+  initialData?: {
+    business_name?: string;
+    first_name?: string;
+    last_name?: string;
+    role?: string;
+    website_url?: string;
+    export_goals?: string;
+    entity_type?: string;
+    full_name?: string;
+  };
+}
+
+// Form-level validation result
+interface FormValidationResult {
+  isValid: boolean;
+  message: string;
 }
 
 const VALIDATION_FIELDS: ValidationField[] = [
@@ -89,264 +106,105 @@ const VALIDATION_FIELDS: ValidationField[] = [
   }
 ];
 
-interface ValidationResult {
-  is_valid: boolean;
-  suggestions: string[];
-  confidence: number;
-}
+export const BusinessValidationForm: React.FC<BusinessValidationFormProps> = ({ 
+  onValidationComplete,
+  initialData = {}
+}) => {
+  const [formData, setFormData] = useState({
+    entityType: initialData.entity_type || '',
+    sector: '',
+    subcategory: '',
+    companyName: initialData.business_name || '',
+    registrationNumber: '',
+    taxNumber: '',
+    contactName: initialData.full_name || '',
+    contactRole: initialData.role || '',
+    website: initialData.website_url || '',
+    exportGoals: initialData.export_goals || ''
+  });
 
-export const BusinessValidationForm: React.FC<BusinessValidationFormProps> = ({ onValidationComplete }) => {
-  const [formData, setFormData] = useState<Record<string, string>>({});
-  const [validation, setValidation] = useState<Record<string, ValidationResult>>({});
-  const [isValidating, setIsValidating] = useState<Record<string, boolean>>({});
-  const [detectedEntityType, setDetectedEntityType] = useState<string | null>(null);
-  const [selectedEntityType, setSelectedEntityType] = useState<string>('');
-  const [selectedSector, setSelectedSector] = useState<string>('Food Products');
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
-  const { validateBusiness, businessData, setBusinessData } = useAssessmentContext();
-  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
+  const [validationResults, setValidationResults] = useState<{
+    registration: FormValidationResult;
+    tax: FormValidationResult;
+  }>({
+    registration: { isValid: false, message: '' },
+    tax: { isValid: false, message: '' }
+  });
 
-  // Initialize form with business data from context
-  useEffect(() => {
-    if (businessData) {
-      if (businessData.company_name) {
-        setFormData(prev => ({ ...prev, company_name: businessData.company_name }));
-        // Trigger entity detection
-        const entityType = detectEntityType(businessData.company_name);
-        setDetectedEntityType(entityType);
-        if (entityType) {
-          setSelectedEntityType(entityType);
-        }
-      }
-      
-      // Set sector and subcategory if available
-      if (businessData.sector) {
-        setSelectedSector(businessData.sector);
-      }
-      if (businessData.subcategory) {
-        setSelectedSubcategory(businessData.subcategory);
-      }
-    }
-  }, [businessData]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Detect entity type from company name
-  const detectEntityType = (companyName: string): string | null => {
-    for (const [type, pattern] of Object.entries(ENTITY_TYPE_PATTERNS)) {
-      if (pattern.test(companyName)) {
-        // Automatically set the selected entity type when detected
-        setSelectedEntityType(type);
-        return type;
-      }
-    }
-    return null;
-  };
+  // Convert service validation result to form validation result
+  const convertValidationResult = (result: ServiceValidationResult): FormValidationResult => ({
+    isValid: result.is_valid,
+    message: result.suggestions[0] || ''
+  });
 
-  // Pre-validate input before sending to API
-  const preValidateInput = (field: ValidationField, value: string): { isValid: boolean; message: string } => {
-    switch (field.name) {
-      case 'registration_number':
-        if (!value.trim()) {
-          return {
-            isValid: false,
-            message: 'Registration number is required'
-          };
-        }
-        if (!VALIDATION_PATTERNS.REGISTRATION.test(value)) {
-          return {
-            isValid: false,
-            message: 'Registration number must be in format YYYY/XXXXXX/XX'
-          };
-        }
-        const year = parseInt(value.split('/')[0]);
-        const currentYear = new Date().getFullYear();
-        if (isNaN(year) || year < 1900 || year > currentYear) {
-          return {
-            isValid: false,
-            message: `Year must be between 1900 and ${currentYear}`
-          };
-        }
-        return { isValid: true, message: '' };
-      case 'tax_number':
-        if (!value.trim()) {
-          return {
-            isValid: false,
-            message: 'Tax number is required'
-          };
-        }
-        if (!/^\d*$/.test(value)) {
-          return {
-            isValid: false,
-            message: 'Tax number must contain only digits'
-          };
-        }
-        if (!VALIDATION_PATTERNS.TAX_NUMBER.test(value)) {
-          return {
-            isValid: false,
-            message: value.length < 10 
-              ? 'Tax number is too short - must be exactly 10 digits'
-              : value.length > 10 
-                ? 'Tax number is too long - must be exactly 10 digits'
-                : 'Tax number must be exactly 10 digits'
-          };
-        }
-        return { isValid: true, message: '' };
-      case 'company_name':
-        if (!value.trim()) {
-          return {
-            isValid: false,
-            message: 'Company name is required'
-          };
-        }
-        if (value.length < 3) {
-          return {
-            isValid: false,
-            message: 'Company name must be at least 3 characters long'
-          };
-        }
-        break;
-    }
-    return { isValid: true, message: '' };
-  };
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
 
-  const handleChange = useCallback(async (field: ValidationField, value: string) => {
-    setFormData(prev => ({ ...prev, [field.name]: value }));
-    
-    // Update detected entity type for company name
-    if (field.name === 'company_name') {
-      const entityType = detectEntityType(value);
-      setDetectedEntityType(entityType);
-      
-      // Only auto-select if no manual selection has been made
-      if (entityType && !selectedEntityType) {
-        setSelectedEntityType(entityType);
-      }
-    }
-
-    // Don't validate empty fields unless they're required
-    if (!value && !field.required) {
-      return;
-    }
-
-    // Pre-validate input
-    const preValidation = preValidateInput(field, value);
-    if (!preValidation.isValid) {
-      setValidation(prev => ({
-        ...prev,
-        [field.name]: {
-          is_valid: false,
-          suggestions: [preValidation.message],
-          confidence: 0
-        }
-      }));
-      return;
-    }
-
-    // Clear existing timer for this field
-    if (debounceTimers.current[field.name]) {
-      clearTimeout(debounceTimers.current[field.name]);
-    }
-
-    // Set new timer
-    debounceTimers.current[field.name] = setTimeout(async () => {
-      setIsValidating(prev => ({ ...prev, [field.name]: true }));
-      
+    // Validate registration number and tax number as they're entered
+    if (name === 'registrationNumber' && value.length > 0) {
       try {
-        // For registration number and tax number, use local validation first
-        if (field.name === 'registration_number' || field.name === 'tax_number') {
-          const isValid = VALIDATION_PATTERNS[field.name === 'registration_number' ? 'REGISTRATION' : 'TAX_NUMBER'].test(value);
-          if (isValid) {
-            setValidation(prev => ({
-              ...prev,
-              [field.name]: {
-                is_valid: true,
-                suggestions: [`Valid ${field.name.replace('_', ' ')}`],
-                confidence: 0.95
-              }
-            }));
-            setIsValidating(prev => ({ ...prev, [field.name]: false }));
-            return;
-          }
-        }
-
-        // For other fields or if local validation fails, call the API
-        const result = await validateBusiness(field.name, value);
-        
-        // If it's the company name field and we detected an entity type, increase confidence
-        if (field.name === 'company_name' && detectedEntityType) {
-          result.confidence = Math.min(1, result.confidence + 0.1);
-          result.suggestions = [
-            ...result.suggestions,
-            `Detected business entity type: ${BUSINESS_ENTITY_TYPES.find(t => t.value === detectedEntityType)?.label}`
-          ];
-        }
-        
-        setValidation(prev => ({ ...prev, [field.name]: result }));
-      } catch (error) {
-        console.error('Validation error:', error);
-        setValidation(prev => ({
+        const result: ServiceValidationResult = await verificationService.verifyBusiness(value);
+        setValidationResults(prev => ({
           ...prev,
-          [field.name]: {
-            is_valid: false,
-            suggestions: ['Validation service error. Please try again.'],
-            confidence: 0
-          }
+          registration: convertValidationResult(result)
         }));
-      } finally {
-        setIsValidating(prev => ({ ...prev, [field.name]: false }));
+      } catch (error) {
+        console.error('Registration validation error:', error);
+        setValidationResults(prev => ({
+          ...prev,
+          registration: { isValid: false, message: 'Validation service error' }
+        }));
       }
-    }, 300);
-  }, [validateBusiness, selectedEntityType, detectedEntityType]);
+    }
 
-  const getFieldValidationState = (field: ValidationField) => {
-    const validationResult = validation[field.name];
-    if (!validationResult) return '';
-    return validationResult.is_valid ? 'is-valid' : 'is-invalid';
-  };
-
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return 'text-green-600';
-    if (confidence >= 0.5) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const isFormValid = () => {
-    return VALIDATION_FIELDS.every(field => {
-      const validationResult = validation[field.name];
-      return validationResult && validationResult.is_valid;
-    }) && selectedSubcategory && selectedEntityType;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isFormValid() && selectedSubcategory && onValidationComplete) {
-      // Store the validated data
-      const validatedData = {
-        ...formData,
-        sector: selectedSector,
-        subcategory: selectedSubcategory,
-        entityType: selectedEntityType,
-        company_name: formData.company_name || '',
-        registration_number: formData.registration_number || '',
-        tax_number: formData.tax_number || ''
-      };
-      
-      // Update business data in context
-      setBusinessData(validatedData);
-      
-      // Call the completion handler which will handle the transition
-      onValidationComplete();
+    if (name === 'taxNumber' && value.length > 0) {
+      try {
+        const result: ServiceValidationResult = await verificationService.verifyTax(value);
+        setValidationResults(prev => ({
+          ...prev,
+          tax: convertValidationResult(result)
+        }));
+      } catch (error) {
+        console.error('Tax validation error:', error);
+        setValidationResults(prev => ({
+          ...prev,
+          tax: { isValid: false, message: 'Validation service error' }
+        }));
+      }
     }
   };
 
-  // Helper function to get validation message class
-  const getValidationMessageClass = (field: ValidationField) => {
-    const validationResult = validation[field.name];
-    if (!validationResult) return '';
-    return validationResult.is_valid 
-      ? 'text-green-600'
-      : validationResult.confidence > 0 
-        ? 'text-yellow-600' 
-        : 'text-red-600';
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // Final validation check
+      const registrationResult: ServiceValidationResult = await verificationService.verifyBusiness(formData.registrationNumber);
+      const taxResult: ServiceValidationResult = await verificationService.verifyTax(formData.taxNumber);
+
+      if (!registrationResult.is_valid || !taxResult.is_valid) {
+        setValidationResults({
+          registration: convertValidationResult(registrationResult),
+          tax: convertValidationResult(taxResult)
+        });
+        return;
+      }
+
+      // If all validations pass, call the completion handler
+      onValidationComplete(formData);
+    } catch (error) {
+      console.error('Validation error:', error);
+      setValidationResults({
+        registration: { isValid: false, message: 'Validation service error' },
+        tax: { isValid: false, message: 'Validation service error' }
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -359,181 +217,156 @@ export const BusinessValidationForm: React.FC<BusinessValidationFormProps> = ({ 
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Business Entity Type Selection */}
-        <div className="form-group">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Business Entity Type
-            <span className="text-red-500 ml-1">*</span>
-          </label>
-          <select
-            value={selectedEntityType}
-            onChange={(e) => setSelectedEntityType(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            required
-          >
-            <option value="">Select business entity type</option>
-            {BUSINESS_ENTITY_TYPES.map(type => (
-              <option key={type.value} value={type.value}>
-                {type.label}
-              </option>
-            ))}
-          </select>
-          {detectedEntityType && selectedEntityType !== detectedEntityType && (
-            <p className="mt-2 text-sm text-yellow-600">
-              Note: We detected {BUSINESS_ENTITY_TYPES.find(t => t.value === detectedEntityType)?.label} in your company name, 
-              but you can override this selection if needed.
-            </p>
-          )}
-        </div>
-
-        {/* Industry Sector Selection */}
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Industry Sector
-              <span className="text-red-500 ml-1">*</span>
+            <label className="block text-sm font-medium text-gray-700">
+              Business Entity Type
             </label>
             <select
-              value={selectedSector}
-              onChange={(e) => {
-                setSelectedSector(e.target.value);
-                setSelectedSubcategory('');
-              }}
+              name="entityType"
+              value={formData.entityType}
+              onChange={handleInputChange}
+              required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             >
-              {Object.entries(INDUSTRY_SECTORS).map(([sector, { active }]) => (
-                <option key={sector} value={sector} disabled={!active}>
-                  {sector} {!active && '(Coming Soon)'}
-                </option>
-              ))}
+              <option value="">Select type</option>
+              <option value="PTY LTD">Private Company (Pty) Ltd</option>
+              <option value="LTD">Public Company (Ltd)</option>
+              <option value="CC">Close Corporation (CC)</option>
+              <option value="SOLE PROP">Sole Proprietorship</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Subcategory
-              <span className="text-red-500 ml-1">*</span>
+            <label className="block text-sm font-medium text-gray-700">
+              Company Name
             </label>
-            <select
-              value={selectedSubcategory}
-              onChange={(e) => setSelectedSubcategory(e.target.value)}
+            <input
+              type="text"
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleInputChange}
+              required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="">Select a subcategory</option>
-              {INDUSTRY_SECTORS[selectedSector]?.subcategories.map(subcategory => (
-                <option key={subcategory} value={subcategory}>
-                  {subcategory}
-                </option>
-              ))}
-            </select>
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Registration Number
+            </label>
+            <input
+              type="text"
+              name="registrationNumber"
+              value={formData.registrationNumber}
+              onChange={handleInputChange}
+              required
+              placeholder="2018/123456/07"
+              className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 ${
+                validationResults.registration.isValid
+                  ? 'border-green-300 focus:border-green-500'
+                  : 'border-gray-300 focus:border-blue-500'
+              }`}
+            />
+            {validationResults.registration.message && (
+              <p className={`mt-1 text-sm ${
+                validationResults.registration.isValid ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {validationResults.registration.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Tax Number
+            </label>
+            <input
+              type="text"
+              name="taxNumber"
+              value={formData.taxNumber}
+              onChange={handleInputChange}
+              required
+              placeholder="9876543210"
+              className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 ${
+                validationResults.tax.isValid
+                  ? 'border-green-300 focus:border-green-500'
+                  : 'border-gray-300 focus:border-blue-500'
+              }`}
+            />
+            {validationResults.tax.message && (
+              <p className={`mt-1 text-sm ${
+                validationResults.tax.isValid ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {validationResults.tax.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Contact Name
+            </label>
+            <input
+              type="text"
+              name="contactName"
+              value={formData.contactName}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Contact Role
+            </label>
+            <input
+              type="text"
+              name="contactRole"
+              value={formData.contactRole}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Website
+            </label>
+            <input
+              type="url"
+              name="website"
+              value={formData.website}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Export Goals
+            </label>
+            <textarea
+              name="exportGoals"
+              value={formData.exportGoals}
+              onChange={handleInputChange as any}
+              required
+              rows={3}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
           </div>
         </div>
 
-        {/* Existing validation fields */}
-        {VALIDATION_FIELDS.map(field => (
-          <div key={field.name} className="form-group">
-            <label 
-              htmlFor={field.name}
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            
-            <div className="relative">
-              <input
-                id={field.name}
-                type={field.type}
-                name={field.name}
-                value={formData[field.name] || ''}
-                onChange={(e) => handleChange(field, e.target.value)}
-                placeholder={field.placeholder}
-                aria-label={field.label}
-                className={`
-                  mt-1 block w-full rounded-md shadow-sm
-                  ${getFieldValidationState(field)}
-                  ${validation[field.name]?.is_valid 
-                    ? 'border-green-500 focus:border-green-500 focus:ring-green-500' 
-                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                  }
-                `}
-              />
-              
-              {isValidating[field.name] && (
-                <div className="absolute right-3 top-3" role="status" aria-label="Loading">
-                  <Spinner size="sm" />
-                </div>
-              )}
-            </div>
-
-            {/* Help text */}
-            <p className="mt-1 text-sm text-gray-500" id={`${field.name}-help`}>
-              {field.helpText}
-            </p>
-
-            {/* Entity type detection feedback */}
-            {field.name === 'company_name' && detectedEntityType && (
-              <div className="mt-2">
-                <p className="text-sm text-blue-600">
-                  Detected entity type: {detectedEntityType.replace('_', ' ')}
-                </p>
-              </div>
-            )}
-
-            {/* Enhanced validation feedback */}
-            {validation[field.name] && (
-              <div className="mt-2" aria-live="polite">
-                {validation[field.name].suggestions.map((suggestion, idx) => (
-                  <p 
-                    key={idx} 
-                    className={`text-sm ${getValidationMessageClass(field)}`}
-                    role="alert"
-                  >
-                    {suggestion}
-                  </p>
-                ))}
-                
-                {/* Enhanced confidence indicator */}
-                {validation[field.name].confidence > 0 && (
-                  <div className="mt-2">
-                    <div className="flex items-center">
-                      <div className="flex-grow h-2 rounded-full bg-gray-200">
-                        <div 
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            validation[field.name].confidence >= 0.8 ? 'bg-green-500' :
-                            validation[field.name].confidence >= 0.5 ? 'bg-yellow-500' :
-                            'bg-red-500'
-                          }`}
-                          style={{ width: `${Math.round(validation[field.name].confidence * 100)}%` }}
-                        />
-                      </div>
-                      <span 
-                        className={`ml-2 text-sm ${getConfidenceColor(validation[field.name].confidence)}`}
-                        role="status"
-                      >
-                        {Math.round(validation[field.name].confidence * 100)}% match
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
-
-        {/* Submit button with enhanced messaging */}
-        <div className="mt-8">
+        <div className="flex justify-end">
           <button
             type="submit"
-            disabled={!isFormValid() || !selectedSubcategory}
-            className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-colors
-              ${isFormValid() && selectedSubcategory
-                ? 'bg-blue-600 hover:bg-blue-700' 
-                : 'bg-gray-400 cursor-not-allowed'}`}
+            disabled={isSubmitting || !validationResults.registration.isValid || !validationResults.tax.isValid}
+            className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
           >
-            {isFormValid() && selectedSubcategory
-              ? 'Continue to Assessment'
-              : 'Please Complete All Required Fields'}
+            {isSubmitting ? 'Validating...' : 'Validate & Continue'}
           </button>
         </div>
       </form>

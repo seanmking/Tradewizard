@@ -1,21 +1,27 @@
-"""Assessment questions and formatting utilities."""
+"""Assessment questions and formatting utilities with improved conversation flow."""
 
 QUESTIONS = [
     {
-        'id': 'business_details',
-        'text': 'Could you please tell me your name, your role, and the name of your business?',
+        'id': 'personal_introduction',
+        'text': "Hi there! I'm Sarah, your export readiness consultant. I'm excited to help you explore international opportunities for your business. Could you please tell me your name, your role, and the name of your company?",
         'extract': ['first_name', 'last_name', 'role', 'business_name']
     },
     {
-        'id': 'business_type',
-        'text': 'What type of business entity are you (e.g., Pty Ltd, CC, Sole Proprietor)?',
-        'extract': ['business_type']
+        'id': 'website_info',
+        'text': "Thanks, {first_name}! It's great to meet you. Could you share your company website URL? This will help me understand more about {business_name} while we chat.",
+        'extract': ['website_url']
     },
     {
-        'id': 'industry_sector',
-        'text': 'Which industry sector does your business operate in?',
-        'extract': ['industry']
+        'id': 'export_aspirations',
+        'text': "Excellent! While I review your website information, I'd love to hear what sparked your interest in exploring international markets. What are your main export goals for {business_name}? Please give as much detail as possible so I can assist craft the best possible export path for your business.",
+        'extract': ['export_goals', 'target_markets']
+    },
+    {
+        'id': 'business_verification_intro',
+        'text': "Thanks for sharing that. I've gathered some information about {business_name} from your website. To proceed with your export readiness assessment, we'll need to verify a few business details. This helps us provide the most accurate guidance for your specific situation.",
+        'extract': []  # Transition message, no extraction needed
     }
+    # Additional verification questions will follow after website data is processed
 ]
 
 def format_question(question, context):
