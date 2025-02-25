@@ -65,7 +65,7 @@ class TradeAssessmentService:
             'website': {
                 'id': 'website',
                 'question': {
-                    'text': "Thanks, {first_name}! Could you share your business website URL? This will help me understand your products and current markets.",
+                    'text': "Great to meet you {first_name}! Could you share your business website URL? This will help me understand your products and current markets.",
                     'extract_fields': ['website_url'],
                     'system_displayed': True
                 },
@@ -98,7 +98,7 @@ class TradeAssessmentService:
             'export_motivation': {
                 'id': 'export_motivation',
                 'question': {
-                    'text': "Great! And while I look through your website, could you please tell me what's motivating you to explore export opportunities for {business_name}?",
+                    'text': "Awesome! And while I look through your website, could you please tell me what's motivating you to explore export opportunities for {business_name}?",
                     'extract_fields': ['export_motivation'],
                     'system_displayed': True
                 },
@@ -170,7 +170,7 @@ class TradeAssessmentService:
                     },
                     {
                         'id': 'tax_number',
-                        'label': 'Tax/VAT Number',
+                        'label': 'Tax Number',
                         'type': 'text',
                         'required': True
                     }
@@ -375,12 +375,19 @@ Extract ONLY the following fields from the message if explicitly stated:
 Message: {message}
 
 Respond with ONLY a valid JSON object containing the extracted information.
+Example format: {{"field1": "value1", "field2": "value2"}}
+Do not include any text before or after the JSON object.
 """
         
         try:
             response = self._make_llm_request(extraction_prompt)
-            extracted_data = json.loads(response)
-            return {k: v for k, v in extracted_data.items() if v and v.strip()}
+            # Try to find a JSON object in the response
+            json_start = response.find('{')
+            json_end = response.rfind('}')
+            if json_start >= 0 and json_end > json_start:
+                json_str = response[json_start:json_end + 1]
+                extracted_data = json.loads(json_str)
+                return {k: v for k, v in extracted_data.items() if v and v.strip()}
         except Exception as e:
             print(f"Forced extraction failed: {str(e)}")
             return {}

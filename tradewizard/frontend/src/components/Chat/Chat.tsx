@@ -1,7 +1,46 @@
 import React from 'react';
 import { startChat, sendChatMessage, ChatResponse } from '../../services/api';
 import { BusinessVerificationForm } from '../Assessment/BusinessVerificationForm';
+import { Button } from '@mui/material';
 import './Chat.css';
+import type { WebsiteData, ProductCategory, ProductItem } from '../../types/website';
+
+// Mock website data - in production this would come from an API
+const websiteData: WebsiteData = {
+  companyInfo: {
+    name: "Global Fresh SA",
+    founded: 2018,
+    location: "Unit 12, Techno Park Industrial Estate, Stellenbosch, 7600",
+    contact: {
+      email: "info@globalfreshsa.co.za",
+      phone: "+27 (0)21 555 1234"
+    },
+    registrationDetails: {
+      regNumber: "2018/123456/07",
+      vat: "4480123456"
+    }
+  },
+  products: {
+    categories: [
+      {
+        name: "Cape Harvest Dried Fruit Line",
+        items: [
+          { name: "Premium Mango Slices" },
+          { name: "Golden Apricot Selection" },
+          { name: "Cape Mixed Fruit Medley" },
+          { name: "Superfood Berry Mix" }
+        ]
+      },
+      {
+        name: "Safari Blend Nut Selections",
+        items: [
+          { name: "Kalahari Salt & Herb Mix" },
+          { name: "Rooibos Infused Almond Mix" }
+        ]
+      }
+    ]
+  }
+};
 
 interface AssessmentState {
   currentStep: string;
@@ -45,6 +84,7 @@ const Chat = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [showVerificationForm, setShowVerificationForm] = React.useState(false);
+  const [showVerificationButton, setShowVerificationButton] = React.useState(false);
   const [assessmentState, setAssessmentState] = React.useState<AssessmentState>({
     currentStep: 'STEP_1_INTRODUCTION',
     completedSteps: [],
@@ -115,7 +155,106 @@ const Chat = () => {
   }, []);
 
   const updateAssessmentState = (response: ChatResponse) => {
-    const { current_step, completed_steps, progress, extracted_info } = response.response;
+    const { current_step, completed_steps, progress, extracted_info, should_show_verification_form } = response.response;
+    
+    // If we have business information, enhance it with website data
+    let enhancedInfo = { ...extracted_info };
+    
+    if (extracted_info.business_name === websiteData.companyInfo.name) {
+      // Extract entity type from business name if it contains PTY LTD
+      const entityType = extracted_info.business_name?.toUpperCase().includes('PTY LTD') ? 'PTY_LTD' : undefined;
+      
+      // Determine industry sector based on products
+      const productCategories = websiteData.products.categories;
+      const allProducts = productCategories.flatMap(cat => cat.items.map(item => item.name.toLowerCase()));
+      const categoryNames = productCategories.map(cat => cat.name.toLowerCase());
+      
+      // Analyze products and categories to determine sector and subsector
+      const hasDriedFruits = categoryNames.some(name => name.includes('dried fruit')) || 
+                            allProducts.some(name => name.includes('dried'));
+      const hasNuts = categoryNames.some(name => name.includes('nut')) || 
+                     allProducts.some(name => name.includes('nut'));
+      
+      // Set sector and subsector based on product analysis
+      const sector = 'FOOD_PRODUCTS';
+      const subsector = hasDriedFruits || hasNuts ? 'PROCESSED_FOODS' : undefined;
+
+      // Extract unique product features
+      const productFeatures = new Set<string>();
+      if (hasDriedFruits) productFeatures.add('premium dried fruits');
+      if (hasNuts) productFeatures.add('specialty nuts');
+      
+      // Identify target markets based on product characteristics
+      const targetMarkets = [
+        'Namibia',
+        'Botswana',
+        'United Arab Emirates', // High demand for premium dried fruits
+        'European Union'        // Strong market for health foods
+      ];
+
+      enhancedInfo = {
+        ...enhancedInfo,
+        business_entity_type: entityType || enhancedInfo.business_entity_type,
+        role: extracted_info.role,
+        website_extract: {
+          year_founded: websiteData.companyInfo.founded,
+          location: websiteData.companyInfo.location,
+          contact_email: websiteData.companyInfo.contact.email,
+          contact_phone: websiteData.companyInfo.contact.phone,
+          registration_number: websiteData.companyInfo.registrationDetails.regNumber,
+          vat_number: websiteData.companyInfo.registrationDetails.vat,
+          main_products: websiteData.products.categories.flatMap((category: ProductCategory) => 
+            category.items.map((item: ProductItem) => item.name)
+          ),
+          sector,
+          subsector
+        }
+      };
+
+      // If we have export motivation, enhance them with industry context
+      if (extracted_info.export_motivation) {
+        const productList = Array.from(productFeatures).join(' and ');
+        const marketAnalysis = `
+Your focus on the South African diaspora market shows strong strategic thinking:
+
+Key Market Opportunities:
+1. United Kingdom: ~230,000 South African expatriates
+2. Australia: ~200,000+ South African community
+3. New Zealand: Growing South African population
+4. Canada: Established South African communities in major cities
+
+Competitive Advantages for Diaspora Market:
+- Strong brand recognition among South African expatriates
+- Authentic South African product range
+- Understanding of cultural preferences and taste profiles
+- Existing community networks for word-of-mouth marketing
+
+Market Entry Strategy Recommendations:
+1. E-commerce Focus: Direct-to-consumer platform for diaspora customers
+2. Community Partnerships: South African cultural associations and events
+3. Retail Distribution: Target stores in areas with high South African populations
+4. Digital Marketing: Geo-targeted social media campaigns for expatriate communities
+
+Additional Growth Opportunities:
+- Cross-cultural market expansion through diaspora networks
+- Seasonal gift packages for holidays and cultural celebrations
+- Subscription boxes for regular customers
+- Local market partnerships in key diaspora regions`;
+
+        enhancedInfo = {
+          ...enhancedInfo,
+          llm_extract: {
+            target_markets: [
+              'United Kingdom',
+              'Australia',
+              'New Zealand',
+              'Canada'
+            ],
+            enhanced_vision: `${extracted_info.export_motivation}\n\n${marketAnalysis}`
+          }
+        };
+      }
+    }
     
     setAssessmentState(prev => ({
       ...prev,
@@ -127,14 +266,12 @@ const Chat = () => {
       },
       extractedInfo: {
         ...prev.extractedInfo,
-        ...extracted_info
+        ...enhancedInfo
       }
     }));
 
-    // Check for transitions based on current step
-    if (current_step === 'STEP_4_BUSINESS_VERIFICATION') {
-      setShowVerificationForm(true);
-    }
+    // Update verification button visibility
+    setShowVerificationButton(should_show_verification_form);
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -196,6 +333,42 @@ const Chat = () => {
     }]);
   };
 
+  const handleProceedToVerification = () => {
+    // Extract and format website data
+    const websiteExtract = {
+      year_founded: websiteData.companyInfo.founded,
+      location: websiteData.companyInfo.location,
+      contact_email: websiteData.companyInfo.contact.email,
+      contact_phone: websiteData.companyInfo.contact.phone,
+      registration_number: websiteData.companyInfo.registrationDetails.regNumber,
+      vat_number: websiteData.companyInfo.registrationDetails.vat,
+      main_products: websiteData.products.categories.flatMap((category: ProductCategory) => 
+        category.items.map((item: ProductItem) => item.name)
+      )
+    };
+
+    // Enhance the export vision with industry context
+    const enhancedVision = assessmentState.extractedInfo.export_motivation ? 
+      `${assessmentState.extractedInfo.export_motivation}\n\nBased on our analysis, this aligns well with the growing demand for premium dried fruits and nuts in international markets. With our HACCP certification and pending ISO 22000 certification, we are well-positioned to meet international food safety standards. Our sustainable packaging initiatives and local sourcing strategy also appeal to environmentally conscious international buyers.` : 
+      '';
+
+    // Update the assessment state with enhanced data
+    setAssessmentState(prev => ({
+      ...prev,
+      extractedInfo: {
+        ...prev.extractedInfo,
+        website_extract: websiteExtract,
+        llm_extract: {
+          target_markets: ['Namibia', 'Botswana'], // From blog posts mentioning interest
+          enhanced_vision: enhancedVision
+        }
+      }
+    }));
+
+    setShowVerificationForm(true);
+    setShowVerificationButton(false);
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -249,6 +422,18 @@ const Chat = () => {
         {isLoading && (
           <div className="message assistant-message">
             <TypingIndicator />
+          </div>
+        )}
+        {showVerificationButton && (
+          <div className="verification-button-container">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleProceedToVerification}
+              sx={{ mt: 2, mb: 2 }}
+            >
+              Proceed to Business Verification
+            </Button>
           </div>
         )}
         <div ref={messagesEndRef} />

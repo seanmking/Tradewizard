@@ -17,19 +17,15 @@ interface ChatSession {
 export interface ChatResponse {
   chat_id: string;
   response: {
-    completed_steps: string[];
+    response: string;
     current_step: string;
-    extracted_info: Record<string, any>;
+    completed_steps: string[];
     progress: {
       completed: number;
-      current: string;
       total: number;
     };
-    response: string;
-    step_progress: Record<string, {
-      completed: boolean;
-      required_fields: string[];
-    }>;
+    extracted_info: Record<string, any>;
+    should_show_verification_form: boolean;
   };
 }
 
