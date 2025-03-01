@@ -1,0 +1,431 @@
+{
+  "certification_authorities": {
+    "south_africa": [
+      {
+        "name": "South African Bureau of Standards (SABS)",
+        "description": "National standards body responsible for promoting quality in industry and trade",
+        "services": ["ISO certifications", "Product testing", "Standards development"],
+        "website": "https://www.sabs.co.za",
+        "contact_email": "info@sabs.co.za",
+        "contact_phone": "+27 12 428 7911",
+        "address": "1 Dr Lategan Road, Groenkloof, Pretoria, 0181, South Africa"
+      },
+      {
+        "name": "PPECB (Perishable Products Export Control Board)",
+        "description": "Statutory organization that controls exports of perishable products from South Africa",
+        "services": ["Export certification", "Cold chain management", "Food safety audits"],
+        "website": "https://ppecb.com",
+        "contact_email": "info@ppecb.com",
+        "contact_phone": "+27 21 930 1134",
+        "address": "45 Silwerboom Avenue, Plattekloof, Cape Town, 7500, South Africa"
+      },
+      {
+        "name": "Department of Agriculture, Forestry and Fisheries (DAFF)",
+        "description": "Government department responsible for agricultural export permits and phytosanitary certificates",
+        "services": ["Export permits", "Phytosanitary certificates", "Agricultural regulations"],
+        "website": "https://www.dalrrd.gov.za",
+        "contact_email": "info@dalrrd.gov.za",
+        "contact_phone": "+27 12 319 6000",
+        "address": "Agriculture Place, 20 Steve Biko Street, Arcadia, Pretoria, 0002, South Africa"
+      },
+      {
+        "name": "South African National Accreditation System (SANAS)",
+        "description": "Only national accreditation body giving formal recognition to laboratories, certification bodies, inspection bodies, proficiency testing scheme providers and good laboratory practice test facilities",
+        "services": ["Accreditation services", "Laboratory recognition", "Certification body recognition"],
+        "website": "https://www.sanas.co.za",
+        "contact_email": "info@sanas.co.za",
+        "contact_phone": "+27 12 394 3760",
+        "address": "the dti Campus, 77 Meintjies Street, Sunnyside, Pretoria, 0002, South Africa"
+      }
+    ],
+    "halal": [
+      {
+        "name": "South African National Halal Authority (SANHA)",
+        "description": "Non-profit organization certifying, regulating, and promoting Halal products",
+        "services": ["Halal certification", "Halal auditing", "Halal training"],
+        "website": "https://www.sanha.org.za",
+        "contact_email": "info@sanha.org.za",
+        "contact_phone": "+27 11 870 8000",
+        "address": "P.O. Box 2092, Durban, 4000, South Africa"
+      },
+      {
+        "name": "National Independent Halal Trust (NIHT)",
+        "description": "Independent Halal certifying organization in South Africa",
+        "services": ["Halal certification", "Halal compliance monitoring", "Export certification"],
+        "website": "http://www.halaal.org.za",
+        "contact_email": "info@halaal.org.za",
+        "contact_phone": "+27 21 633 4145",
+        "address": "P.O. Box 38282, Gatesville, 7766, South Africa"
+      },
+      {
+        "name": "Islamic Food and Nutrition Council of America (IFANCA)",
+        "description": "Internationally recognized Halal certifying organization accepted in UAE",
+        "services": ["Global Halal certification", "Export documentation", "Halal training"],
+        "website": "https://www.ifanca.org",
+        "contact_email": "info@ifanca.org",
+        "contact_phone": "+1 847 993 0034",
+        "address": "777 Busse Highway, Park Ridge, IL 60068, USA"
+      }
+    ],
+    "brc_and_food_safety": [
+      {
+        "name": "SGS South Africa",
+        "description": "Leading inspection, verification, testing and certification company",
+        "services": ["BRCGS certification", "ISO certification", "Food safety audits"],
+        "website": "https://www.sgs.co.za",
+        "contact_email": "za.info@sgs.com",
+        "contact_phone": "+27 11 800 1000",
+        "address": "58 Melvill Street, Booysens, Johannesburg, 2091, South Africa"
+      },
+      {
+        "name": "Bureau Veritas South Africa",
+        "description": "Global leader in Testing, Inspection and Certification",
+        "services": ["BRCGS certification", "HACCP certification", "Food safety systems"],
+        "website": "https://www.bureauveritas.co.za",
+        "contact_email": "info@za.bureauveritas.com",
+        "contact_phone": "+27 11 784 8400",
+        "address": "Building 1, Harrowdene Office Park, Western Service Road, Woodmead, Johannesburg, South Africa"
+      },
+      {
+        "name": "Intertek South Africa",
+        "description": "Total Quality Assurance provider to industries worldwide",
+        "services": ["BRCGS certification", "Food testing", "Supply chain audits"],
+        "website": "https://www.intertek.com/south-africa/",
+        "contact_email": "info.southafrica@intertek.com",
+        "contact_phone": "+27 21 657 2800",
+        "address": "15E Riley Road, Bedfordview, 2007, Johannesburg, South Africa"
+      }
+    ]
+  },
+  "export_facilitators": {
+    "south_africa": [
+      {
+        "name": "Trade and Investment South Africa (TISA)",
+        "description": "Division of the Department of Trade, Industry and Competition (DTIC) that promotes exports and investments",
+        "services": ["Export promotion", "Market intelligence", "Trade missions"],
+        "website": "http://www.thedtic.gov.za",
+        "contact_email": "info@thedtic.gov.za",
+        "contact_phone": "+27 12 394 9500",
+        "address": "77 Meintjies Street, Sunnyside, Pretoria, 0002, South Africa"
+      },
+      {
+        "name": "Export Credit Insurance Corporation (ECIC)",
+        "description": "Provides export credit and investment insurance solutions",
+        "services": ["Export credit insurance", "Political risk insurance", "Surety bonds"],
+        "website": "https://www.ecic.co.za",
+        "contact_email": "info@ecic.co.za",
+        "contact_phone": "+27 12 471 3800",
+        "address": "Block C7 & C8, Eco Origins Office Park, 349 Witch Hazel Avenue, Highveld Ext 79, Centurion, South Africa"
+      },
+      {
+        "name": "South African Chamber of Commerce and Industry (SACCI)",
+        "description": "Business association representing various sectors of business",
+        "services": ["Certificates of Origin", "Trade documentation", "Business networking"],
+        "website": "https://sacci.org.za",
+        "contact_email": "info@sacci.org.za",
+        "contact_phone": "+27 11 446 3800",
+        "address": "18 Hurlingham Road, Illovo, Johannesburg, 2196, South Africa"
+      },
+      {
+        "name": "Cape Chamber of Commerce and Industry",
+        "description": "Western Cape's leading business association",
+        "services": ["Export documentation", "Certificates of Origin", "Trade advice"],
+        "website": "https://www.capechamber.co.za",
+        "contact_email": "info@capechamber.co.za",
+        "contact_phone": "+27 21 402 4300",
+        "address": "33 Martin Hammerschlag Way, Foreshore, Cape Town, 8001, South Africa"
+      }
+    ],
+    "consultants": [
+      {
+        "name": "XA Global Trade Advisors",
+        "description": "Export consulting firm specializing in African trade",
+        "services": ["Export readiness assessment", "Market entry strategy", "Compliance management"],
+        "website": "https://xa.co.za",
+        "contact_email": "info@xa.co.za",
+        "contact_phone": "+27 10 597 0835",
+        "address": "Illovo Edge Office Block, Building 3, 2nd Floor, Cnr Fricker & Harries Roads, Illovo, Johannesburg, South Africa"
+      },
+      {
+        "name": "Trade Advisory Africa",
+        "description": "Consulting firm specializing in trade compliance and market access",
+        "services": ["Export documentation", "Tariff classification", "Customs compliance"],
+        "website": "https://tradeadvisory.co.za",
+        "contact_email": "info@tradeadvisory.co.za",
+        "contact_phone": "+27 82 707 9768",
+        "address": "Spaces Office Park, Design Quarter District, Cnr William Nicol and Leslie Ave, Fourways, Johannesburg, South Africa"
+      },
+      {
+        "name": "AfricaGrow Export Consultants",
+        "description": "Export management company helping businesses access international markets",
+        "services": ["Market selection", "Distributor identification", "Export management"],
+        "website": "https://africagrow.co.za",
+        "contact_email": "info@africagrow.co.za",
+        "contact_phone": "+27 21 851 8001",
+        "address": "Unit F6, Centurion Business Park, Bosmandam Road, Milnerton, Cape Town, 7441, South Africa"
+      }
+    ]
+  },
+  "logistics_providers": {
+    "freight_forwarders": [
+      {
+        "name": "Kuehne + Nagel South Africa",
+        "description": "Global logistics provider with strong presence in South Africa",
+        "services": ["Sea freight", "Air freight", "Contract logistics", "Integrated logistics"],
+        "website": "https://za.kuehne-nagel.com",
+        "contact_email": "info.johannesburg@kuehne-nagel.com",
+        "contact_phone": "+27 11 578 0600",
+        "address": "35 Commerce Crescent, Kramerville, Sandton, 2196, South Africa"
+      },
+      {
+        "name": "Berry & Donaldson",
+        "description": "South African freight forwarder specializing in imports and exports",
+        "services": ["Customs clearing", "Freight forwarding", "Warehousing", "Distribution"],
+        "website": "https://berrydon.co.za",
+        "contact_email": "info@berrydon.co.za",
+        "contact_phone": "+27 21 405 1600",
+        "address": "The Regent, 19-33 Regent Road, Sea Point, Cape Town, 8001, South Africa"
+      },
+      {
+        "name": "Savino Del Bene South Africa",
+        "description": "Global freight forwarder with expertise in food exports",
+        "services": ["Sea freight", "Air freight", "Customs clearance", "Insurance"],
+        "website": "https://www.savinodelbene.com",
+        "contact_email": "info.johannesburg@savinodelbene.com",
+        "contact_phone": "+27 11 927 6908",
+        "address": "Unit 3, Aviation Park, 18 Pomona Road, Kempton Park, Johannesburg, South Africa"
+      },
+      {
+        "name": "CFR Freight SA",
+        "description": "South African freight forwarder with strong African network",
+        "services": ["Perishable exports", "Cold chain logistics", "Export documentation", "Customs clearing"],
+        "website": "https://www.cfrfreight.co.za",
+        "contact_email": "info@cfrfreight.co.za",
+        "contact_phone": "+27 21 528 8200",
+        "address": "11 Kinetic Road, Airport Industria, Cape Town, 7490, South Africa"
+      }
+    ],
+    "shipping_lines": [
+      {
+        "name": "Maersk South Africa",
+        "description": "Global container shipping company with extensive services from South Africa",
+        "services": ["Container shipping", "Cold chain logistics", "Supply chain management"],
+        "website": "https://www.maersk.com/local-information/africa/south-africa",
+        "contact_email": "ZA.IMPORT@maersk.com",
+        "contact_phone": "+27 31 336 7000",
+        "address": "8th Floor, Durban Bay House, 333 Anton Lembede Street, Durban, 4001, South Africa"
+      },
+      {
+        "name": "MSC South Africa",
+        "description": "Major global shipping line serving South African ports",
+        "services": ["Container shipping", "Reefer services", "Project cargo"],
+        "website": "https://www.msc.com/zaf",
+        "contact_email": "za-info@msc.com",
+        "contact_phone": "+27 31 360 7911",
+        "address": "MSC House, 1 Morrision Street, Durban, 4001, South Africa"
+      },
+      {
+        "name": "CMA CGM South Africa",
+        "description": "French shipping line with strong presence in African trade lanes",
+        "services": ["Container shipping", "Refrigerated cargo", "Inland solutions"],
+        "website": "https://www.cma-cgm.com/local/south-africa",
+        "contact_email": "DUR.genmbox@cma-cgm.com",
+        "contact_phone": "+27 31 581 3700",
+        "address": "4th Floor, CMA CGM House, 197-199 Peter Mokaba Road, Durban, 4001, South Africa"
+      }
+    ],
+    "airlines": [
+      {
+        "name": "Emirates SkyCargo South Africa",
+        "description": "Cargo division of Emirates airline with extensive services to Middle East",
+        "services": ["Air freight", "Perishable cargo", "Pharmaceutical transport"],
+        "website": "https://www.skycargo.com",
+        "contact_email": "skycargoafrica@emirates.com",
+        "contact_phone": "+27 11 697 3736",
+        "address": "Private Bag X10, Kempton Park, Johannesburg, 1627, South Africa"
+      },
+      {
+        "name": "South African Airways Cargo",
+        "description": "Cargo division of South Africa's national airline",
+        "services": ["General cargo", "Perishables", "Express cargo"],
+        "website": "https://www.flysaa.com/about-us/supporting-business/cargo",
+        "contact_email": "cargo.reservations@flysaa.com",
+        "contact_phone": "+27 11 978 3366",
+        "address": "Airways Park, OR Tambo International Airport, Johannesburg, 1627, South Africa"
+      },
+      {
+        "name": "British Airways World Cargo",
+        "description": "Cargo division of British Airways with direct services to UK",
+        "services": ["General cargo", "Priority freight", "Specialized shipping"],
+        "website": "https://www.iagcargo.com",
+        "contact_email": "customersupport@iagcargo.com",
+        "contact_phone": "+27 10 446 9090",
+        "address": "OR Tambo International Airport, Johannesburg, 1627, South Africa"
+      }
+    ]
+  },
+  "target_market_contacts": {
+    "uae": [
+      {
+        "name": "UAE Ministry of Climate Change and Environment",
+        "description": "Government authority responsible for food import regulations",
+        "services": ["Food import approvals", "Regulations information", "Compliance guidance"],
+        "website": "https://www.moccae.gov.ae",
+        "contact_email": "info@moccae.gov.ae",
+        "contact_phone": "+971 4 214 8444",
+        "address": "Crescent Building, Sheikh Zayed Road, Al Wasl, Dubai, United Arab Emirates"
+      },
+      {
+        "name": "Dubai Municipality - Food Safety Department",
+        "description": "Local authority responsible for food safety in Dubai",
+        "services": ["Food import inspection", "Food labeling approval", "Certificate validation"],
+        "website": "https://www.dm.gov.ae",
+        "contact_email": "foodsafety@dm.gov.ae",
+        "contact_phone": "+971 4 221 5555",
+        "address": "Dubai Municipality Main Building, Baniyas Road, Dubai, United Arab Emirates"
+      },
+      {
+        "name": "Emirates Authority for Standardization and Metrology (ESMA)",
+        "description": "Federal authority responsible for standards and quality in UAE",
+        "services": ["Product certification", "Standards information", "Technical regulations"],
+        "website": "https://www.esma.gov.ae",
+        "contact_email": "info@esma.gov.ae",
+        "contact_phone": "+971 4 294 6666",
+        "address": "Emirates Towers Offices, Sheikh Zayed Road, Dubai, United Arab Emirates"
+      },
+      {
+        "name": "South African Business Council (SABCO) UAE",
+        "description": "Network of South African businesses operating in the UAE",
+        "services": ["Networking", "Market intelligence", "Business connections"],
+        "website": "https://www.sabco.ae",
+        "contact_email": "info@sabco.ae",
+        "contact_phone": "+971 4 427 0739",
+        "address": "Dubai, United Arab Emirates"
+      }
+    ],
+    "uk": [
+      {
+        "name": "UK Department for Environment, Food and Rural Affairs (DEFRA)",
+        "description": "Government department responsible for food imports and agricultural standards",
+        "services": ["Import regulations", "Food safety standards", "Agricultural policy"],
+        "website": "https://www.gov.uk/government/organisations/department-for-environment-food-rural-affairs",
+        "contact_email": "defra.helpline@defra.gov.uk",
+        "contact_phone": "+44 3459 33 55 77",
+        "address": "Nobel House, 17 Smith Square, London, SW1P 3JR, United Kingdom"
+      },
+      {
+        "name": "Food Standards Agency (FSA)",
+        "description": "UK's food safety regulator",
+        "services": ["Food safety guidance", "Importers guidance", "Regulatory information"],
+        "website": "https://www.food.gov.uk",
+        "contact_email": "helpline@food.gov.uk",
+        "contact_phone": "+44 20 7276 8829",
+        "address": "Floors 6 and 7, Clive House, 70 Petty France, London, SW1H 9EX, United Kingdom"
+      },
+      {
+        "name": "UK South African Chamber of Commerce",
+        "description": "Business network for South African companies in the UK",
+        "services": ["Networking events", "Business connections", "Market intelligence"],
+        "website": "https://southafricanchamber.co.uk",
+        "contact_email": "info@southafricanchamber.co.uk",
+        "contact_phone": "+44 20 7808 5511",
+        "address": "South Africa House, Trafalgar Square, London, WC2N 5DP, United Kingdom"
+      },
+      {
+        "name": "UK Department for International Trade (DIT)",
+        "description": "Government department that promotes UK trade across the world",
+        "services": ["Import regulations", "Business opportunities", "Market information"],
+        "website": "https://www.gov.uk/government/organisations/department-for-international-trade",
+        "contact_email": "enquiries@trade.gov.uk",
+        "contact_phone": "+44 20 7215 5000",
+        "address": "King Charles Street, Whitehall, London, SW1A 2AH, United Kingdom"
+      }
+    ]
+  },
+  "distributors": {
+    "uae": [
+      {
+        "name": "Fresh Fruits Company",
+        "description": "Major importer and distributor of fresh and dried fruits in UAE",
+        "product_focus": ["Dried fruits", "Nuts", "Organic products"],
+        "market_channels": ["Retail chains", "Hotels", "Catering"],
+        "website": "https://www.freshfruitscompany.ae",
+        "contact_email": "info@freshfruitscompany.ae",
+        "contact_phone": "+971 4 881 4338",
+        "address": "Fruit & Vegetable Market, Al Awir, Dubai, United Arab Emirates"
+      },
+      {
+        "name": "Barakat Group",
+        "description": "Leading fresh produce and food company in UAE",
+        "product_focus": ["Fresh fruit", "Dried fruits", "Juices"],
+        "market_channels": ["Retail", "Food service", "Online"],
+        "website": "https://www.barakatgroup.com",
+        "contact_email": "info@barakatgroup.com",
+        "contact_phone": "+971 4 320 1050",
+        "address": "P.O. Box 50881, Dubai, United Arab Emirates"
+      },
+      {
+        "name": "Truebell Marketing & Trading",
+        "description": "Full-service distribution company specializing in food and beverage",
+        "product_focus": ["Specialty foods", "Gourmet products", "Health foods"],
+        "market_channels": ["Retail", "HORECA", "Airlines"],
+        "website": "https://www.truebell.org",
+        "contact_email": "info@truebell.org",
+        "contact_phone": "+971 4 880 1131",
+        "address": "P.O. Box 61041, Jebel Ali Free Zone, Dubai, United Arab Emirates"
+      },
+      {
+        "name": "NRTC Group",
+        "description": "Importer and distributor of fresh and processed food products",
+        "product_focus": ["Fresh produce", "Dried fruits", "Organic products"],
+        "market_channels": ["Retail", "Wholesale", "Food service"],
+        "website": "https://www.nrtcgroup.com",
+        "contact_email": "info@nrtcfresh.com",
+        "contact_phone": "+971 4 320 8889",
+        "address": "P.O. Box 98521, Dubai, United Arab Emirates"
+      }
+    ],
+    "uk": [
+      {
+        "name": "Community Foods Ltd",
+        "description": "Leading UK importer and distributor of dried fruits, nuts, and health foods",
+        "product_focus": ["Organic dried fruits", "Fair trade products", "Health foods"],
+        "market_channels": ["Retail chains", "Independent health stores", "Food manufacturing"],
+        "website": "https://www.communityfoods.co.uk",
+        "contact_email": "info@communityfoods.co.uk",
+        "contact_phone": "+44 20 8208 2288",
+        "address": "Medina Road, Whetstone, London, N20 6RS, United Kingdom"
+      },
+      {
+        "name": "Whitworths",
+        "description": "UK's leading supplier of dried fruits, nuts and seeds",
+        "product_focus": ["Consumer packed dried fruits", "Baking ingredients", "Snack products"],
+        "market_channels": ["Retail", "Food manufacturing", "Private label"],
+        "website": "https://www.whitworths.co.uk",
+        "contact_email": "info@whitworths.co.uk",
+        "contact_phone": "+44 1933 653000",
+        "address": "Orchard House, Irthlingborough, Northants, NN9 5DB, United Kingdom"
+      },
+      {
+        "name": "Infinity Foods",
+        "description": "One of the UK's leading distributors of organic and natural foods",
+        "product_focus": ["Organic dried fruits", "Ethically sourced products", "Wholefood"],
+        "market_channels": ["Independent retailers", "Health food stores", "Food co-ops"],
+        "website": "https://infinityfoodswholesale.co.uk",
+        "contact_email": "info@infinityfoodswholesale.co.uk",
+        "contact_phone": "+44 1273 603563",
+        "address": "67 Norway Street, Portslade, Brighton, BN41 1AE, United Kingdom"
+      },
+      {
+        "name": "Suma Wholefoods",
+        "description": "UK's largest worker's cooperative and wholesaler of vegetarian foods",
+        "product_focus": ["Ethical products", "Organic dried fruits", "Health foods"],
+        "market_channels": ["Independent retailers", "Buying groups", "Online"],
+        "website": "https://www.suma.coop",
+        "contact_email": "sales@suma.coop",
+        "contact_phone": "+44 1422 313840",
+        "address": "Lowfields Business Park, Elland, HX5 9DB, United Kingdom"
+      }
+    ]
+  }
+} 

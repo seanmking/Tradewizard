@@ -1,0 +1,259 @@
+.verification-form {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.verification-form h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.form-description {
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.verification-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.verification-section:last-child {
+  border-bottom: none;
+}
+
+.verification-section h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+.verification-field {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.verification-field:last-child {
+  border-bottom: none;
+}
+
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.field-header label {
+  font-weight: 600;
+  color: #34495e;
+}
+
+.edit-button {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-button:hover {
+  background-color: #e9ecef;
+}
+
+.field-value {
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  color: #2c3e50;
+}
+
+.verification-field input[type="text"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.verification-field input[type="text"]:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.products-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.product-edit-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.product-edit-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.remove-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.remove-button:hover {
+  background-color: #c0392b;
+}
+
+.add-button {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+}
+
+.add-button:hover {
+  background-color: #27ae60;
+}
+
+.capabilities-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.capability-edit-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.capability-edit-row label {
+  font-weight: 600;
+  color: #34495e;
+}
+
+.product-list,
+.capabilities-list {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.product-list li,
+.capabilities-list li {
+  margin-bottom: 0.5rem;
+}
+
+.market-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.market-button {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.market-button:hover {
+  background-color: #e9ecef;
+}
+
+.market-button.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.market-note {
+  font-style: italic;
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #3498db;
+}
+
+.market-info-display,
+.regulatory-info-display {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  padding: 1.5rem;
+}
+
+.market-info-display h4,
+.regulatory-info-display h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.market-detail,
+.regulatory-detail {
+  margin-bottom: 1.5rem;
+}
+
+.market-detail:last-child,
+.regulatory-detail:last-child {
+  margin-bottom: 0;
+}
+
+.market-detail strong,
+.regulatory-detail strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #34495e;
+}
+
+.market-detail ul,
+.regulatory-detail ul,
+.regulatory-detail ol {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.market-detail li,
+.regulatory-detail li {
+  margin-bottom: 0.5rem;
+}
+
+.form-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+} 

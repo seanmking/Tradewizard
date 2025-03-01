@@ -1,0 +1,245 @@
+{
+  "certifications": {
+    "standard_timeline": "14-18 weeks for core certifications",
+    "breakdown": [
+      {
+        "certification": "HACCP Level 3",
+        "preparation": "4-6 weeks",
+        "audit_process": "2-3 weeks",
+        "certification_issuance": "4-6 weeks",
+        "total_time": "10-15 weeks",
+        "accelerated_options": "Pre-audit consulting can reduce preparation time"
+      },
+      {
+        "certification": "BRCGS Food Safety",
+        "preparation": "8-10 weeks",
+        "audit_process": "2-3 weeks",
+        "certification_issuance": "2-3 weeks",
+        "total_time": "12-16 weeks",
+        "accelerated_options": "Gap assessment can identify focus areas to reduce preparation time"
+      },
+      {
+        "certification": "Halal Certification",
+        "preparation": "2-3 weeks",
+        "audit_process": "1-2 weeks",
+        "certification_issuance": "3-6 weeks",
+        "total_time": "6-11 weeks",
+        "accelerated_options": "Working with recognized certifying bodies can expedite the process"
+      },
+      {
+        "certification": "SA Export Certificate",
+        "preparation": "2-3 weeks",
+        "audit_process": "2-4 weeks",
+        "certification_issuance": "4-5 weeks",
+        "total_time": "8-12 weeks",
+        "accelerated_options": "Working with PPECB and DAFF consultants can increase approval likelihood"
+      }
+    ]
+  },
+  "shipping": {
+    "sea_freight": [
+      {
+        "route": "Cape Town → Dubai",
+        "transit_time": "18-21 days",
+        "documentation_processing": "3-5 days",
+        "customs_clearance": "5-7 days",
+        "total_time": "26-33 days",
+        "cost_range": "R42,000-R48,000 per 20ft container",
+        "frequency": "Weekly sailings"
+      },
+      {
+        "route": "Cape Town → London",
+        "transit_time": "16-19 days",
+        "documentation_processing": "3-4 days",
+        "customs_clearance": "6-8 days post-Brexit",
+        "total_time": "25-31 days",
+        "cost_range": "R45,000-R52,000 per 20ft container",
+        "frequency": "Weekly sailings"
+      },
+      {
+        "route": "Durban → Dubai",
+        "transit_time": "14-17 days",
+        "documentation_processing": "3-5 days",
+        "customs_clearance": "5-7 days",
+        "total_time": "22-29 days",
+        "cost_range": "R39,000-R45,000 per 20ft container",
+        "frequency": "Multiple weekly sailings"
+      },
+      {
+        "route": "Durban → London",
+        "transit_time": "20-24 days",
+        "documentation_processing": "3-4 days",
+        "customs_clearance": "6-8 days post-Brexit",
+        "total_time": "29-36 days",
+        "cost_range": "R48,000-R55,000 per 20ft container",
+        "frequency": "Weekly sailings"
+      }
+    ],
+    "air_freight": [
+      {
+        "route": "Cape Town → Dubai",
+        "transit_time": "1-2 days",
+        "documentation_processing": "1-2 days",
+        "customs_clearance": "3-4 days",
+        "total_time": "5-8 days",
+        "cost_range": "R85-R120 per kg",
+        "frequency": "Daily flights"
+      },
+      {
+        "route": "Cape Town → London",
+        "transit_time": "2-3 days",
+        "documentation_processing": "1-2 days",
+        "customs_clearance": "3-5 days",
+        "total_time": "6-10 days",
+        "cost_range": "R95-R140 per kg",
+        "frequency": "Daily flights"
+      },
+      {
+        "route": "Johannesburg → Dubai",
+        "transit_time": "1 day",
+        "documentation_processing": "1-2 days",
+        "customs_clearance": "3-4 days",
+        "total_time": "5-7 days",
+        "cost_range": "R80-R115 per kg",
+        "frequency": "Multiple daily flights"
+      },
+      {
+        "route": "Johannesburg → London",
+        "transit_time": "1-2 days",
+        "documentation_processing": "1-2 days",
+        "customs_clearance": "3-5 days",
+        "total_time": "5-9 days",
+        "cost_range": "R90-R130 per kg",
+        "frequency": "Daily flights"
+      }
+    ]
+  },
+  "market_entry": {
+    "uae": {
+      "minimum_timeline": "16 weeks from project start",
+      "standard_timeline": "20-24 weeks from project start",
+      "breakdown": [
+        {
+          "phase": "Certification acquisition",
+          "duration": "10-14 weeks",
+          "critical_path": true
+        },
+        {
+          "phase": "Packaging adaptation",
+          "duration": "6-8 weeks",
+          "critical_path": true
+        },
+        {
+          "phase": "Partner identification",
+          "duration": "8-12 weeks",
+          "critical_path": true
+        },
+        {
+          "phase": "Shipping arrangements",
+          "duration": "4-5 weeks",
+          "critical_path": false
+        },
+        {
+          "phase": "Documentation preparation",
+          "duration": "4-6 weeks",
+          "critical_path": false
+        },
+        {
+          "phase": "Product registration",
+          "duration": "6-8 weeks",
+          "critical_path": true
+        }
+      ],
+      "key_challenges": [
+        "Halal certification requirements",
+        "Bilingual labeling requirements",
+        "Port congestion in Jebel Ali (avg 7-day delay)",
+        "Requirement for local agent/distributor"
+      ]
+    },
+    "uk": {
+      "minimum_timeline": "20 weeks from project start",
+      "standard_timeline": "24-28 weeks from project start",
+      "breakdown": [
+        {
+          "phase": "BRCGS certification",
+          "duration": "12-16 weeks",
+          "critical_path": true
+        },
+        {
+          "phase": "Packaging adaptation",
+          "duration": "6-8 weeks",
+          "critical_path": true
+        },
+        {
+          "phase": "Partner identification",
+          "duration": "8-12 weeks",
+          "critical_path": true
+        },
+        {
+          "phase": "Shipping arrangements",
+          "duration": "4-5 weeks",
+          "critical_path": false
+        },
+        {
+          "phase": "Documentation preparation",
+          "duration": "4-6 weeks",
+          "critical_path": false
+        },
+        {
+          "phase": "Post-Brexit registration",
+          "duration": "6-8 weeks",
+          "critical_path": true
+        }
+      ],
+      "key_challenges": [
+        "Post-Brexit documentation complexity",
+        "UK border checks (23% rejection rate for food imports)",
+        "Retailer requirements beyond regulatory compliance",
+        "High quality standards and competition"
+      ]
+    }
+  },
+  "seasonal_considerations": {
+    "uae": [
+      {
+        "period": "Ramadan",
+        "months": "Variable (based on lunar calendar)",
+        "impact": "20-30% increase in demand for gift products and dried fruits",
+        "planning_requirement": "Orders must be placed 10-12 weeks before Ramadan starts"
+      },
+      {
+        "period": "Summer (June-August)",
+        "months": "June-August",
+        "impact": "Shipping challenges due to high temperatures",
+        "planning_requirement": "Extra packaging protection and temperature monitoring"
+      },
+      {
+        "period": "Dubai Shopping Festival",
+        "months": "January-February",
+        "impact": "Increased retail activity and promotional opportunities",
+        "planning_requirement": "Promotional planning 3-4 months in advance"
+      }
+    ],
+    "uk": [
+      {
+        "period": "Christmas season",
+        "months": "October-December",
+        "impact": "30-40% increase in dried fruit demand for baking and gifting",
+        "planning_requirement": "Orders must be placed 3-4 months before peak season"
+      },
+      {
+        "period": "Summer holiday",
+        "months": "July-August",
+        "impact": "Slow decision-making due to holiday period",
+        "planning_requirement": "Avoid launching new products during this period"
+      },
+      {
+        "period": "Veganuary",
+        "months": "January",
+        "impact": "Increased focus on plant-based products",
+        "planning_requirement": "Promotional planning 2-3 months in advance"
+      }
+    ]
+  }
+} 

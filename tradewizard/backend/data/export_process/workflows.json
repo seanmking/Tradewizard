@@ -1,0 +1,316 @@
+{
+  "preparation_phase": [
+    {
+      "step": "Market research",
+      "description": "Conduct comprehensive market research on target export markets",
+      "timeline": "2-3 months",
+      "resources_required": "Market research consultants, industry reports, trade data",
+      "output": "Market overview report with opportunities and challenges",
+      "dependencies": "None",
+      "cost_estimate": "R35,000-R75,000",
+      "key_considerations": [
+        "Market size and growth trends",
+        "Consumer preferences and behavior",
+        "Competitive landscape",
+        "Price points and positioning",
+        "Distribution channels"
+      ]
+    },
+    {
+      "step": "Product adaptation",
+      "description": "Adapt products to meet target market requirements and preferences",
+      "timeline": "1-3 months",
+      "resources_required": "Product development team, regulatory consultants",
+      "output": "Market-specific product specifications",
+      "dependencies": "Market research completion",
+      "cost_estimate": "R50,000-R120,000",
+      "key_considerations": [
+        "Ingredient modifications if needed",
+        "Packaging design and materials",
+        "Shelf-life requirements",
+        "Labeling compliance",
+        "Product positioning"
+      ]
+    },
+    {
+      "step": "Certification acquisition",
+      "description": "Obtain required certifications for target markets",
+      "timeline": "3-6 months",
+      "resources_required": "Quality assurance team, certification consultants",
+      "output": "Market-specific certificates",
+      "dependencies": "Product adaptation completion",
+      "cost_estimate": "R85,000-R350,000 depending on certifications required",
+      "key_considerations": [
+        "Required vs. optional certifications",
+        "Certification body selection",
+        "Documentation preparation",
+        "Facility preparation for audits",
+        "Timeline for certification processes"
+      ]
+    },
+    {
+      "step": "Partner identification",
+      "description": "Identify and evaluate potential distribution partners",
+      "timeline": "2-4 months",
+      "resources_required": "Business development team, legal counsel",
+      "output": "Shortlist of qualified partners with evaluation",
+      "dependencies": "Market research completion",
+      "cost_estimate": "R65,000-R120,000 including travel",
+      "key_considerations": [
+        "Partner market coverage and capabilities",
+        "Financial stability and track record",
+        "Category experience with similar products",
+        "Existing retail relationships",
+        "Warehousing and logistics capabilities"
+      ]
+    },
+    {
+      "step": "Financial planning",
+      "description": "Develop export budget and pricing strategy",
+      "timeline": "1-2 months",
+      "resources_required": "Finance team, pricing consultants",
+      "output": "Export budget and pricing model",
+      "dependencies": "Market research, partner identification",
+      "cost_estimate": "R25,000-R45,000",
+      "key_considerations": [
+        "Landed cost calculation",
+        "Distribution margins",
+        "Competitive pricing analysis",
+        "Break-even analysis",
+        "Cash flow projections"
+      ]
+    }
+  ],
+  "documentation_phase": [
+    {
+      "step": "Export registration",
+      "description": "Register as exporter with relevant authorities",
+      "timeline": "4-6 weeks",
+      "resources_required": "Administrative staff, regulatory consultants",
+      "output": "Export registration numbers and permits",
+      "dependencies": "None (can run parallel to preparation phase)",
+      "cost_estimate": "R8,000-R15,000",
+      "key_considerations": [
+        "SARS registration as exporter",
+        "Industry-specific registrations",
+        "Local municipality permits if required",
+        "Documentation requirements",
+        "Renewal procedures"
+      ]
+    },
+    {
+      "step": "Product registration",
+      "description": "Register products with target market authorities if required",
+      "timeline": "1-3 months",
+      "resources_required": "Regulatory affairs team, in-market consultants",
+      "output": "Product registration certificates",
+      "dependencies": "Export registration, product adaptation",
+      "cost_estimate": "R25,000-R60,000 per product",
+      "key_considerations": [
+        "Market-specific registration requirements",
+        "Laboratory testing requirements",
+        "Documentation translation if needed",
+        "In-market representation requirements",
+        "Registration renewal process"
+      ]
+    },
+    {
+      "step": "Develop export documentation templates",
+      "description": "Create templates for recurring export documentation",
+      "timeline": "2-3 weeks",
+      "resources_required": "Administrative staff, shipping consultants",
+      "output": "Document templates package",
+      "dependencies": "Export registration",
+      "cost_estimate": "R15,000-R30,000",
+      "key_considerations": [
+        "Commercial invoice format",
+        "Packing list format",
+        "Certificate of origin procedures",
+        "Customs declaration forms",
+        "Market-specific documents"
+      ]
+    },
+    {
+      "step": "Establish banking relationships",
+      "description": "Set up banking relationships for international trade",
+      "timeline": "2-4 weeks",
+      "resources_required": "Finance team, banking partners",
+      "output": "Trade finance facilities and procedures",
+      "dependencies": "None (can run parallel to other steps)",
+      "cost_estimate": "Minimal direct costs",
+      "key_considerations": [
+        "Letter of credit processing capabilities",
+        "Currency exchange services",
+        "International payment methods",
+        "Bank charges structure",
+        "Trade finance options"
+      ]
+    }
+  ],
+  "logistics_phase": [
+    {
+      "step": "Shipping provider selection",
+      "description": "Select and contract freight forwarders and shipping providers",
+      "timeline": "3-4 weeks",
+      "resources_required": "Logistics team, procurement",
+      "output": "Shipping provider contracts and procedures",
+      "dependencies": "Partner identification",
+      "cost_estimate": "Minimal direct costs (service fees will be per shipment)",
+      "key_considerations": [
+        "Experience with perishable goods",
+        "Coverage of target markets",
+        "Temperature control capabilities",
+        "Tracking systems",
+        "Documentation handling services"
+      ]
+    },
+    {
+      "step": "Packaging optimization",
+      "description": "Optimize packaging for international shipping",
+      "timeline": "3-6 weeks",
+      "resources_required": "Packaging engineers, logistics consultants",
+      "output": "International shipping packaging specifications",
+      "dependencies": "Product adaptation",
+      "cost_estimate": "R30,000-R60,000 for design and testing",
+      "key_considerations": [
+        "Protection during transit",
+        "Temperature stability",
+        "Moisture barrier properties",
+        "Container utilization optimization",
+        "Regulatory compliance of shipping materials"
+      ]
+    },
+    {
+      "step": "Establish shipping procedures",
+      "description": "Develop standard operating procedures for export logistics",
+      "timeline": "2-3 weeks",
+      "resources_required": "Logistics team, operations staff",
+      "output": "Export logistics manual",
+      "dependencies": "Shipping provider selection",
+      "cost_estimate": "R20,000-R40,000",
+      "key_considerations": [
+        "Order processing workflows",
+        "Documentation preparation",
+        "Loading and shipping procedures",
+        "Temperature monitoring",
+        "Problem resolution protocols"
+      ]
+    },
+    {
+      "step": "Insurance arrangement",
+      "description": "Arrange cargo and export insurance",
+      "timeline": "1-2 weeks",
+      "resources_required": "Finance team, insurance broker",
+      "output": "Insurance policies and claims procedures",
+      "dependencies": "None (can run in parallel)",
+      "cost_estimate": "Annual premiums vary by volume and value",
+      "key_considerations": [
+        "Coverage types needed",
+        "Deductible levels",
+        "Claims process efficiency",
+        "Provider financial stability",
+        "Special requirements for food products"
+      ]
+    }
+  ],
+  "market_entry_phase": [
+    {
+      "step": "Contract negotiation",
+      "description": "Negotiate and finalize distribution agreements",
+      "timeline": "1-3 months",
+      "resources_required": "Business development team, legal counsel",
+      "output": "Signed distribution agreements",
+      "dependencies": "Partner identification, financial planning",
+      "cost_estimate": "R40,000-R80,000 in legal fees",
+      "key_considerations": [
+        "Exclusivity terms",
+        "Minimum order quantities",
+        "Performance requirements",
+        "Marketing support provisions",
+        "Term and termination conditions"
+      ]
+    },
+    {
+      "step": "Initial order planning",
+      "description": "Plan and prepare for first export order",
+      "timeline": "4-8 weeks",
+      "resources_required": "Sales team, production, logistics",
+      "output": "Initial order fulfillment plan",
+      "dependencies": "Contract negotiation, logistics establishment",
+      "cost_estimate": "R25,000-R50,000 in planning costs (excluding product cost)",
+      "key_considerations": [
+        "Production scheduling",
+        "Quality control procedures",
+        "Documentation preparation",
+        "Shipping arrangements",
+        "Payment terms and processing"
+      ]
+    },
+    {
+      "step": "Market launch support",
+      "description": "Provide sales and marketing support for market entry",
+      "timeline": "Ongoing, 3-6 months initial period",
+      "resources_required": "Marketing team, sales support",
+      "output": "Market entry marketing package and support",
+      "dependencies": "Initial order delivery",
+      "cost_estimate": "R50,000-R150,000 for initial marketing support",
+      "key_considerations": [
+        "Marketing materials development",
+        "Training for distributor staff",
+        "Launch promotions",
+        "Point-of-sale materials",
+        "Digital marketing support"
+      ]
+    }
+  ],
+  "ongoing_management_phase": [
+    {
+      "step": "Performance monitoring",
+      "description": "Establish systems to monitor export performance",
+      "timeline": "Ongoing",
+      "resources_required": "Business intelligence team, sales analysts",
+      "output": "Export performance dashboard and reports",
+      "dependencies": "Initial orders completed",
+      "cost_estimate": "R15,000-R40,000 for reporting system setup",
+      "key_considerations": [
+        "Key performance indicators",
+        "Reporting frequency and format",
+        "Market share tracking",
+        "Competitive intelligence",
+        "Customer feedback systems"
+      ]
+    },
+    {
+      "step": "Relationship management",
+      "description": "Ongoing distributor relationship management",
+      "timeline": "Ongoing",
+      "resources_required": "International account managers",
+      "output": "Strong distributor relationships and growth",
+      "dependencies": "Contract negotiation",
+      "cost_estimate": "R25,000-R60,000 per month (staff and travel)",
+      "key_considerations": [
+        "Regular communication cadence",
+        "Market visits schedule",
+        "Performance reviews",
+        "Issue resolution processes",
+        "Growth planning"
+      ]
+    },
+    {
+      "step": "Compliance monitoring",
+      "description": "Monitor and maintain regulatory compliance",
+      "timeline": "Ongoing",
+      "resources_required": "Regulatory affairs team",
+      "output": "Compliance assurance and renewal management",
+      "dependencies": "All certifications and registrations completed",
+      "cost_estimate": "R15,000-R30,000 per month",
+      "key_considerations": [
+        "Certification renewal calendar",
+        "Regulatory change monitoring",
+        "Testing schedule management",
+        "Documentation updates",
+        "Audit preparation procedures"
+      ]
+    }
+  ]
+} 

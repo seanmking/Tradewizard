@@ -1,0 +1,232 @@
+.initial-input-form {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.form-header h2 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+}
+
+.form-header p {
+  color: #7f8c8d;
+  font-size: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.form-group input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.form-actions {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.submit-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #2980b9;
+}
+
+.submit-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.form-info {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.form-info p {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.form-description {
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.input-help {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-top: 0.5rem;
+}
+
+.markets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.market-option {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.market-option:hover {
+  border-color: #3498db;
+  background-color: #f8f9fa;
+}
+
+.market-option.selected {
+  border-color: #3498db;
+  background-color: #ebf5fb;
+}
+
+.market-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #bdc3c7;
+  border-radius: 4px;
+  margin-right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.market-option.selected .market-checkbox {
+  border-color: #3498db;
+  background-color: #3498db;
+}
+
+.checkmark {
+  color: white;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.market-name {
+  font-size: 0.9rem;
+}
+
+.custom-market {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.custom-market input {
+  flex: 1;
+  margin-right: 0.5rem;
+}
+
+.custom-market button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.custom-market button:hover {
+  background-color: #2980b9;
+}
+
+.custom-market button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.selected-markets {
+  margin-top: 1rem;
+}
+
+.selected-markets p {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.market-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.market-tag {
+  display: flex;
+  align-items: center;
+  background-color: #ebf5fb;
+  border: 1px solid #3498db;
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.market-tag button {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 1.2rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+} 

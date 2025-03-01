@@ -1,0 +1,145 @@
+{
+  "uae": [
+    {
+      "requirement": "Bilingual labels (Arabic/English)",
+      "description": "All product information must be provided in both Arabic and English languages",
+      "regulation": "UAE.S GSO 9:2013",
+      "priority": "Critical",
+      "cost_impact": "Medium - requires redesign of packaging with translation services",
+      "timeline": "4-6 weeks for translation and design approval"
+    },
+    {
+      "requirement": "Nutrition panel per 100g",
+      "description": "Nutritional information must be displayed per 100g of product in table format",
+      "regulation": "UAE.S GSO 2233:2018",
+      "priority": "Critical",
+      "cost_impact": "Low - requires laboratory analysis and label update",
+      "timeline": "2-3 weeks for laboratory analysis"
+    },
+    {
+      "requirement": "Allergens in red font",
+      "description": "Allergens must be highlighted in red text within the ingredients list",
+      "regulation": "MOHAP Regulation",
+      "priority": "Critical",
+      "cost_impact": "Low - design adjustment",
+      "timeline": "1-2 weeks for design update"
+    },
+    {
+      "requirement": "Halal logo",
+      "description": "Products requiring Halal certification must display the appropriate logo",
+      "regulation": "UAE.S 2055-1:2015",
+      "priority": "Critical for meat/animal products, Recommended for others",
+      "cost_impact": "Low - design addition once certification obtained",
+      "timeline": "1 week for design update (after certification)"
+    },
+    {
+      "requirement": "Production/expiry dates format",
+      "description": "Production and expiry dates must be in day/month/year format and printed directly on packaging",
+      "regulation": "UAE.S GSO 150-1:2013",
+      "priority": "Critical",
+      "cost_impact": "Medium - may require printing process adjustments",
+      "timeline": "3-4 weeks for implementation"
+    }
+  ],
+  "uk": [
+    {
+      "requirement": "FSA-compliant allergen box",
+      "description": "Allergens must be listed in a separate box or highlighted in the ingredients list",
+      "regulation": "UK Food Information Regulations 2014",
+      "priority": "Critical",
+      "cost_impact": "Low - design adjustment",
+      "timeline": "1-2 weeks for design update"
+    },
+    {
+      "requirement": "E-marketing weights",
+      "description": "Products must be labeled with metric measurements (e.g., 200g not 7.05oz)",
+      "regulation": "UK Weights and Measures Regulations",
+      "priority": "Critical",
+      "cost_impact": "Low - design adjustment",
+      "timeline": "1 week for design update"
+    },
+    {
+      "requirement": "Post-Brexit UKCA mark",
+      "description": "UK Conformity Assessed mark replacing CE marking for certain product categories",
+      "regulation": "UK Product Safety Regulations",
+      "priority": "Medium (depends on product category)",
+      "cost_impact": "Low - design addition",
+      "timeline": "1 week for design update"
+    },
+    {
+      "requirement": "Traffic light nutrition labeling",
+      "description": "Color-coded nutritional information (red, amber, green) for key nutrients",
+      "regulation": "UK Food Standards Agency voluntary scheme (but preferred by retailers)",
+      "priority": "Recommended",
+      "cost_impact": "Medium - requires design adjustment and potentially reformulation",
+      "timeline": "2-3 weeks for design update"
+    },
+    {
+      "requirement": "Recycling information",
+      "description": "Packaging must include information about recyclability and disposal",
+      "regulation": "UK Packaging (Essential Requirements) Regulations",
+      "priority": "Medium",
+      "cost_impact": "Low - design addition",
+      "timeline": "1 week for design update"
+    }
+  ],
+  "materials": [
+    {
+      "type": "Primary packaging",
+      "requirements": [
+        {
+          "material": "Food-grade plastic",
+          "regulations": "EU Regulation 10/2011, UK Materials and Articles in Contact with Food Regulations",
+          "testing": "Migration testing required",
+          "considerations": "BPA-free required for many retailers"
+        },
+        {
+          "material": "Paper/cardboard",
+          "regulations": "EU Regulation 1935/2004, UK Materials and Articles in Contact with Food Regulations",
+          "testing": "Heavy metals testing",
+          "considerations": "FSC certification preferred by many retailers"
+        },
+        {
+          "material": "Glass",
+          "regulations": "EU Regulation 1935/2004, UK Materials and Articles in Contact with Food Regulations",
+          "testing": "Fragment testing",
+          "considerations": "Weight considerations for shipping costs"
+        }
+      ]
+    },
+    {
+      "type": "Secondary packaging",
+      "requirements": [
+        {
+          "material": "Corrugated cardboard",
+          "regulations": "Various international shipping standards",
+          "testing": "Crush resistance testing",
+          "considerations": "Recycled content requirements in some markets"
+        }
+      ]
+    }
+  ],
+  "shelf_life": [
+    {
+      "requirement": "Minimum remaining shelf life",
+      "description": "Products must have minimum shelf life remaining upon arrival in market",
+      "uae_requirement": "70% of total shelf life",
+      "uk_requirement": "60% of total shelf life",
+      "impact": "Critical for product acceptance by distributors/retailers"
+    },
+    {
+      "requirement": "Storage temperature declaration",
+      "description": "Required storage temperature/conditions must be clearly stated",
+      "uae_requirement": "Arabic and English, with temperature range",
+      "uk_requirement": "Clear storage instructions required",
+      "impact": "Medium - important for quality assurance"
+    },
+    {
+      "requirement": "Best-before vs. Use-by distinction",
+      "description": "Different terminology for shelf life depending on product safety risk",
+      "uae_requirement": "Expiry date format mandatory",
+      "uk_requirement": "Use-by for perishable foods, Best-before for others",
+      "impact": "Medium - affects regulatory compliance"
+    }
+  ]
+} 

@@ -1,0 +1,96 @@
+{
+  "mandatory": [
+    {
+      "name": "HACCP Level 3",
+      "standard": "SANS 10330",
+      "description": "Hazard Analysis and Critical Control Points certification required for food exports",
+      "timeline": "10-12 weeks",
+      "cost_range": "R85,000-R120,000",
+      "renewal": "Annual audit required",
+      "countries": ["all"],
+      "provider_examples": ["SABS", "Bureau Veritas", "SGS"]
+    },
+    {
+      "name": "SA Export Certificate",
+      "standard": "ZA Number registration",
+      "description": "South African export registration number",
+      "timeline": "8-12 weeks",
+      "cost_range": "R15,000-R25,000",
+      "renewal": "Annual renewal",
+      "countries": ["all"],
+      "provider_examples": ["DAFF", "PPECB"]
+    },
+    {
+      "name": "Halal Certification",
+      "standard": "ESMA Standard",
+      "description": "Required for all food products entering UAE market",
+      "timeline": "6-8 weeks",
+      "cost_range": "R35,000-R50,000",
+      "renewal": "Annual certification",
+      "countries": ["uae", "saudi", "qatar", "kuwait"],
+      "provider_examples": ["SANHA", "MJC", "NIHT"]
+    },
+    {
+      "name": "BRCGS Food Safety",
+      "standard": "Issue 9",
+      "description": "Global standard required by most UK retailers",
+      "timeline": "12-16 weeks",
+      "cost_range": "R120,000-R180,000",
+      "renewal": "Annual certification",
+      "countries": ["uk", "eu"],
+      "provider_examples": ["SAI Global", "NSF", "Intertek"]
+    }
+  ],
+  "optional_advantages": [
+    {
+      "name": "EU Organic Certification",
+      "standard": "834/2007 & 889/2008",
+      "description": "Organic certification valid in UK and EU markets",
+      "timeline": "12-18 months (including transition period)",
+      "cost_range": "R85,000-R150,000",
+      "renewal": "Annual audit",
+      "countries": ["uk", "eu"],
+      "provider_examples": ["Control Union", "Ecocert", "Soil Association"]
+    },
+    {
+      "name": "Gulf Organic Certification",
+      "standard": "GSO CAC/GL 32",
+      "description": "Organic certification for GCC countries",
+      "timeline": "12-18 months (including transition period)",
+      "cost_range": "R70,000-R120,000",
+      "renewal": "Annual audit",
+      "countries": ["uae", "saudi", "qatar", "kuwait"],
+      "provider_examples": ["Emirates Authority for Standardization", "ESMA"]
+    },
+    {
+      "name": "Fair Trade Certification",
+      "standard": "Fairtrade International",
+      "description": "Ethical trading certification valued in premium markets",
+      "timeline": "6-8 months",
+      "cost_range": "R50,000-R90,000",
+      "renewal": "Annual audit",
+      "countries": ["all"],
+      "provider_examples": ["FLOCERT", "Fair Trade South Africa"]
+    },
+    {
+      "name": "ISO 22000",
+      "standard": "ISO 22000:2018",
+      "description": "Food safety management system certification",
+      "timeline": "8-12 months",
+      "cost_range": "R100,000-R150,000",
+      "renewal": "Three-year cycle with annual surveillance",
+      "countries": ["all"],
+      "provider_examples": ["SGS", "Bureau Veritas", "TÜV SÜD"]
+    },
+    {
+      "name": "Kosher Certification",
+      "standard": "Orthodox Union (OU)",
+      "description": "Certification for products meeting Jewish dietary laws",
+      "timeline": "3-6 months",
+      "cost_range": "R30,000-R60,000",
+      "renewal": "Annual renewal",
+      "countries": ["all"],
+      "provider_examples": ["Cape Beth Din", "Union of Orthodox Synagogues"]
+    }
+  ]
+} 

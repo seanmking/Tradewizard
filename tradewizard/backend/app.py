@@ -3,6 +3,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 from services.trade_assessment_service import TradeAssessmentService
+from services.sidekick_service import SideKickService
 
 # Load environment variables
 load_dotenv()
@@ -10,8 +11,9 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Initialize service
+# Initialize services
 assessment_service = TradeAssessmentService()
+sidekick_service = SideKickService()
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -69,6 +71,74 @@ def get_chat_history(chat_id):
     try:
         history = assessment_service.get_chat_history(chat_id)
         return jsonify({"chat_id": chat_id, "history": history}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# SideKick API Endpoints
+@app.route('/api/sidekick/analyze', methods=['POST'])
+def analyze_company():
+    try:
+        data = request.json
+        website_url = data.get('website_url')
+        target_markets = data.get('target_markets', [])
+        product_info = data.get('product_info')
+        
+        if not website_url:
+            return jsonify({"error": "Website URL is required"}), 400
+        
+        if not target_markets:
+            return jsonify({"error": "At least one target market is required"}), 400
+        
+        # Generate the "What We Think We Know" dashboard
+        dashboard = sidekick_service.generate_what_we_know_dashboard(
+            website_url=website_url,
+            target_markets=target_markets,
+            product_info=product_info
+        )
+        
+        # Add a dashboard ID
+        dashboard["dashboard_id"] = os.urandom(8).hex()
+        
+        return jsonify(dashboard), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/sidekick/verify', methods=['POST'])
+def verify_information():
+    try:
+        data = request.json
+        dashboard_id = data.get('dashboard_id')
+        verified_info = data.get('verified_info')
+        
+        if not dashboard_id:
+            return jsonify({"error": "Dashboard ID is required"}), 400
+        
+        if not verified_info:
+            return jsonify({"error": "Verified information is required"}), 400
+        
+        # Update the dashboard with verified information
+        result = sidekick_service.verify_dashboard_information(
+            dashboard_id=dashboard_id,
+            verified_info=verified_info
+        )
+        
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/sidekick/generate-plan', methods=['POST'])
+def generate_export_plan():
+    try:
+        data = request.json
+        dashboard_id = data.get('dashboard_id')
+        
+        if not dashboard_id:
+            return jsonify({"error": "Dashboard ID is required"}), 400
+        
+        # Generate the export plan
+        export_plan = sidekick_service.generate_export_plan(dashboard_id=dashboard_id)
+        
+        return jsonify(export_plan), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

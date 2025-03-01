@@ -150,4 +150,12 @@
 
 .app-content {
   animation: fadeIn 0.3s ease-out;
+}
+
+.sidekick-wrapper {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  margin-bottom: 2rem;
 } 

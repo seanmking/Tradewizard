@@ -1,0 +1,476 @@
+{
+  "market_overview": {
+    "country": "United Kingdom",
+    "population": "67.33 million (2023)",
+    "gdp": "$3.07 trillion (2022)",
+    "gdp_growth": "4.1% (2022)",
+    "currency": "British Pound (GBP)",
+    "exchange_rate": "1 USD = 0.79 GBP (fluctuating)",
+    "key_cities": ["London", "Manchester", "Birmingham", "Edinburgh", "Glasgow", "Leeds"],
+    "economic_outlook": "Moderate growth projected with ongoing recovery from Brexit transition and pandemic impacts. Food sector showing resilience with increasing focus on domestic and diverse international sourcing."
+  },
+  "food_market_data": {
+    "market_size": "$295 billion (2022)",
+    "growth_rate": "3.1% CAGR (2022-2027 projected)",
+    "import_dependence": "Approximately 46% of food consumed is imported",
+    "south_african_imports": "$720 million (2022)",
+    "key_trends": [
+      "Strong focus on sustainability and ethical sourcing",
+      "Growing demand for plant-based and natural products",
+      "Increasing importance of traceability and food safety",
+      "Rapid growth in online grocery shopping",
+      "Rising interest in international and exotic flavors"
+    ]
+  },
+  "dried_fruit_sector": {
+    "market_size": "$1.2 billion (2022)",
+    "growth_rate": "4.8% CAGR (2022-2027 projected)",
+    "consumption_patterns": "Year-round consumption with peaks during Christmas baking season (October-December). Growing as healthy snacking option and cooking ingredient.",
+    "popular_products": [
+      {
+        "product": "Raisins and Sultanas",
+        "market_share": "28%",
+        "notes": "Imports primarily from Turkey, USA, and South Africa"
+      },
+      {
+        "product": "Dates",
+        "market_share": "17%",
+        "notes": "Imports from Middle East, North Africa, and Pakistan"
+      },
+      {
+        "product": "Dried Cranberries",
+        "market_share": "14%",
+        "notes": "Imports primarily from USA and Canada"
+      },
+      {
+        "product": "Dried Apricots",
+        "market_share": "12%",
+        "notes": "Imports from Turkey, South Africa, and Uzbekistan"
+      },
+      {
+        "product": "Prunes",
+        "market_share": "9%",
+        "notes": "Imports from USA, Chile, and France"
+      },
+      {
+        "product": "Dried Mango",
+        "market_share": "7%",
+        "notes": "Imports from Philippines, Thailand, and South Africa"
+      },
+      {
+        "product": "Other Dried Fruits",
+        "market_share": "13%",
+        "notes": "Including figs, apple, pineapple, and exotic varieties"
+      }
+    ],
+    "pricing_trends": [
+      {
+        "segment": "Economy",
+        "price_range": "£1.50-£2.50 per 250g",
+        "retail_channels": "Discount supermarkets, value ranges in major supermarkets"
+      },
+      {
+        "segment": "Mainstream",
+        "price_range": "£2.50-£4.00 per 250g",
+        "retail_channels": "Major supermarkets, convenience stores"
+      },
+      {
+        "segment": "Premium",
+        "price_range": "£4.00-£6.50 per 250g",
+        "retail_channels": "High-end supermarkets, specialty food stores"
+      },
+      {
+        "segment": "Organic/Specialty",
+        "price_range": "£5.00-£8.00 per 250g",
+        "retail_channels": "Health food stores, organic shops, online specialists"
+      }
+    ],
+    "seasonality": "Peak sales during Christmas baking season (October-December, 35-40% of annual sales), secondary peak during summer for snacking"
+  },
+  "consumer_insights": {
+    "demographics": {
+      "primary_consumers": "Health-conscious consumers, families, older demographics (45+)",
+      "age_groups": "35-65 years (highest consumption)",
+      "income_levels": "Middle and upper-middle income households"
+    },
+    "purchasing_factors": [
+      {
+        "factor": "Price",
+        "importance": "High",
+        "notes": "UK consumers are price-sensitive, especially post-Brexit and during cost-of-living increases"
+      },
+      {
+        "factor": "Quality and taste",
+        "importance": "High",
+        "notes": "Consistent quality and flavor are key drivers of repeat purchases"
+      },
+      {
+        "factor": "Health benefits",
+        "importance": "High",
+        "notes": "Growing awareness of nutritional benefits driving consumption"
+      },
+      {
+        "factor": "Sustainability",
+        "importance": "Medium-high and growing",
+        "notes": "Increasing concern about environmental impact and ethical sourcing"
+      },
+      {
+        "factor": "Packaging",
+        "importance": "Medium",
+        "notes": "Preference for recyclable packaging and clear product information"
+      },
+      {
+        "factor": "Country of origin",
+        "importance": "Medium-low",
+        "notes": "Less important than quality and price, but growing interest in provenance"
+      },
+      {
+        "factor": "Certifications",
+        "importance": "Medium",
+        "notes": "Organic, Fairtrade, and sustainability certifications increasingly valued"
+      }
+    ],
+    "consumption_occasions": [
+      "Healthy snacking (on-the-go and at home)",
+      "Baking (especially seasonal)",
+      "Breakfast (with cereals, porridge, yogurt)",
+      "Cooking (in savory dishes and desserts)",
+      "Children's lunchboxes",
+      "Fitness and sports nutrition"
+    ]
+  },
+  "retail_landscape": {
+    "major_retailers": [
+      {
+        "name": "Tesco",
+        "market_share": "27.5%",
+        "store_count": "4,000+",
+        "notes": "Largest supermarket chain with multiple formats from Express to Extra"
+      },
+      {
+        "name": "Sainsbury's",
+        "market_share": "15.2%",
+        "store_count": "1,400+",
+        "notes": "Strong in mid to premium positioning with quality focus"
+      },
+      {
+        "name": "Asda",
+        "market_share": "14.1%",
+        "store_count": "600+",
+        "notes": "Value-focused positioning with large store formats"
+      },
+      {
+        "name": "Morrisons",
+        "market_share": "9.5%",
+        "store_count": "500+",
+        "notes": "Focus on fresh food and market street concept"
+      },
+      {
+        "name": "Aldi",
+        "market_share": "9.3%",
+        "store_count": "950+",
+        "notes": "Fast-growing discount retailer with limited but growing range"
+      },
+      {
+        "name": "Lidl",
+        "market_share": "7.1%",
+        "store_count": "800+",
+        "notes": "Discount retailer with increasing focus on quality"
+      },
+      {
+        "name": "Waitrose",
+        "market_share": "4.7%",
+        "store_count": "330+",
+        "notes": "Premium positioning with high-quality focus"
+      }
+    ],
+    "specialty_channels": [
+      {
+        "name": "Holland & Barrett",
+        "description": "Health food retailer with 800+ UK stores",
+        "product_focus": "Health foods, organic dried fruits, no added sugar options"
+      },
+      {
+        "name": "Whole Foods Market",
+        "description": "Premium natural and organic retailer with 7 UK stores",
+        "product_focus": "Organic and premium dried fruits, bulk options"
+      },
+      {
+        "name": "Planet Organic",
+        "description": "UK's largest organic supermarket chain",
+        "product_focus": "Organic dried fruits, sustainable options"
+      },
+      {
+        "name": "Independent health food stores",
+        "description": "Approximately 800 independent stores across UK",
+        "product_focus": "Organic, specialty, and bulk dried fruits"
+      }
+    ],
+    "e_commerce": {
+      "market_share": "13% of food retail (accelerated growth since pandemic)",
+      "key_platforms": [
+        "Tesco Online",
+        "Ocado",
+        "Amazon Fresh",
+        "Sainsbury's Online",
+        "Asda Online",
+        "Specialized health food sites (e.g., BuyWholefoodsOnline)"
+      ],
+      "growth_rate": "15% CAGR (2022-2027 projected)"
+    }
+  },
+  "competitive_landscape": {
+    "market_leaders": [
+      {
+        "company": "Whitworths (UK)",
+        "products": "Full range of dried fruits, baking products",
+        "market_share": "22%",
+        "strengths": "Strong brand recognition, wide distribution, product innovation",
+        "pricing_strategy": "Mid-range with premium and value options"
+      },
+      {
+        "company": "Tesco own label (UK)",
+        "products": "Full range of dried fruits",
+        "market_share": "14%",
+        "strengths": "Store presence, competitive pricing, improving quality",
+        "pricing_strategy": "Value to mid-range pricing"
+      },
+      {
+        "company": "Sainsbury's own label (UK)",
+        "products": "Full range of dried fruits",
+        "market_share": "9%",
+        "strengths": "Quality positioning, Taste the Difference premium range",
+        "pricing_strategy": "Mid-range with premium tier"
+      },
+      {
+        "company": "Crazy Jack (UK)",
+        "products": "Organic dried fruits",
+        "market_share": "7%",
+        "strengths": "Organic focus, health positioning, quality reputation",
+        "pricing_strategy": "Premium pricing"
+      },
+      {
+        "company": "Sun-Maid (USA)",
+        "products": "Raisins and other dried fruits",
+        "market_share": "6%",
+        "strengths": "Global brand recognition, consistent quality",
+        "pricing_strategy": "Premium pricing for branded imported products"
+      }
+    ],
+    "south_african_competitors": [
+      {
+        "company": "Cecilia's Farm",
+        "products": "Premium dried fruits, especially peaches, apricots, and mangoes",
+        "market_presence": "Limited but growing in premium retail",
+        "strengths": "High quality, attractive packaging, South African provenance",
+        "challenges": "Limited brand awareness, distribution challenges"
+      },
+      {
+        "company": "Safari",
+        "products": "Dried fruits and nuts",
+        "market_presence": "Minimal direct branded presence",
+        "strengths": "Competitive pricing, bulk supply capabilities",
+        "challenges": "Limited UK market knowledge, minimal marketing investment"
+      },
+      {
+        "company": "South African bulk suppliers",
+        "products": "Various dried fruits for private label and food manufacturing",
+        "market_presence": "Strong in B2B and private label supply",
+        "strengths": "Competitive pricing, consistent quality, counter-seasonal supply",
+        "challenges": "Limited consumer brand recognition, commodity positioning"
+      }
+    ],
+    "private_label": {
+      "market_share": "42% and growing",
+      "key_players": [
+        "Tesco Finest and standard ranges",
+        "Sainsbury's Taste the Difference and standard ranges",
+        "Asda Extra Special and standard ranges",
+        "Morrisons The Best and standard ranges",
+        "Waitrose Essential and premium ranges"
+      ],
+      "pricing": "Typically tiered: value (20-30% below branded), standard (10-15% below branded), premium (comparable to branded)",
+      "quality_positioning": "Improving quality across all tiers, with premium private label competing directly with brands"
+    }
+  },
+  "distribution_channels": {
+    "import_process": {
+      "key_ports": ["Felixstowe", "Southampton", "London Gateway", "Liverpool"],
+      "customs_clearance": "1-3 days typical processing time (longer since Brexit)",
+      "documentation": "Digital processing through CHIEF/CDS systems",
+      "challenges": "Post-Brexit documentation complexity, occasional port delays"
+    },
+    "distribution_models": [
+      {
+        "model": "Direct to retail",
+        "suitability": "Large volumes to major retailers",
+        "pros": "Higher margins, direct relationship with retailers",
+        "cons": "Complex compliance requirements, high service level expectations"
+      },
+      {
+        "model": "UK importer/distributor",
+        "suitability": "Most common for new market entrants",
+        "pros": "Market knowledge, existing relationships, handles compliance",
+        "cons": "Lower margins, less control over market positioning"
+      },
+      {
+        "model": "Food service distributor",
+        "suitability": "Targeting hospitality and food manufacturing",
+        "pros": "Access to different market segments, bulk volumes",
+        "cons": "Price competitive, less brand visibility"
+      },
+      {
+        "model": "Online direct",
+        "suitability": "Premium, niche products",
+        "pros": "Higher margins, direct consumer relationship",
+        "cons": "Complex post-Brexit logistics, limited volume potential"
+      }
+    ],
+    "key_distributors": [
+      {
+        "name": "Community Foods Ltd",
+        "specialization": "Dried fruits, nuts, and health foods",
+        "retail_coverage": "Major retailers and health food stores",
+        "strengths": "Strong relationships with retailers, organic expertise"
+      },
+      {
+        "name": "Infinity Foods Wholesale",
+        "specialization": "Organic and natural foods",
+        "retail_coverage": "Independent health food stores, organic shops",
+        "strengths": "Ethical focus, strong in independent sector"
+      },
+      {
+        "name": "Suma Wholefoods",
+        "specialization": "Vegetarian, organic, and ethical foods",
+        "retail_coverage": "Independent retailers, buying groups, online",
+        "strengths": "Cooperative structure, ethical positioning"
+      },
+      {
+        "name": "Hider Food Imports",
+        "specialization": "Specialty foods including dried fruits",
+        "retail_coverage": "Farm shops, delis, independent retailers",
+        "strengths": "Specialty food focus, premium positioning"
+      }
+    ]
+  },
+  "market_entry_considerations": {
+    "opportunities": [
+      {
+        "segment": "Premium dried fruits",
+        "potential": "Medium-high",
+        "notes": "Growing demand for high-quality, distinctive products with provenance"
+      },
+      {
+        "segment": "Organic certified",
+        "potential": "High",
+        "notes": "Strong growth in organic sector with price premiums"
+      },
+      {
+        "segment": "No added sugar/natural",
+        "potential": "High",
+        "notes": "Increasing consumer concern about sugar content"
+      },
+      {
+        "segment": "Ready-to-eat snack packs",
+        "potential": "Medium-high",
+        "notes": "Growing on-the-go and healthy snacking market"
+      },
+      {
+        "segment": "Baking ingredients",
+        "potential": "Medium",
+        "notes": "Stable market with seasonal peaks"
+      }
+    ],
+    "challenges": [
+      {
+        "challenge": "Post-Brexit import regulations",
+        "impact": "High",
+        "mitigation": "Work with experienced UK importers familiar with new requirements"
+      },
+      {
+        "challenge": "Retailer compliance requirements",
+        "impact": "High",
+        "mitigation": "Ensure BRCGS certification and meet retailer-specific standards"
+      },
+      {
+        "challenge": "Price competition",
+        "impact": "Medium-high",
+        "mitigation": "Focus on quality differentiation and unique varieties"
+      },
+      {
+        "challenge": "Sustainability expectations",
+        "impact": "Medium-high",
+        "mitigation": "Develop clear sustainability credentials and packaging"
+      },
+      {
+        "challenge": "Limited consumer awareness of South African products",
+        "impact": "Medium",
+        "mitigation": "Emphasize quality, unique varieties, and ethical production"
+      }
+    ],
+    "recommended_approach": {
+      "entry_strategy": "Partner with established UK importer/distributor with retail relationships",
+      "initial_focus": "Premium retailers and health food sector",
+      "product_positioning": "High-quality, ethically produced South African dried fruits with emphasis on taste and sustainability",
+      "pricing_strategy": "Premium positioning (10-15% above market average) with distinctive packaging",
+      "promotion": "Trade show participation (Speciality & Fine Food Fair, Natural & Organic Products Europe), in-store sampling, digital marketing"
+    }
+  },
+  "regulatory_environment": {
+    "import_regulations": {
+      "governing_body": "Food Standards Agency (FSA) and Department for Environment, Food and Rural Affairs (DEFRA)",
+      "key_requirements": [
+        "UK importer of record required post-Brexit",
+        "Health certificate from country of origin",
+        "Phytosanitary certificate for certain products",
+        "Pre-notification through IPAFFS system",
+        "Commercial documentation (invoice, packing list, etc.)"
+      ],
+      "labeling_requirements": [
+        "Product name",
+        "List of ingredients with allergens emphasized",
+        "Net quantity",
+        "Use-by or best-before date",
+        "Storage conditions",
+        "Country of origin",
+        "Name and address of UK food business operator",
+        "Nutritional declaration",
+        "Lot marking"
+      ]
+    },
+    "tariffs_and_taxes": {
+      "import_duty": "Varies by product (0-12% typical range)",
+      "vat": "0% VAT on most unprocessed food products",
+      "other_fees": "Import processing fees, inspection charges if applicable"
+    },
+    "recent_changes": [
+      "Post-Brexit UK Global Tariff implementation",
+      "New UK Conformity Assessed (UKCA) marking requirements",
+      "Stricter enforcement of health and phytosanitary controls",
+      "Upcoming Extended Producer Responsibility regulations for packaging"
+    ]
+  },
+  "future_outlook": {
+    "market_projections": {
+      "5_year_growth": "4.8% CAGR for dried fruits sector",
+      "emerging_segments": [
+        "Functional dried fruits (with added vitamins, superfoods)",
+        "Sustainable and plastic-free packaging",
+        "Exotic and unique varieties",
+        "Convenience formats for on-the-go consumption"
+      ]
+    },
+    "consumer_trends": [
+      "Increasing focus on natural, minimally processed foods",
+      "Growing interest in provenance and ethical production",
+      "Rising demand for transparent supply chains and sustainability",
+      "Continued growth in plant-based and flexitarian diets"
+    ],
+    "innovation_opportunities": [
+      "Plastic-free, compostable packaging solutions",
+      "Novel preservation techniques maintaining nutritional value",
+      "Unique South African fruit varieties with distinctive flavor profiles",
+      "Functional products targeting specific health benefits"
+    ]
+  }
+} 

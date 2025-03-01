@@ -1,0 +1,158 @@
+{
+  "general_requirements": [
+    {
+      "requirement": "Maximum moisture content",
+      "standard": "SANS 10049",
+      "specification": "Max 4% for dried fruits, 3% for nuts",
+      "description": "Controls moisture levels to prevent mold growth and ensure product stability",
+      "testing_method": "Laboratory moisture analysis",
+      "testing_frequency": "Each production batch",
+      "cost_range": "R350-R650 per test",
+      "importance": "Critical - direct impact on food safety and shelf life"
+    },
+    {
+      "requirement": "Aflatoxin limits",
+      "standard": "EC Regulation 1881/2006",
+      "specification": "Maximum 4ppb for total aflatoxins, 2ppb for aflatoxin B1",
+      "description": "Limits toxic compounds produced by certain molds",
+      "testing_method": "HPLC or ELISA testing",
+      "testing_frequency": "Each production batch",
+      "cost_range": "R1,200-R2,500 per test",
+      "importance": "Critical - direct impact on food safety"
+    },
+    {
+      "requirement": "Pesticide residue limits",
+      "standard": "Codex Alimentarius / EU MRL",
+      "specification": "Varies by pesticide and product",
+      "description": "Controls maximum residue levels (MRLs) of agricultural chemicals",
+      "testing_method": "GC-MS/MS or LC-MS/MS analysis",
+      "testing_frequency": "Periodic (quarterly recommended)",
+      "cost_range": "R3,000-R6,500 per analysis",
+      "importance": "High - regulatory requirement in most markets"
+    },
+    {
+      "requirement": "Heavy metals",
+      "standard": "EC Regulation 1881/2006",
+      "specification": "Lead: max 0.1 mg/kg, Cadmium: max 0.05 mg/kg",
+      "description": "Limits toxic metals in food products",
+      "testing_method": "ICP-MS testing",
+      "testing_frequency": "Bi-annual",
+      "cost_range": "R1,800-R3,000 per test",
+      "importance": "High - regulatory requirement in most markets"
+    },
+    {
+      "requirement": "Microbiological limits",
+      "standard": "SANS 10049 / Codex Alimentarius",
+      "specification": "Various limits for pathogens and indicator organisms",
+      "description": "Controls microbial contamination in final products",
+      "testing_method": "Standard plate count and pathogen-specific tests",
+      "testing_frequency": "Each production batch",
+      "cost_range": "R850-R2,500 per full analysis",
+      "importance": "Critical - direct impact on food safety"
+    }
+  ],
+  "treatment_requirements": [
+    {
+      "requirement": "Fumigation",
+      "standard": "ISPM-15 / Methyl Bromide protocol",
+      "description": "Pest treatment to meet phytosanitary requirements",
+      "applicability": "Required for many dried fruits and nuts",
+      "implementation": "Must be performed by certified fumigation provider",
+      "certification": "Fumigation Certificate required",
+      "cost_range": "R3,500-R5,500 per container",
+      "timeline": "24-48 hours including ventilation period"
+    },
+    {
+      "requirement": "Cold Treatment",
+      "standard": "DAFF Protocol",
+      "description": "Cold storage at specified temperature to eliminate pests",
+      "applicability": "Alternative to fumigation for some products",
+      "implementation": "-18°C for 7 days in monitored cold storage",
+      "certification": "Temperature log records required",
+      "cost_range": "R4,500-R7,000 per treatment",
+      "timeline": "Minimum 7 days plus handling time"
+    },
+    {
+      "requirement": "Heat Treatment",
+      "standard": "Industry-specific protocols",
+      "description": "Thermal processing to reduce microbial load",
+      "applicability": "Specific nut varieties (e.g., almonds, hazelnuts)",
+      "implementation": "Validated heat treatment process with temperature monitoring",
+      "certification": "Treatment records required",
+      "cost_range": "R3,000-R6,500 per batch",
+      "timeline": "Process-specific, typically 1-2 days including cooling"
+    }
+  ],
+  "market_specific": {
+    "uae": [
+      {
+        "requirement": "Halal compliance",
+        "description": "Products must comply with Islamic dietary laws",
+        "implementation": "Halal certification from recognized body",
+        "documentation": "Halal certificate required for import clearance",
+        "timeline": "Must be certified before production"
+      },
+      {
+        "requirement": "Food additive restrictions",
+        "description": "Stricter limits on certain preservatives and colorants",
+        "implementation": "Product formulation must comply with GSO standards",
+        "documentation": "Certificate of Analysis showing additive levels",
+        "timeline": "During product development phase"
+      }
+    ],
+    "uk": [
+      {
+        "requirement": "Novel food regulations",
+        "description": "Special authorization for foods not consumed in EU before May 1997",
+        "implementation": "Pre-market authorization required for novel ingredients",
+        "documentation": "Novel food authorization documentation if applicable",
+        "timeline": "Up to 18 months for authorization process"
+      },
+      {
+        "requirement": "Allergen controls",
+        "description": "Strict controls for cross-contamination of 14 major allergens",
+        "implementation": "Segregated production and allergen management program",
+        "documentation": "Allergen control statement in food safety documentation",
+        "timeline": "Ongoing requirement with periodic verification"
+      }
+    ]
+  },
+  "factory_requirements": [
+    {
+      "requirement": "HACCP implementation",
+      "description": "Hazard Analysis Critical Control Point system",
+      "standard": "SANS 10330",
+      "implementation": "Identify hazards, establish critical control points, monitoring procedures",
+      "documentation": "Full HACCP plan and monitoring records",
+      "cost_impact": "R85,000-R150,000 for development and implementation",
+      "timeline": "3-6 months for full implementation"
+    },
+    {
+      "requirement": "Good Manufacturing Practices (GMP)",
+      "description": "Basic hygiene and manufacturing standards",
+      "standard": "SANS 10049",
+      "implementation": "Facility design, equipment, processes, personnel practices",
+      "documentation": "GMP manual and procedures",
+      "cost_impact": "R60,000-R120,000 for development and implementation",
+      "timeline": "2-4 months for full implementation"
+    },
+    {
+      "requirement": "Traceability system",
+      "description": "Ability to track products one step forward and one step back",
+      "standard": "ISO 22005",
+      "implementation": "Lot coding system, record keeping",
+      "documentation": "Traceability procedures and batch records",
+      "cost_impact": "R45,000-R85,000 for system development",
+      "timeline": "2-3 months for implementation"
+    },
+    {
+      "requirement": "Pest control program",
+      "description": "Prevention and monitoring of pest activity",
+      "standard": "Industry best practice",
+      "implementation": "Contracted pest control service, monitoring stations",
+      "documentation": "Pest control records and service reports",
+      "cost_impact": "R1,800-R3,500 monthly for contracted service",
+      "timeline": "Immediate implementation"
+    }
+  ]
+} 

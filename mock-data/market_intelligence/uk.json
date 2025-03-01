@@ -1,0 +1,155 @@
+{
+  "market_size": "USD 540.6M (2023)",
+  "growth_rate": "5.78% CAGR (2024-2032)",
+  "distribution_channels": [
+    {
+      "type": "Supermarkets",
+      "examples": ["Tesco", "Waitrose", "Sainsbury's"],
+      "market_share": "41%",
+      "entry_difficulty": "High",
+      "min_volumes_required": "2000+ units/SKU",
+      "lead_time": "6-9 months for listing"
+    },
+    {
+      "type": "Health stores",
+      "examples": ["Holland & Barrett", "Whole Foods"],
+      "market_share": "18%",
+      "entry_difficulty": "Medium",
+      "min_volumes_required": "500-800 units/SKU",
+      "lead_time": "2-4 months for listing"
+    },
+    {
+      "type": "Online",
+      "examples": ["Ocado", "Amazon UK"],
+      "market_share": "19%",
+      "growth": "19% YOY",
+      "entry_difficulty": "Low",
+      "min_volumes_required": "200-300 units/SKU",
+      "lead_time": "3-6 weeks for listing"
+    }
+  ],
+  "price_benchmarks": {
+    "dried_apricots": {
+      "price_range": "£8.50-12.75/kg",
+      "high_end_retail": "£15-18/kg",
+      "price_sensitivity": "Medium",
+      "optimal_price_point": "£10.99/kg"
+    },
+    "premium_nut_mixes": {
+      "price_range": "£10-15/200g",
+      "high_end_retail": "£18-25/200g",
+      "price_sensitivity": "Low",
+      "optimal_price_point": "£12.99/200g"
+    }
+  },
+  "consumer_trends": [
+    {
+      "trend": "Plant-based diets",
+      "percentage": "63% purchase driver",
+      "growth": "18% YOY",
+      "opportunity": "Position dried fruits as natural plant-based snacking options"
+    },
+    {
+      "trend": "Clean labeling",
+      "percentage": "89% check nutritional info",
+      "growth": "7% YOY",
+      "opportunity": "Emphasize no additives, preservatives, or added sugar"
+    },
+    {
+      "trend": "Ethical sourcing",
+      "percentage": "72% willing to pay premium",
+      "growth": "14% YOY",
+      "opportunity": "Highlight sustainable farming practices and fair trade principles"
+    }
+  ],
+  "key_competitors": [
+    {
+      "name": "Sunsweet Growers",
+      "market_share": "28%",
+      "product_range": "Premium dried fruits, primarily prunes",
+      "price_positioning": "Premium",
+      "distribution": "Major retailers, specialty stores",
+      "strengths": ["Strong brand recognition", "Wide distribution"],
+      "weaknesses": ["Limited product range", "Premium pricing"]
+    },
+    {
+      "name": "Angas Park",
+      "market_share": "Australian imports dominate 41%",
+      "product_range": "Diverse dried fruits",
+      "price_positioning": "Mid to premium",
+      "distribution": "Major supermarkets",
+      "strengths": ["Quality perception", "Product variety"],
+      "weaknesses": ["Limited marketing support", "High logistics costs"]
+    },
+    {
+      "name": "Safari Dried Fruits",
+      "market_share": "3.1% share",
+      "product_range": "South African dried fruits",
+      "price_positioning": "Mid-range",
+      "distribution": "Specialty stores, online",
+      "strengths": ["South African origin story", "Exotic appeal"],
+      "weaknesses": ["Limited retail penetration", "Low brand awareness"]
+    }
+  ],
+  "seasonality": {
+    "peak_demand": "Oct-Dec (holiday season + winter baking)",
+    "low_period": "Mar-May (spring season)",
+    "christmas_effect": "30-40% sales increase during holiday season",
+    "promotional_calendar": {
+      "veganuary": "January",
+      "summer_wellness": "June-August",
+      "back_to_school": "September",
+      "christmas_baking": "October-December"
+    }
+  },
+  "niche_opportunities": [
+    {
+      "segment": "Free-from allergens",
+      "growth_rate": "11% CAGR",
+      "market_size": "£180M",
+      "entry_barrier": "Medium (certification required)",
+      "profit_margin": "20-30% higher than conventional",
+      "key_channels": ["Holland & Barrett", "Ocado", "Whole Foods"]
+    },
+    {
+      "segment": "Sports nutrition",
+      "market_size": "£220M market",
+      "entry_barrier": "Medium (positioning, packaging)",
+      "profit_margin": "25-35% higher with fitness positioning",
+      "key_channels": ["Fitness retailers", "Specialty sports stores", "Online DTC"]
+    }
+  ],
+  "regulatory_requirements": {
+    "import_license": "Not required for most food products, but registration needed",
+    "labeling": [
+      "FSA-compliant allergen box",
+      "Nutrition information panel per 100g",
+      "Country of origin declaration",
+      "Metric weights (e.g., 200g not 7.05oz)"
+    ],
+    "certifications": [
+      "BRC Food Safety (preferred by retailers)",
+      "UK Organic (if claiming organic status)",
+      "Soil Association certification (optional advantage)"
+    ],
+    "documentation": [
+      "Commercial Invoice",
+      "Packing List",
+      "Certificate of Origin",
+      "Phytosanitary Certificate",
+      "Health Certificate"
+    ],
+    "tariffs": {
+      "dried_fruits": "8% MFN duty",
+      "nut_products": "2.5-6% depending on processing"
+    },
+    "timeline": "3-4 weeks for customs clearance and documentation approval"
+  },
+  "entry_strategy_recommendations": [
+    "Focus initially on specialty retailers and online marketplaces",
+    "Highlight South African origin as a quality differentiator",
+    "Invest in UK-compliant packaging with clear nutritional information",
+    "Consider third-party logistics provider with UK customs expertise",
+    "Target September entry for holiday season sales cycle"
+  ]
+} 

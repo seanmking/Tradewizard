@@ -1,0 +1,429 @@
+{
+  "start_up_costs": {
+    "certification": [
+      {
+        "item": "HACCP Level 3 Certification",
+        "cost_range": "R45,000-R65,000",
+        "frequency": "One-time with annual renewal",
+        "renewal_cost": "R18,000-R25,000 annually",
+        "notes": "Required for most export markets"
+      },
+      {
+        "item": "BRCGS Food Safety Certification",
+        "cost_range": "R120,000-R180,000",
+        "frequency": "One-time with annual audit",
+        "renewal_cost": "R60,000-R85,000 annually",
+        "notes": "Premium certification for UK market entry"
+      },
+      {
+        "item": "Halal Certification",
+        "cost_range": "R35,000-R75,000",
+        "frequency": "Annual",
+        "renewal_cost": "R35,000-R75,000",
+        "notes": "Essential for UAE market"
+      },
+      {
+        "item": "SA Export Certificate",
+        "cost_range": "R8,000-R15,000",
+        "frequency": "Per shipment",
+        "renewal_cost": "N/A",
+        "notes": "Required for all exports"
+      },
+      {
+        "item": "EU Organic Certification",
+        "cost_range": "R60,000-R120,000",
+        "frequency": "Annual",
+        "renewal_cost": "R40,000-R80,000",
+        "notes": "Optional; premium market access"
+      }
+    ],
+    "packaging_adaptation": [
+      {
+        "item": "Label redesign (bilingual)",
+        "cost_range": "R20,000-R35,000",
+        "frequency": "One-time with periodic updates",
+        "renewal_cost": "R8,000-R15,000 per update",
+        "notes": "Required for UAE"
+      },
+      {
+        "item": "UK-compliant packaging design",
+        "cost_range": "R25,000-R40,000",
+        "frequency": "One-time with periodic updates",
+        "renewal_cost": "R10,000-R18,000 per update",
+        "notes": "Post-Brexit requirements"
+      },
+      {
+        "item": "Printing setup for new packaging",
+        "cost_range": "R15,000-R30,000 per SKU",
+        "frequency": "One-time per design",
+        "renewal_cost": "N/A",
+        "notes": "Varies by volume and complexity"
+      },
+      {
+        "item": "Compliance testing for packaging",
+        "cost_range": "R12,000-R25,000",
+        "frequency": "Per material type",
+        "renewal_cost": "N/A",
+        "notes": "Food contact material verification"
+      }
+    ],
+    "market_registration": [
+      {
+        "item": "UAE product registration",
+        "cost_range": "R8,000-R15,000 per product",
+        "frequency": "One-time per product",
+        "renewal_cost": "R3,000-R6,000 every 2-3 years",
+        "notes": "Required for all food products"
+      },
+      {
+        "item": "UK import registration",
+        "cost_range": "R7,000-R12,000 per product",
+        "frequency": "One-time per product",
+        "renewal_cost": "R2,500-R5,000 annually",
+        "notes": "Post-Brexit requirement"
+      },
+      {
+        "item": "Trademark registration - UAE",
+        "cost_range": "R35,000-R55,000",
+        "frequency": "10-year coverage",
+        "renewal_cost": "R20,000-R35,000 every 10 years",
+        "notes": "Highly recommended for brand protection"
+      },
+      {
+        "item": "Trademark registration - UK",
+        "cost_range": "R30,000-R50,000",
+        "frequency": "10-year coverage",
+        "renewal_cost": "R18,000-R30,000 every 10 years",
+        "notes": "Highly recommended for brand protection"
+      }
+    ],
+    "consulting_and_training": [
+      {
+        "item": "Export readiness assessment",
+        "cost_range": "R25,000-R40,000",
+        "frequency": "One-time",
+        "renewal_cost": "N/A",
+        "notes": "Recommended before major investments"
+      },
+      {
+        "item": "Export documentation training",
+        "cost_range": "R12,000-R20,000",
+        "frequency": "One-time with refreshers",
+        "renewal_cost": "R5,000-R8,000 for refreshers",
+        "notes": "Capacity building for internal team"
+      },
+      {
+        "item": "Market entry strategy consulting",
+        "cost_range": "R50,000-R150,000",
+        "frequency": "Per market",
+        "renewal_cost": "N/A",
+        "notes": "Varies widely based on consultant expertise"
+      },
+      {
+        "item": "Distributor identification service",
+        "cost_range": "R35,000-R75,000",
+        "frequency": "Per market",
+        "renewal_cost": "N/A",
+        "notes": "Includes introductions and negotiations support"
+      }
+    ]
+  },
+  "per_shipment_costs": {
+    "logistics": [
+      {
+        "item": "20ft refrigerated container - Sea freight to UAE",
+        "cost_range": "R42,000-R48,000",
+        "variables": [
+          "Fuel surcharges",
+          "Port congestion",
+          "Seasonal demand"
+        ],
+        "notes": "Capacity: approximately 20 tons of product"
+      },
+      {
+        "item": "20ft refrigerated container - Sea freight to UK",
+        "cost_range": "R45,000-R52,000",
+        "variables": [
+          "Fuel surcharges",
+          "Port congestion",
+          "Seasonal demand"
+        ],
+        "notes": "Capacity: approximately 20 tons of product"
+      },
+      {
+        "item": "Air freight to UAE",
+        "cost_range": "R85-R120 per kg",
+        "variables": [
+          "Urgency premium",
+          "Volume discounts",
+          "Seasonal rates"
+        ],
+        "notes": "Recommended for high-value, low-volume products"
+      },
+      {
+        "item": "Air freight to UK",
+        "cost_range": "R95-R140 per kg",
+        "variables": [
+          "Urgency premium",
+          "Volume discounts",
+          "Seasonal rates"
+        ],
+        "notes": "Recommended for high-value, low-volume products"
+      }
+    ],
+    "documentation": [
+      {
+        "item": "Certificate of Origin",
+        "cost_range": "R850-R1,500",
+        "variables": [
+          "Chamber of Commerce fees",
+          "Authentication fees"
+        ],
+        "notes": "Required for all shipments"
+      },
+      {
+        "item": "Health Certificate",
+        "cost_range": "R2,200-R3,500",
+        "variables": [
+          "Laboratory testing fees",
+          "Express processing fees"
+        ],
+        "notes": "Required for food products"
+      },
+      {
+        "item": "Phytosanitary Certificate",
+        "cost_range": "R1,500-R2,800",
+        "variables": [
+          "Inspection fees",
+          "Express processing fees"
+        ],
+        "notes": "Required for plant-based products"
+      },
+      {
+        "item": "Export permit",
+        "cost_range": "R750-R1,200",
+        "variables": [
+          "Product category",
+          "Destination market"
+        ],
+        "notes": "Varies by product type"
+      },
+      {
+        "item": "Fumigation Certificate",
+        "cost_range": "R3,500-R5,000",
+        "variables": [
+          "Volume of goods",
+          "Treatment type"
+        ],
+        "notes": "May be required for certain products"
+      }
+    ],
+    "customs_and_clearance": [
+      {
+        "item": "Customs clearance - Export (SA)",
+        "cost_range": "R3,500-R5,000",
+        "variables": [
+          "Complexity of shipment",
+          "Special requirements"
+        ],
+        "notes": "Mandatory for all exports"
+      },
+      {
+        "item": "Customs clearance - Import (UAE)",
+        "cost_range": "R4,500-R7,000",
+        "variables": [
+          "Customs inspection fees",
+          "Document verification"
+        ],
+        "notes": "Can be arranged through distributor"
+      },
+      {
+        "item": "Customs clearance - Import (UK)",
+        "cost_range": "R5,500-R8,500",
+        "variables": [
+          "Post-Brexit requirements",
+          "Inspection fees"
+        ],
+        "notes": "More complex since Brexit"
+      },
+      {
+        "item": "Import duties - UAE",
+        "cost_range": "5% of CIF value",
+        "variables": [
+          "Product classification",
+          "Free trade agreements"
+        ],
+        "notes": "Standard GCC external tariff"
+      },
+      {
+        "item": "Import duties - UK",
+        "cost_range": "Varies by product (0-12% typical range)",
+        "variables": [
+          "Product classification",
+          "Free trade agreements"
+        ],
+        "notes": "Check UK Global Tariff schedule"
+      }
+    ],
+    "insurance_and_handling": [
+      {
+        "item": "Cargo insurance",
+        "cost_range": "0.3-0.8% of cargo value",
+        "variables": [
+          "Coverage level",
+          "Destination risk profile",
+          "Claim history"
+        ],
+        "notes": "Highly recommended for all shipments"
+      },
+      {
+        "item": "Loading and handling at origin",
+        "cost_range": "R3,000-R4,500",
+        "variables": [
+          "Special handling requirements",
+          "Port congestion"
+        ],
+        "notes": "Standard for container shipments"
+      },
+      {
+        "item": "Unloading and handling at destination",
+        "cost_range": "R3,500-R6,000",
+        "variables": [
+          "Port efficiency",
+          "Special handling requirements"
+        ],
+        "notes": "Often higher in UAE than UK"
+      },
+      {
+        "item": "Temperature monitoring",
+        "cost_range": "R1,500-R3,000 per container",
+        "variables": [
+          "Technology type",
+          "Reporting frequency"
+        ],
+        "notes": "Recommended for quality assurance"
+      }
+    ]
+  },
+  "ongoing_costs": {
+    "compliance": [
+      {
+        "item": "Certification renewals",
+        "annual_cost_range": "R120,000-R190,000",
+        "notes": "Combined cost for core certifications"
+      },
+      {
+        "item": "Compliance monitoring",
+        "annual_cost_range": "R40,000-R75,000",
+        "notes": "Quality testing and verification"
+      },
+      {
+        "item": "Laboratory testing",
+        "annual_cost_range": "R35,000-R55,000",
+        "notes": "Periodic verification of product safety"
+      }
+    ],
+    "marketing": [
+      {
+        "item": "Market visits (UAE)",
+        "annual_cost_range": "R70,000-R120,000",
+        "notes": "2-3 visits per year recommended"
+      },
+      {
+        "item": "Market visits (UK)",
+        "annual_cost_range": "R80,000-R140,000",
+        "notes": "2-3 visits per year recommended"
+      },
+      {
+        "item": "Trade show participation",
+        "annual_cost_range": "R150,000-R350,000 per show",
+        "notes": "Major shows like Gulfood or Speciality & Fine Food Fair"
+      },
+      {
+        "item": "Marketing materials",
+        "annual_cost_range": "R40,000-R80,000",
+        "notes": "Market-specific promotional materials"
+      }
+    ],
+    "relationship_management": [
+      {
+        "item": "Distributor support",
+        "annual_cost_range": "R50,000-R100,000",
+        "notes": "Technical and marketing support"
+      },
+      {
+        "item": "Market intelligence",
+        "annual_cost_range": "R30,000-R60,000",
+        "notes": "Subscription services and reports"
+      },
+      {
+        "item": "Customer relationship management",
+        "annual_cost_range": "R25,000-R50,000",
+        "notes": "Systems and personnel"
+      }
+    ],
+    "financial": [
+      {
+        "item": "Currency hedging",
+        "annual_cost_range": "0.5-1.5% of export value",
+        "notes": "Recommended for larger volumes"
+      },
+      {
+        "item": "Export credit insurance",
+        "annual_cost_range": "0.35-0.85% of insured turnover",
+        "notes": "Protection against non-payment"
+      },
+      {
+        "item": "International banking fees",
+        "annual_cost_range": "R15,000-R30,000",
+        "notes": "Transaction and account maintenance fees"
+      }
+    ]
+  },
+  "market_specific_cost_factors": {
+    "uae": [
+      {
+        "factor": "Ramadan season",
+        "impact": "30-50% increase in marketing costs",
+        "notes": "Higher competition for shelf space and consumer attention"
+      },
+      {
+        "factor": "Summer temperature control",
+        "impact": "15-25% increase in shipping costs",
+        "notes": "Additional cooling requirements during June-August"
+      },
+      {
+        "factor": "Arabic translation services",
+        "impact": "R8,000-R15,000 per product",
+        "notes": "Ongoing cost for new products and updates"
+      },
+      {
+        "factor": "Local agent fees",
+        "impact": "3-7% of product value",
+        "notes": "Required legal representation in UAE"
+      }
+    ],
+    "uk": [
+      {
+        "factor": "Brexit documentation",
+        "impact": "R3,000-R5,000 per shipment",
+        "notes": "Additional paperwork since Brexit"
+      },
+      {
+        "factor": "Retailer compliance",
+        "impact": "R25,000-R75,000 per retailer",
+        "notes": "Meeting specific retailer requirements"
+      },
+      {
+        "factor": "Christmas season rush",
+        "impact": "20-30% increase in shipping costs",
+        "notes": "Premium for guaranteed delivery during peak season"
+      },
+      {
+        "factor": "Pound sterling volatility",
+        "impact": "Hedging costs of 0.8-1.8% of contract value",
+        "notes": "Higher due to Brexit-related uncertainty"
+      }
+    ]
+  }
+} 

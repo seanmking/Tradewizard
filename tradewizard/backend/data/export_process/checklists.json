@@ -1,0 +1,550 @@
+{
+  "preparation_phase": {
+    "title": "Export Preparation Checklist",
+    "description": "Tasks to complete before initiating the export process",
+    "items": [
+      {
+        "id": "prep_01",
+        "task": "Conduct export readiness assessment",
+        "description": "Evaluate the company's capacity, resources, and commitment to exporting",
+        "required_evidence": "Completed assessment report",
+        "estimated_time": "2-3 weeks",
+        "resources_needed": [
+          "Export consultant or internal export team",
+          "Financial statements",
+          "Production capacity data"
+        ],
+        "dependencies": []
+      },
+      {
+        "id": "prep_02",
+        "task": "Research target market requirements",
+        "description": "Identify regulatory, cultural, and market-specific requirements for each target market",
+        "required_evidence": "Market research report with regulatory requirements",
+        "estimated_time": "3-4 weeks",
+        "resources_needed": [
+          "Market research tools or consultant",
+          "Access to trade databases",
+          "Regulatory information sources"
+        ],
+        "dependencies": ["prep_01"]
+      },
+      {
+        "id": "prep_03",
+        "task": "Develop export business plan",
+        "description": "Create a comprehensive plan including market entry strategy, timelines, and budget",
+        "required_evidence": "Documented export business plan",
+        "estimated_time": "4-6 weeks",
+        "resources_needed": [
+          "Financial projections",
+          "Marketing strategy",
+          "Operational plan"
+        ],
+        "dependencies": ["prep_01", "prep_02"]
+      },
+      {
+        "id": "prep_04",
+        "task": "Secure necessary financing",
+        "description": "Arrange financing for export activities including working capital and credit insurance",
+        "required_evidence": "Approved financing documentation",
+        "estimated_time": "4-8 weeks",
+        "resources_needed": [
+          "Financial statements",
+          "Export business plan",
+          "Banking relationships"
+        ],
+        "dependencies": ["prep_03"]
+      },
+      {
+        "id": "prep_05",
+        "task": "Identify potential partners/distributors",
+        "description": "Research and contact potential distributors, agents or partners in target markets",
+        "required_evidence": "List of qualified potential partners with contact information",
+        "estimated_time": "6-10 weeks",
+        "resources_needed": [
+          "Market research data",
+          "Industry connections",
+          "Trade show participation"
+        ],
+        "dependencies": ["prep_02"]
+      },
+      {
+        "id": "prep_06",
+        "task": "Register intellectual property",
+        "description": "Protect trademarks, patents, and other IP in target export markets",
+        "required_evidence": "IP registration applications or certificates",
+        "estimated_time": "8-20 weeks (varies by market)",
+        "resources_needed": [
+          "IP attorney",
+          "Product specifications",
+          "Brand assets"
+        ],
+        "dependencies": ["prep_02"]
+      }
+    ]
+  },
+  "certification_phase": {
+    "title": "Export Certification Checklist",
+    "description": "Required certifications and standards to be obtained",
+    "items": [
+      {
+        "id": "cert_01",
+        "task": "Obtain HACCP Level 3 certification",
+        "description": "Implement and certify HACCP food safety management system",
+        "required_evidence": "HACCP certificate",
+        "estimated_time": "10-15 weeks",
+        "resources_needed": [
+          "HACCP consultant",
+          "Staff training",
+          "Documentation system",
+          "Audit fees"
+        ],
+        "dependencies": ["prep_01"]
+      },
+      {
+        "id": "cert_02",
+        "task": "Secure SA Export Certificate",
+        "description": "Apply for and obtain South African export permit for agricultural products",
+        "required_evidence": "Export certificate",
+        "estimated_time": "8-12 weeks",
+        "resources_needed": [
+          "Product specifications",
+          "PPECB inspection",
+          "Application fees"
+        ],
+        "dependencies": ["cert_01"]
+      },
+      {
+        "id": "cert_03",
+        "task": "Obtain Halal certification (for UAE)",
+        "description": "Implement Halal requirements and obtain certification from recognized authority",
+        "required_evidence": "Halal certificate",
+        "estimated_time": "6-11 weeks",
+        "resources_needed": [
+          "Halal consultant",
+          "Process modifications",
+          "Audit fees"
+        ],
+        "dependencies": ["prep_02", "cert_01"]
+      },
+      {
+        "id": "cert_04",
+        "task": "Obtain BRCGS Food Safety certification (for UK)",
+        "description": "Implement and certify BRCGS food safety management system",
+        "required_evidence": "BRCGS certificate",
+        "estimated_time": "12-16 weeks",
+        "resources_needed": [
+          "BRCGS consultant",
+          "Staff training",
+          "Documentation system",
+          "Audit fees"
+        ],
+        "dependencies": ["cert_01"]
+      },
+      {
+        "id": "cert_05",
+        "task": "Complete any additional market-specific certifications",
+        "description": "Secure any other certifications required for specific products or markets",
+        "required_evidence": "Relevant certificates",
+        "estimated_time": "Varies by certification",
+        "resources_needed": [
+          "Relevant consultants",
+          "Application fees"
+        ],
+        "dependencies": ["prep_02", "cert_01"]
+      }
+    ]
+  },
+  "product_adaptation_phase": {
+    "title": "Product Adaptation Checklist",
+    "description": "Modifications required to meet target market requirements",
+    "items": [
+      {
+        "id": "adapt_01",
+        "task": "Develop market-specific packaging",
+        "description": "Design packaging that meets target market regulations and consumer preferences",
+        "required_evidence": "Approved packaging designs",
+        "estimated_time": "6-8 weeks",
+        "resources_needed": [
+          "Packaging designer",
+          "Regulatory consultant",
+          "Market research data"
+        ],
+        "dependencies": ["prep_02", "cert_01"]
+      },
+      {
+        "id": "adapt_02",
+        "task": "Create compliant labeling",
+        "description": "Develop labels with all required information in appropriate languages",
+        "required_evidence": "Approved label designs",
+        "estimated_time": "4-6 weeks",
+        "resources_needed": [
+          "Translation services",
+          "Regulatory consultant",
+          "Graphic designer"
+        ],
+        "dependencies": ["prep_02", "adapt_01"]
+      },
+      {
+        "id": "adapt_03",
+        "task": "Test product stability for export conditions",
+        "description": "Verify product shelf life and stability under export shipping conditions",
+        "required_evidence": "Stability test results",
+        "estimated_time": "8-12 weeks",
+        "resources_needed": [
+          "Laboratory services",
+          "Sample products",
+          "Testing protocols"
+        ],
+        "dependencies": ["prep_02"]
+      },
+      {
+        "id": "adapt_04",
+        "task": "Adapt product formulation if necessary",
+        "description": "Modify product formulation to meet target market regulations or preferences",
+        "required_evidence": "Reformulation documentation and testing results",
+        "estimated_time": "12-20 weeks",
+        "resources_needed": [
+          "R&D team",
+          "Ingredient suppliers",
+          "Testing services"
+        ],
+        "dependencies": ["prep_02"]
+      },
+      {
+        "id": "adapt_05",
+        "task": "Produce market samples",
+        "description": "Create fully compliant product samples for potential distributors/buyers",
+        "required_evidence": "Market-ready samples",
+        "estimated_time": "3-5 weeks",
+        "resources_needed": [
+          "Production time",
+          "Packaging materials",
+          "Shipping arrangements"
+        ],
+        "dependencies": ["adapt_01", "adapt_02", "adapt_03", "adapt_04"]
+      }
+    ]
+  },
+  "documentation_phase": {
+    "title": "Export Documentation Checklist",
+    "description": "Documentation required for export shipments",
+    "items": [
+      {
+        "id": "doc_01",
+        "task": "Register as exporter with relevant authorities",
+        "description": "Obtain necessary exporter registrations and numbers",
+        "required_evidence": "Exporter registration documentation",
+        "estimated_time": "2-4 weeks",
+        "resources_needed": [
+          "Company registration documents",
+          "Tax information",
+          "Application fees"
+        ],
+        "dependencies": ["prep_01"]
+      },
+      {
+        "id": "doc_02",
+        "task": "Prepare commercial documentation templates",
+        "description": "Develop templates for invoices, packing lists, and other commercial documents",
+        "required_evidence": "Document templates",
+        "estimated_time": "1-2 weeks",
+        "resources_needed": [
+          "Export documentation specialist",
+          "Document management system"
+        ],
+        "dependencies": ["doc_01"]
+      },
+      {
+        "id": "doc_03",
+        "task": "Establish Certificate of Origin process",
+        "description": "Set up process for obtaining Certificates of Origin for each shipment",
+        "required_evidence": "Chamber of Commerce registration and process documentation",
+        "estimated_time": "2-3 weeks",
+        "resources_needed": [
+          "Chamber of Commerce membership",
+          "Documentation procedures"
+        ],
+        "dependencies": ["doc_01"]
+      },
+      {
+        "id": "doc_04",
+        "task": "Set up health/phytosanitary certificate process",
+        "description": "Establish process for obtaining health certificates for food products",
+        "required_evidence": "Process documentation and relationships with issuing authorities",
+        "estimated_time": "3-5 weeks",
+        "resources_needed": [
+          "Laboratory relationships",
+          "Testing protocols",
+          "Application procedures"
+        ],
+        "dependencies": ["doc_01", "cert_01"]
+      },
+      {
+        "id": "doc_05",
+        "task": "Prepare import documentation for target markets",
+        "description": "Compile information needed for import clearance in destination markets",
+        "required_evidence": "Market-specific import documentation requirements",
+        "estimated_time": "2-4 weeks per market",
+        "resources_needed": [
+          "Customs broker",
+          "Regulatory information",
+          "Partner input"
+        ],
+        "dependencies": ["prep_02", "doc_01"]
+      }
+    ]
+  },
+  "logistics_phase": {
+    "title": "Export Logistics Checklist",
+    "description": "Transportation and logistics arrangements",
+    "items": [
+      {
+        "id": "log_01",
+        "task": "Select freight forwarder/logistics partner",
+        "description": "Identify and contract with freight forwarder experienced in target markets",
+        "required_evidence": "Signed logistics agreement",
+        "estimated_time": "3-5 weeks",
+        "resources_needed": [
+          "RFP process",
+          "Service requirements",
+          "Pricing comparisons"
+        ],
+        "dependencies": ["prep_02"]
+      },
+      {
+        "id": "log_02",
+        "task": "Determine optimal shipping method",
+        "description": "Evaluate air freight vs. sea freight options for each market",
+        "required_evidence": "Shipping method analysis and decision",
+        "estimated_time": "2-3 weeks",
+        "resources_needed": [
+          "Product specifications",
+          "Volume projections",
+          "Freight quotes"
+        ],
+        "dependencies": ["prep_02", "log_01"]
+      },
+      {
+        "id": "log_03",
+        "task": "Develop packaging specifications for transport",
+        "description": "Create specifications for export packaging, palletization, and container loading",
+        "required_evidence": "Packaging and loading specifications",
+        "estimated_time": "2-4 weeks",
+        "resources_needed": [
+          "Logistics expertise",
+          "Product dimensions and weights",
+          "Climate considerations"
+        ],
+        "dependencies": ["adapt_01", "log_02"]
+      },
+      {
+        "id": "log_04",
+        "task": "Arrange cargo insurance",
+        "description": "Secure appropriate insurance coverage for export shipments",
+        "required_evidence": "Insurance policy",
+        "estimated_time": "1-3 weeks",
+        "resources_needed": [
+          "Insurance broker",
+          "Product valuations",
+          "Risk assessment"
+        ],
+        "dependencies": ["log_02"]
+      },
+      {
+        "id": "log_05",
+        "task": "Establish export inventory management process",
+        "description": "Create procedures for managing inventory designated for export",
+        "required_evidence": "Inventory management procedures",
+        "estimated_time": "3-5 weeks",
+        "resources_needed": [
+          "Inventory management system",
+          "Warehouse space",
+          "Staff training"
+        ],
+        "dependencies": ["prep_03"]
+      }
+    ]
+  },
+  "market_entry_phase": {
+    "title": "Market Entry Checklist",
+    "description": "Final steps for entering export markets",
+    "items": [
+      {
+        "id": "entry_01",
+        "task": "Finalize distributor/partner agreements",
+        "description": "Negotiate and sign agreements with selected partners in target markets",
+        "required_evidence": "Signed distribution agreements",
+        "estimated_time": "6-12 weeks",
+        "resources_needed": [
+          "Legal counsel",
+          "Negotiation strategy",
+          "Market knowledge"
+        ],
+        "dependencies": ["prep_05", "adapt_05"]
+      },
+      {
+        "id": "entry_02",
+        "task": "Register products in target markets",
+        "description": "Complete any required product registrations with local authorities",
+        "required_evidence": "Product registration documentation",
+        "estimated_time": "6-8 weeks (UAE), 4-6 weeks (UK)",
+        "resources_needed": [
+          "Local partner support",
+          "Product documentation",
+          "Application fees"
+        ],
+        "dependencies": ["cert_01", "cert_02", "cert_03", "cert_04", "adapt_02"]
+      },
+      {
+        "id": "entry_03",
+        "task": "Develop market-specific marketing materials",
+        "description": "Create promotional materials tailored to each target market",
+        "required_evidence": "Market-ready marketing materials",
+        "estimated_time": "4-6 weeks",
+        "resources_needed": [
+          "Marketing agency",
+          "Translation services",
+          "Design services"
+        ],
+        "dependencies": ["prep_02", "adapt_01"]
+      },
+      {
+        "id": "entry_04",
+        "task": "Plan initial shipment",
+        "description": "Schedule and prepare for first commercial shipment to each market",
+        "required_evidence": "Shipment plan and documentation",
+        "estimated_time": "4-6 weeks",
+        "resources_needed": [
+          "Logistics partner",
+          "Production schedule",
+          "Documentation team"
+        ],
+        "dependencies": ["entry_01", "entry_02", "log_01", "log_02", "log_03", "log_04"]
+      },
+      {
+        "id": "entry_05",
+        "task": "Establish payment processes",
+        "description": "Set up secure payment methods and terms with international customers",
+        "required_evidence": "Banking arrangements and payment terms",
+        "estimated_time": "2-4 weeks",
+        "resources_needed": [
+          "Banking relationships",
+          "Letter of credit templates",
+          "Credit insurance"
+        ],
+        "dependencies": ["entry_01"]
+      }
+    ]
+  },
+  "market_specific_checklists": {
+    "uae": [
+      {
+        "id": "uae_01",
+        "task": "Verify Halal compliance throughout supply chain",
+        "description": "Ensure all aspects of production and logistics meet Halal requirements",
+        "required_evidence": "Halal compliance documentation",
+        "estimated_time": "4-6 weeks",
+        "resources_needed": [
+          "Halal consultant",
+          "Supply chain documentation",
+          "Certification body"
+        ],
+        "dependencies": ["cert_03"]
+      },
+      {
+        "id": "uae_02",
+        "task": "Implement Arabic labeling requirements",
+        "description": "Ensure all packaging includes required Arabic text and information",
+        "required_evidence": "Arabic label proofs",
+        "estimated_time": "3-5 weeks",
+        "resources_needed": [
+          "Arabic translator",
+          "UAE regulatory expert",
+          "Packaging designer"
+        ],
+        "dependencies": ["adapt_02"]
+      },
+      {
+        "id": "uae_03",
+        "task": "Appoint local agent/distributor",
+        "description": "Legally required for foreign companies exporting to UAE",
+        "required_evidence": "Agent agreement",
+        "estimated_time": "8-12 weeks",
+        "resources_needed": [
+          "UAE legal counsel",
+          "Due diligence process",
+          "Negotiation strategy"
+        ],
+        "dependencies": ["prep_05"]
+      },
+      {
+        "id": "uae_04",
+        "task": "Plan for Ramadan season (if applicable)",
+        "description": "Adjust production, logistics, and marketing for Ramadan timing",
+        "required_evidence": "Ramadan strategy document",
+        "estimated_time": "6-8 weeks",
+        "resources_needed": [
+          "Ramadan calendar",
+          "Market intelligence",
+          "Distributor input"
+        ],
+        "dependencies": ["entry_01", "entry_03"]
+      }
+    ],
+    "uk": [
+      {
+        "id": "uk_01",
+        "task": "Complete UK Importer of Record arrangements",
+        "description": "Post-Brexit requirement for someone to act as importer of record in UK",
+        "required_evidence": "Importer of Record documentation",
+        "estimated_time": "4-6 weeks",
+        "resources_needed": [
+          "UK partner/distributor",
+          "UK customs expertise",
+          "Legal documentation"
+        ],
+        "dependencies": ["entry_01"]
+      },
+      {
+        "id": "uk_02",
+        "task": "Register with UK Food Standards Agency (if applicable)",
+        "description": "Register as food business operator with FSA",
+        "required_evidence": "FSA registration confirmation",
+        "estimated_time": "4-8 weeks",
+        "resources_needed": [
+          "UK regulatory consultant",
+          "Product documentation",
+          "Application fees"
+        ],
+        "dependencies": ["cert_04"]
+      },
+      {
+        "id": "uk_03",
+        "task": "Ensure compliance with UK retailer standards",
+        "description": "Meet additional requirements imposed by major UK retailers",
+        "required_evidence": "Retailer compliance documentation",
+        "estimated_time": "6-10 weeks per retailer",
+        "resources_needed": [
+          "Retailer specifications",
+          "Quality assurance team",
+          "Distributor support"
+        ],
+        "dependencies": ["cert_04", "entry_01"]
+      },
+      {
+        "id": "uk_04",
+        "task": "Prepare for seasonal demand patterns",
+        "description": "Plan for UK seasonal peaks (Christmas, summer holidays, etc.)",
+        "required_evidence": "Seasonal planning document",
+        "estimated_time": "4-6 weeks",
+        "resources_needed": [
+          "UK market calendar",
+          "Demand forecasts",
+          "Production capacity"
+        ],
+        "dependencies": ["entry_01", "entry_03"]
+      }
+    ]
+  }
+} 

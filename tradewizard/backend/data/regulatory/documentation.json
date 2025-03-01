@@ -1,0 +1,161 @@
+{
+  "export_documentation": [
+    {
+      "document": "Certificate of Origin",
+      "standard": "SADC Model",
+      "description": "Certifies the country of manufacture/production of goods",
+      "required_for": ["All export markets"],
+      "issuing_authority": "Chambers of Commerce",
+      "timeline": "2-3 business days",
+      "cost_range": "R350-R650 per certificate",
+      "validity": "Typically valid for shipment referenced only",
+      "renewal": "Required for each shipment"
+    },
+    {
+      "document": "Phytosanitary Certificate",
+      "standard": "DAFF-approved",
+      "description": "Certifies that plants/plant products have been inspected and are free from pests",
+      "required_for": ["All markets for plant products"],
+      "issuing_authority": "Department of Agriculture, Forestry and Fisheries (DAFF)",
+      "timeline": "5-7 business days",
+      "cost_range": "R420-R850 per certificate",
+      "validity": "30 days from issuance",
+      "renewal": "Required for each shipment"
+    },
+    {
+      "document": "Commercial Invoice",
+      "standard": "With HS Code declaration",
+      "description": "Invoice with detailed product information including HS codes",
+      "required_for": ["All export markets"],
+      "issuing_authority": "Exporter",
+      "timeline": "Self-generated",
+      "cost_range": "No direct cost",
+      "validity": "For the specific shipment only",
+      "renewal": "Required for each shipment"
+    },
+    {
+      "document": "Packing List",
+      "standard": "Standard international format",
+      "description": "Detailed list of package contents with weights and dimensions",
+      "required_for": ["All export markets"],
+      "issuing_authority": "Exporter",
+      "timeline": "Self-generated",
+      "cost_range": "No direct cost",
+      "validity": "For the specific shipment only",
+      "renewal": "Required for each shipment"
+    },
+    {
+      "document": "Bill of Lading / Airway Bill",
+      "standard": "Carrier-specific",
+      "description": "Receipt issued by carrier confirming shipment of goods",
+      "required_for": ["All export markets"],
+      "issuing_authority": "Shipping line / Airline",
+      "timeline": "1-2 days after vessel departure",
+      "cost_range": "Included in shipping fees",
+      "validity": "Until delivery is completed",
+      "renewal": "Required for each shipment"
+    },
+    {
+      "document": "Health Certificate",
+      "standard": "Destination market requirements",
+      "description": "Confirms products are safe for human consumption",
+      "required_for": ["Most food exports"],
+      "issuing_authority": "Department of Health / DAFF",
+      "timeline": "7-10 business days",
+      "cost_range": "R2,500-R4,500",
+      "validity": "Typically 6 months",
+      "renewal": "Every 6 months or as specified"
+    },
+    {
+      "document": "Food Label Assessment Certificate",
+      "standard": "Destination market requirements",
+      "description": "Confirms compliance with labeling regulations",
+      "required_for": ["UAE", "EU markets"],
+      "issuing_authority": "Recognized testing laboratories",
+      "timeline": "10-15 business days",
+      "cost_range": "R3,500-R7,000",
+      "validity": "Typically valid while product specifications unchanged",
+      "renewal": "When product or packaging changes"
+    }
+  ],
+  "market_specific": {
+    "uae": [
+      {
+        "document": "UAE Health Certificate",
+        "description": "Specific health certificate for UAE Ministry of Health",
+        "timeline": "10-12 business days",
+        "cost_range": "R5,000-R8,000",
+        "special_requirements": "Must be on DAFF letterhead with specific UAE format"
+      },
+      {
+        "document": "Halal Certificate",
+        "description": "Required for all food products entering UAE",
+        "timeline": "Depends on existing certification (3-8 weeks)",
+        "cost_range": "R35,000-R50,000 for initial certification",
+        "special_requirements": "Must be from UAE-recognized Halal certification body"
+      },
+      {
+        "document": "Certificate of Analysis",
+        "description": "Laboratory results confirming product meets specifications",
+        "timeline": "7-10 business days",
+        "cost_range": "R1,800-R4,500 per analysis",
+        "special_requirements": "Must be from accredited laboratory"
+      }
+    ],
+    "uk": [
+      {
+        "document": "UK Import Declaration",
+        "description": "Post-Brexit requirement for all goods entering UK",
+        "timeline": "Must be completed before shipment arrival",
+        "cost_range": "£40-£55 per declaration (via agent)",
+        "special_requirements": "Requires EORI number and proper classification"
+      },
+      {
+        "document": "UK Food Import Pre-Notification",
+        "description": "Advance notification of food imports to UK border authorities",
+        "timeline": "Must be completed at least 24 hours before arrival",
+        "cost_range": "£25-£35 per notification (via agent)",
+        "special_requirements": "Must be submitted through IPAFFS system"
+      },
+      {
+        "document": "Certificate of Analysis",
+        "description": "Laboratory results confirming product meets UK specifications",
+        "timeline": "7-10 business days",
+        "cost_range": "R1,800-R4,500 per analysis",
+        "special_requirements": "Must include allergen and nutritional analysis"
+      }
+    ]
+  },
+  "registration_requirements": [
+    {
+      "registration": "ZA Number",
+      "description": "South African export registration number",
+      "required_for": ["All food exports"],
+      "issuing_authority": "DAFF / PPECB",
+      "timeline": "8-12 weeks",
+      "cost_range": "R15,000-R25,000",
+      "validity": "Annual",
+      "renewal_process": "Annual inspection and fee payment"
+    },
+    {
+      "registration": "EORI Number (UK)",
+      "description": "Economic Operator Registration Identification for UK trade",
+      "required_for": ["UK exports"],
+      "issuing_authority": "UK HMRC",
+      "timeline": "3-5 business days",
+      "cost_range": "No direct cost",
+      "validity": "Permanent (unless details change)",
+      "renewal_process": "No renewal needed unless company details change"
+    },
+    {
+      "registration": "UAE Importer Registration",
+      "description": "Registration with UAE Food Control Authorities",
+      "required_for": ["UAE exports"],
+      "issuing_authority": "UAE Ministry of Climate Change and Environment",
+      "timeline": "4-6 weeks",
+      "cost_range": "AED 1,500-3,000 (via UAE agent)",
+      "validity": "Annual",
+      "renewal_process": "Annual renewal through UAE agent"
+    }
+  ]
+} 

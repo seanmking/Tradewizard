@@ -1,0 +1,155 @@
+{
+  "market_size": "USD 387.2M (2024)",
+  "growth_rate": "6.2% CAGR (2024-2030)",
+  "distribution_channels": [
+    {
+      "type": "Hypermarkets",
+      "examples": ["Carrefour", "Lulu"],
+      "market_share": "62%",
+      "entry_difficulty": "High",
+      "min_volumes_required": "1000+ units/SKU",
+      "lead_time": "3-6 months for listing"
+    },
+    {
+      "type": "Specialty stores",
+      "examples": ["Jones the Grocer", "Organic Foods & Cafe"],
+      "market_share": "15%",
+      "entry_difficulty": "Medium",
+      "min_volumes_required": "300-500 units/SKU",
+      "lead_time": "1-3 months for listing"
+    },
+    {
+      "type": "Online",
+      "examples": ["Amazon.ae", "Kibsons"],
+      "market_share": "23%",
+      "growth": "23% YOY",
+      "entry_difficulty": "Low",
+      "min_volumes_required": "100-200 units/SKU",
+      "lead_time": "2-4 weeks for listing"
+    }
+  ],
+  "price_benchmarks": {
+    "premium_dried_mango": {
+      "price_range": "AED 45-60/kg",
+      "high_end_retail": "AED 75-90/kg",
+      "price_sensitivity": "Medium",
+      "optimal_price_point": "AED 52/kg"
+    },
+    "specialty_nut_mixes": {
+      "price_range": "AED 55-85/250g",
+      "high_end_retail": "AED 90-120/250g",
+      "price_sensitivity": "Low",
+      "optimal_price_point": "AED 70/250g"
+    }
+  },
+  "consumer_trends": [
+    {
+      "trend": "Health-conscious",
+      "percentage": "78% seek 'natural' claims",
+      "growth": "12% YOY",
+      "opportunity": "Emphasize no-added-sugar, preservative-free messaging"
+    },
+    {
+      "trend": "Gift packaging",
+      "percentage": "40% premium price for festive packaging",
+      "growth": "15% YOY",
+      "opportunity": "Develop Ramadan and Eid special editions"
+    },
+    {
+      "trend": "Flavor innovation",
+      "percentage": "63% interest in local spice infusions",
+      "growth": "9% YOY",
+      "opportunity": "Create UAE-inspired flavors (saffron, cardamom, etc.)"
+    }
+  ],
+  "key_competitors": [
+    {
+      "name": "Al Maya",
+      "market_share": "35%",
+      "product_range": "Wide range of dried fruits and nuts",
+      "price_positioning": "Mid-range",
+      "distribution": "Own retail chain + wholesale",
+      "strengths": ["Local presence", "Strong distribution network"],
+      "weaknesses": ["Limited premium offerings", "Generic packaging"]
+    },
+    {
+      "name": "Bateel Dates",
+      "market_share": "Undefined (Premium segment leader)",
+      "product_range": "Premium dates and gourmet foods",
+      "price_positioning": "Ultra-premium",
+      "distribution": "Own boutiques + high-end retail",
+      "strengths": ["Brand prestige", "Gift market dominance"],
+      "weaknesses": ["Limited to dates category", "High price point"]
+    },
+    {
+      "name": "Outspan",
+      "market_share": "7.2% import share",
+      "product_range": "South African fruits",
+      "price_positioning": "Mid to premium",
+      "distribution": "Major retailers",
+      "strengths": ["Established South African brand", "Quality perception"],
+      "weaknesses": ["Limited marketing", "Inconsistent availability"]
+    }
+  ],
+  "seasonality": {
+    "peak_demand": "Nov-Feb (tourist season + National Day gifting)",
+    "low_period": "Jun-Aug (summer slowdown)",
+    "ramadan_effect": "20-30% sales increase during Ramadan month",
+    "promotional_calendar": {
+      "dubai_shopping_festival": "Jan-Feb",
+      "ramadan": "Variable (lunar calendar)",
+      "national_day": "December 2",
+      "dubai_food_festival": "February-March"
+    }
+  },
+  "niche_opportunities": [
+    {
+      "segment": "Organic certified",
+      "growth_rate": "28% CAGR",
+      "market_size": "USD 42M",
+      "entry_barrier": "Medium (certification required)",
+      "profit_margin": "25-35% higher than conventional",
+      "key_channels": ["Organic Foods & Cafe", "Kibsons", "Waitrose"]
+    },
+    {
+      "segment": "Ramadan-specific assortments",
+      "market_size": "AED 220M seasonal market",
+      "entry_barrier": "Low (packaging adaptation)",
+      "profit_margin": "30-45% higher during season",
+      "key_channels": ["Gift shops", "Hypermarkets", "Corporate orders"]
+    }
+  ],
+  "regulatory_requirements": {
+    "import_license": "Required via UAE agent",
+    "labeling": [
+      "Arabic/English bilingual",
+      "Nutritional facts mandatory",
+      "Ingredients list with allergens highlighted",
+      "Production/expiry dates (day/month/year)"
+    ],
+    "certifications": [
+      "ESMA registration",
+      "Halal certification recommended",
+      "Health certificates from country of origin"
+    ],
+    "documentation": [
+      "Certificate of Origin",
+      "Commercial Invoice",
+      "Packing List",
+      "Airway Bill/Bill of Lading",
+      "Food Label Assessment Certificate"
+    ],
+    "tariffs": {
+      "dried_fruits": "5% customs duty + 5% VAT",
+      "gift_sets": "5% customs duty + 5% VAT"
+    },
+    "timeline": "4-6 weeks for initial approvals"
+  },
+  "entry_strategy_recommendations": [
+    "Partner with UAE-based distributor with existing retail relationships",
+    "Start with online channels (Amazon.ae, Noon) for market testing",
+    "Develop Ramadan gift boxes for Q1 2026 sales cycle",
+    "Focus on health and natural messaging on packaging",
+    "Participate in Gulfood Exhibition (February) for distributor meetings"
+  ]
+} 
