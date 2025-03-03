@@ -26,6 +26,9 @@ function cleanup_processes() {
     # Kill any existing Python processes on port 5002
     lsof -ti:5002 | xargs kill -9 2>/dev/null
     
+    # Kill any existing Node.js processes on port 3001 (mock server)
+    lsof -ti:3001 | xargs kill -9 2>/dev/null
+    
     echo_success "Process cleanup completed"
 }
 
@@ -67,6 +70,26 @@ cleanup_processes
 
 # Start Ollama
 start_ollama
+
+# Start the mock server
+echo_info "Starting mock server..."
+cd tradewizard
+node mock-server.js &
+MOCK_SERVER_PID=$!
+
+# Wait a bit for the mock server to start
+sleep 2
+
+# Check if the mock server is running
+if ! kill -0 $MOCK_SERVER_PID 2>/dev/null; then
+    echo_error "Mock server failed to start."
+    exit 1
+fi
+
+echo_success "Mock server started successfully (PID: $MOCK_SERVER_PID)"
+
+# Return to the root directory
+cd ..
 
 # Check if backend dependencies are installed
 echo_info "Checking backend dependencies..."
@@ -162,14 +185,15 @@ echo_success "TradeWizard is now running!"
 echo_info "Services are available at:"
 echo_info "Backend: http://localhost:5002"
 echo_info "Frontend: http://localhost:3000"
+echo_info "Mock Server: http://localhost:3001"
 echo_info "Press Ctrl+C to stop all servers"
 
 # Function to handle cleanup on exit
 function cleanup_on_exit() {
     echo_info "Shutting down..."
     
-    # Kill the backend and frontend servers
-    kill $BACKEND_PID $FRONTEND_PID 2>/dev/null
+    # Kill the backend, frontend, and mock servers
+    kill $BACKEND_PID $FRONTEND_PID $MOCK_SERVER_PID 2>/dev/null
     
     # Cleanup any remaining processes on the ports
     cleanup_processes

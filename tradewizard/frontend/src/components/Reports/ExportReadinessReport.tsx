@@ -1,16 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './ExportReadinessReport.css';
-
-interface MarketData {
-  market_size: string;
-  growth_rate: string;
-  key_trends: string[];
-  regulatory_requirements: string[];
-}
-
-interface MarketInsights {
-  [key: string]: MarketData;
-}
+import MarketService, { MarketData } from '../../services/MarketService';
 
 interface ExportReadinessReportProps {
   userData: Record<string, any>;
@@ -19,10 +9,71 @@ interface ExportReadinessReportProps {
 }
 
 const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData, onClose, onGoToDashboard }) => {
-  // Mock data for the report
+  const [marketInsights, setMarketInsights] = useState<{ [key: string]: MarketData }>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedMarketsList, setSelectedMarketsList] = useState<string[]>([]);
+
+  useEffect(() => {
+    const loadMarketData = async () => {
+      setLoading(true);
+      
+      // Determine which markets to load
+      let selectedMarkets = [];
+      
+      // Handle different ways the selected markets could be stored
+      if (userData.selectedMarkets && Array.isArray(userData.selectedMarkets)) {
+        selectedMarkets = userData.selectedMarkets;
+      } else if (userData.selected_markets) {
+        // Handle if it's a string that needs parsing
+        if (typeof userData.selected_markets === 'string') {
+          try {
+            selectedMarkets = JSON.parse(userData.selected_markets);
+          } catch {
+            selectedMarkets = userData.selected_markets.split(',').map((m: string) => m.trim());
+          }
+        } else if (Array.isArray(userData.selected_markets)) {
+          selectedMarkets = userData.selected_markets;
+        }
+      }
+      
+      // Log for debugging
+      console.log('Selected markets to load:', selectedMarkets);
+      
+      if (selectedMarkets.length === 0) {
+        // Default markets for testing if none are selected
+        selectedMarkets = ['United Kingdom', 'United States', 'European Union', 'United Arab Emirates'];
+      }
+      
+      // Store the selected markets in state regardless of API success
+      setSelectedMarketsList(selectedMarkets);
+      
+      try {
+        // Fetch data for all selected markets using the MarketService
+        const insights = await MarketService.fetchMultipleMarkets(selectedMarkets);
+        console.log('Fetched market insights:', insights);
+        setMarketInsights(insights);
+      } catch (error) {
+        console.error('Error loading market data:', error);
+        // Set a default error state
+        setMarketInsights({
+          'Error': {
+            market_size: 'Failed to load data',
+            growth_rate: 'Failed to load data',
+            key_trends: ['Please try again later'],
+            regulatory_requirements: ['Data unavailable']
+          }
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadMarketData();
+  }, [userData]);
+
+  // Mock data for the report (non-market data still hard-coded for now)
   const reportData = {
     companyName: userData.companyName || 'Global Fresh SA',
-    selectedMarkets: userData.selectedMarkets || ['European Union', 'United Arab Emirates'],
     strengths: [
       'HACCP Level 1 certification',
       'Premium product positioning',
@@ -56,144 +107,194 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData,
         description: 'Develop standardized procedures for managing export documentation including certificates of origin, phytosanitary certificates, and commercial invoices.',
         timeframe: '1 month'
       }
-    ],
-    market_insights: {
-      'European Union': {
-        market_size: '€42.7 billion (dried fruits & nuts)',
-        growth_rate: '5.8% annually',
-        key_trends: [
-          'Growing demand for ethically-sourced products',
-          'Premium positioning for exotic dried fruits',
-          'Increasing interest in sustainable packaging',
-          'Rising consumer awareness of health benefits'
-        ],
-        regulatory_requirements: [
-          'EU Food Safety Regulations (EC 178/2002)',
-          'Packaging and labeling directives',
-          'Maximum residue levels compliance',
-          'Sustainability reporting for larger operations'
-        ]
-      },
-      'United Arab Emirates': {
-        market_size: '$1.2 billion (dried fruits & nuts)',
-        growth_rate: '7.2% annually',
-        key_trends: [
-          'Premium imported food products gaining market share',
-          'Strong demand for healthy snacking options',
-          'Growing retail sector with international chains',
-          'Increasing focus on food security and quality imports'
-        ],
-        regulatory_requirements: [
-          'Halal certification',
-          'UAE.S GSO 9/2013 labeling standard',
-          'Food import permits',
-          'Product registration with municipalities'
-        ]
-      }
-    } as MarketInsights
+    ]
   };
 
+  // Determine which markets to display (use the keys from the fetched insights)
+  const selectedMarkets = Object.keys(marketInsights);
+
+  if (loading) {
+    return (
+      <div className="export-readiness-report">
+        <h1>Loading Market Insights...</h1>
+        <p>Please wait while we prepare your Export Readiness Report.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="report-modal">
-      <div className="report-container">
-        <div className="report-header">
-          <h1>Export Readiness Report</h1>
-          <button className="close-button" onClick={onClose}>×</button>
+    <div className="export-readiness-report">
+      <div className="report-header">
+        <h1>Export Readiness Report</h1>
+        <div className="company-info">
+          <h2>{reportData.companyName}</h2>
+          <p>Generated on {new Date().toLocaleDateString()}</p>
         </div>
-        
-        <div className="report-content">
-          <div className="report-section company-overview">
-            <h2>Company Overview</h2>
-            <p><strong>Company:</strong> {reportData.companyName}</p>
-            <p><strong>Target Markets:</strong> {reportData.selectedMarkets.join(', ')}</p>
+      </div>
+
+      <div className="report-section">
+        <h3>Selected Markets</h3>
+        <div className="markets-list">
+          {selectedMarketsList.length > 0 ? (
+            selectedMarketsList.map((market, index) => (
+              <div key={index} className="market-item">
+                <span className="market-name">{market}</span>
+              </div>
+            ))
+          ) : (
+            <p>No markets selected</p>
+          )}
+        </div>
+      </div>
+
+      <div className="report-section">
+        <h3>Export Readiness Assessment</h3>
+        <div className="assessment-grid">
+          <div className="assessment-column">
+            <h4>Strengths</h4>
+            <ul>
+              {reportData.strengths.map((strength, index) => (
+                <li key={index}>{strength}</li>
+              ))}
+            </ul>
           </div>
-          
-          <div className="report-section strengths-weaknesses">
-            <div className="strengths">
-              <h3>Strengths</h3>
-              <ul>
-                {reportData.strengths.map((strength: string, index: number) => (
-                  <li key={index}>{strength}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="areas-improvement">
-              <h3>Areas for Improvement</h3>
-              <ul>
-                {reportData.areas_for_improvement.map((area: string, index: number) => (
-                  <li key={index}>{area}</li>
-                ))}
-              </ul>
-            </div>
+          <div className="assessment-column">
+            <h4>Areas for Improvement</h4>
+            <ul>
+              {reportData.areas_for_improvement.map((area, index) => (
+                <li key={index}>{area}</li>
+              ))}
+            </ul>
           </div>
-          
-          <div className="report-section market-insights">
-            <h2>Market Insights</h2>
-            {reportData.selectedMarkets.map((market: string) => {
-              const marketData = reportData.market_insights[market];
-              return (
-                <div className="market-card" key={market}>
-                  <h3>{market}</h3>
-                  <div className="market-stats">
-                    <div className="stat">
-                      <span className="stat-label">Market Size</span>
-                      <span className="stat-value">{marketData.market_size}</span>
-                    </div>
-                    <div className="stat">
-                      <span className="stat-label">Growth Rate</span>
-                      <span className="stat-value">{marketData.growth_rate}</span>
-                    </div>
+        </div>
+      </div>
+
+      <div className="report-section">
+        <h3>Market Insights</h3>
+        {Object.keys(marketInsights).length > 0 ? (
+          <div className="market-insights">
+            {Object.keys(marketInsights).map((market, index) => (
+              <div key={index} className="market-insight-card">
+                <h4>{market}</h4>
+                <div className="market-data">
+                  {marketInsights[market]?.market_overview && (
+                    <>
+                      <div className="data-row">
+                        <span className="data-label">Population:</span>
+                        <span className="data-value">{marketInsights[market]?.market_overview?.population || 'N/A'}</span>
+                      </div>
+                      <div className="data-row">
+                        <span className="data-label">GDP:</span>
+                        <span className="data-value">{marketInsights[market]?.market_overview?.gdp || 'N/A'}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {marketInsights[market]?.food_market_data && (
+                    <>
+                      <div className="data-row">
+                        <span className="data-label">Market Size:</span>
+                        <span className="data-value">{marketInsights[market]?.food_market_data?.market_size || 'N/A'}</span>
+                      </div>
+                      <div className="data-row">
+                        <span className="data-label">Growth Rate:</span>
+                        <span className="data-value">{marketInsights[market]?.food_market_data?.growth_rate || 'N/A'}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {/* Fallback to legacy fields if needed */}
+                  {!marketInsights[market]?.food_market_data && (
+                    <>
+                      <div className="data-row">
+                        <span className="data-label">Market Size:</span>
+                        <span className="data-value">{marketInsights[market]?.market_size || 'N/A'}</span>
+                      </div>
+                      <div className="data-row">
+                        <span className="data-label">Growth Rate:</span>
+                        <span className="data-value">{marketInsights[market]?.growth_rate || 'N/A'}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  <div className="data-section">
+                    <span className="data-label">Key Trends:</span>
+                    <ul>
+                      {(() => {
+                        // Get trends from either source
+                        const trends = marketInsights[market]?.key_trends || 
+                          (marketInsights[market]?.food_market_data?.key_trends) || [];
+                        
+                        if (trends && trends.length > 0) {
+                          return trends.slice(0, 4).map((trend: any, i: number) => (
+                            <li key={i}>{typeof trend === 'string' ? trend : JSON.stringify(trend)}</li>
+                          ));
+                        }
+                        return <li>No trend data available</li>;
+                      })()}
+                    </ul>
                   </div>
                   
-                  <div className="market-details">
-                    <div className="trends">
-                      <h4>Key Trends</h4>
-                      <ul>
-                        {marketData.key_trends.map((trend: string, index: number) => (
-                          <li key={index}>{trend}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="regulations">
-                      <h4>Regulatory Requirements</h4>
-                      <ul>
-                        {marketData.regulatory_requirements.map((req: string, index: number) => (
-                          <li key={index}>{req}</li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div className="data-section">
+                    <span className="data-label">Regulatory Requirements:</span>
+                    <ul>
+                      {(() => {
+                        // Get regulatory requirements from various possible sources
+                        const reqs = marketInsights[market]?.regulatory_requirements || 
+                          (marketInsights[market]?.regulatory_environment?.import_regulations) || [];
+                        
+                        if (reqs && reqs.length > 0) {
+                          return reqs.slice(0, 4).map((req: any, i: number) => (
+                            <li key={i}>{typeof req === 'string' ? req : JSON.stringify(req)}</li>
+                          ));
+                        }
+                        return <li>No regulatory data available</li>;
+                      })()}
+                    </ul>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
-          
-          <div className="report-section next-steps">
-            <h2>Recommended Next Steps</h2>
-            <div className="steps-timeline">
-              {reportData.next_steps.map((step, index) => (
-                <div className="step-item" key={index}>
-                  <div className="step-number">{index + 1}</div>
-                  <div className="step-content">
-                    <h4>{step.title}</h4>
-                    <p>{step.description}</p>
-                    <span className="timeframe">Timeframe: {step.timeframe}</span>
-                  </div>
-                </div>
-              ))}
+        ) : (
+          <div className="error-message">
+            <p className="notice-title">Market Data Temporarily Unavailable</p>
+            <p>We're currently unable to access detailed market intelligence for your selected markets:</p>
+            <p className="selected-markets-list">{selectedMarketsList.join(', ')}</p>
+            <p>Our team is working to restore this data, and we'll update your dashboard with the complete market insights at our earliest convenience.</p>
+            <p>In the meantime, you can still review your export readiness assessment and recommended next steps below.</p>
+          </div>
+        )}
+      </div>
+
+      <div className="report-section">
+        <h3>Recommended Next Steps</h3>
+        <div className="next-steps">
+          {reportData.next_steps.map((step, index) => (
+            <div key={index} className="next-step-card">
+              <div className="next-step-header">
+                <h4>{step.title}</h4>
+                <span className="timeframe">{step.timeframe}</span>
+              </div>
+              <p>{step.description}</p>
             </div>
-          </div>
+          ))}
         </div>
-        
-        <div className="report-footer">
-          <button className="download-pdf-button">Download PDF Report</button>
-          {onGoToDashboard ? (
-            <button className="go-to-dashboard-button" onClick={onGoToDashboard}>
-              Go to your Dashboard
-            </button>
-          ) : (
-            <button className="close-report-button" onClick={onClose}>Close Report</button>
+      </div>
+
+      <div className="promotional-message">
+        <p>
+          Ready to take your South African exports to the next level? 
+          Our team of trade specialists can help you navigate international markets with confidence.
+          <strong> Upgrade to Trade King Premium for personalized market analysis and export support services.</strong>
+        </p>
+      </div>
+
+      <div className="report-footer">
+        <div className="button-container">
+          <button className="close-button" onClick={onClose}>Back to Assessment</button>
+          {onGoToDashboard && (
+            <button className="dashboard-button" onClick={onGoToDashboard}>Go to Dashboard</button>
           )}
         </div>
       </div>
