@@ -59,6 +59,7 @@ interface UserData {
 interface MarketIntelligenceDashboardProps {
   dashboardData: DashboardData;
   userData: UserData;
+  onClose?: () => void;
 }
 
 const ConfidenceIndicator: React.FC<{ score: number }> = ({ score }) => {
@@ -292,7 +293,8 @@ const TimelinePanel: React.FC<{
 
 const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = ({
   dashboardData,
-  userData
+  userData,
+  onClose
 }) => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     overview: true,
@@ -317,8 +319,11 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
   return (
     <div className="market-intelligence-dashboard">
       <div className="dashboard-header">
-        <h2>Export Potential Analysis</h2>
-        <p>Analyzing your business for export opportunities</p>
+        <h2>Market Intelligence Dashboard</h2>
+        <p>Export opportunities for {userData.business_name || 'your business'}</p>
+        {onClose && (
+          <button className="close-dashboard-button" onClick={onClose}>×</button>
+        )}
       </div>
       
       <div className="dashboard-content">
