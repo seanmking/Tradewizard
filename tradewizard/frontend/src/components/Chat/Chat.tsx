@@ -112,16 +112,22 @@ const Chat = () => {
     return () => clearTimeout(timeoutId);
   }, [isLoading, showVerificationForm]);
 
-  // Scroll to bottom of messages
+  // Scroll to better position when new messages appear
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
-      // If there's a new assistant message that just appeared, scroll to show it at the top
+      // Find the last assistant message or UI component that should be shown
       const assistantMessages = document.querySelectorAll('.assistant-message');
-      if (assistantMessages.length > 0) {
+      const marketSelectionPanel = document.querySelector('.market-selection-panel');
+      
+      if (marketSelectionPanel) {
+        // If there's a market selection panel, scroll to show it at the top
+        marketSelectionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (assistantMessages.length > 0) {
+        // If there are assistant messages, scroll to show the last one from the top
         const lastAssistantMessage = assistantMessages[assistantMessages.length - 1];
         lastAssistantMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
-        // Default behavior - scroll to bottom
+        // Default fallback - scroll to bottom
         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
       }
     }
