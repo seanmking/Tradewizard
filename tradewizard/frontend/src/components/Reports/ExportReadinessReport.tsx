@@ -127,22 +127,6 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData,
             </div>
           </div>
           
-          <div className="report-section next-steps">
-            <h2>Recommended Next Steps</h2>
-            <div className="steps-timeline">
-              {reportData.next_steps.map((step, index) => (
-                <div className="step-item" key={index}>
-                  <div className="step-number">{index + 1}</div>
-                  <div className="step-content">
-                    <h4>{step.title}</h4>
-                    <p>{step.description}</p>
-                    <span className="timeframe">Timeframe: {step.timeframe}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
           <div className="report-section market-insights">
             <h2>Market Insights</h2>
             {reportData.selectedMarkets.map((market: string) => {
@@ -183,6 +167,22 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData,
                 </div>
               );
             })}
+          </div>
+          
+          <div className="report-section next-steps">
+            <h2>Recommended Next Steps</h2>
+            <div className="steps-timeline">
+              {reportData.next_steps.map((step, index) => (
+                <div className="step-item" key={index}>
+                  <div className="step-number">{index + 1}</div>
+                  <div className="step-content">
+                    <h4>{step.title}</h4>
+                    <p>{step.description}</p>
+                    <span className="timeframe">Timeframe: {step.timeframe}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         
