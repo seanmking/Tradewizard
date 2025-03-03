@@ -231,17 +231,17 @@ const InitialAssessmentFlow: React.FC = () => {
   };
   
   // Handle account creation success
-  const handleAccountCreationSuccess = (username: string) => {
+  const handleAccountCreationSuccess = (email: string) => {
     setShowAccountCreation(false);
     setAccountCreated(true);
-    setUsername(username);
+    setUsername(email);
     
     // Add a success message
     setMessages(prev => [
       ...prev,
       {
         role: 'assistant',
-        content: `Account created successfully! Welcome, ${username}. Your export readiness report is now available.`,
+        content: `Account created successfully! Welcome, ${email.split('@')[0]}. Your export readiness report is now available.`,
         timestamp: Date.now(),
         metadata: { step: 'account_created' }
       }

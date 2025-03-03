@@ -7,7 +7,7 @@ interface AccountCreationProps {
 }
 
 const AccountCreation: React.FC<AccountCreationProps> = ({ onSuccess, onCancel }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +20,7 @@ const AccountCreation: React.FC<AccountCreationProps> = ({ onSuccess, onCancel }
     setError('');
     
     // Validate form
-    if (!username || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword) {
       setError('All fields are required');
       return;
     }
@@ -30,17 +30,32 @@ const AccountCreation: React.FC<AccountCreationProps> = ({ onSuccess, onCancel }
       return;
     }
     
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
     try {
       setIsLoading(true);
       
-      // Call API to create account
+      // For POC, bypass the API call and simulate success
+      setTimeout(() => {
+        // Account created successfully
+        onSuccess(email);
+        setIsLoading(false);
+      }, 1000);
+      
+      /* 
+      // This code would be used in production
       const response = await fetch('/api/user/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username,
+          username: email,
           password,
           confirm_password: confirmPassword,
         }),
@@ -50,15 +65,15 @@ const AccountCreation: React.FC<AccountCreationProps> = ({ onSuccess, onCancel }
       
       if (response.ok && data.success) {
         // Account created successfully
-        onSuccess(username);
+        onSuccess(email);
       } else {
         // Handle error
         setError(data.message || 'Failed to create account');
       }
+      */
     } catch (err) {
       setError('An error occurred. Please try again.');
       console.error('Account creation error:', err);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -73,13 +88,13 @@ const AccountCreation: React.FC<AccountCreationProps> = ({ onSuccess, onCancel }
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="email">Email address (this will be your username moving forward)</label>
             <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
               disabled={isLoading}
             />
           </div>
