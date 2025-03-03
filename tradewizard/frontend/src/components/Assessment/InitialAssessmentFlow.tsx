@@ -236,12 +236,16 @@ const InitialAssessmentFlow: React.FC = () => {
     setAccountCreated(true);
     setUsername(email);
     
+    // Extract username from email and capitalize first letter
+    const username = email.split('@')[0];
+    const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
+    
     // Add a success message
     setMessages(prev => [
       ...prev,
       {
         role: 'assistant',
-        content: `Account created successfully! Welcome, ${email.split('@')[0]}. Your export readiness report is now available.`,
+        content: `Account created successfully! Welcome, ${capitalizedUsername}. Your export readiness report is now available.`,
         timestamp: Date.now(),
         metadata: { step: 'account_created' }
       }
