@@ -114,7 +114,17 @@ const Chat = () => {
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      // If there's a new assistant message that just appeared, scroll to show it at the top
+      const assistantMessages = document.querySelectorAll('.assistant-message');
+      if (assistantMessages.length > 0) {
+        const lastAssistantMessage = assistantMessages[assistantMessages.length - 1];
+        lastAssistantMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Default behavior - scroll to bottom
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   };
 
   React.useEffect(() => {
