@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import Chat from './components/Chat/Chat';
-import SideKick from './components/SideKick/SideKick';
 import './App.css';
+import Chat from './components/Chat/Chat';
+import { SideKick } from './components/SideKick/SideKick';
+import InitialAssessmentFlow from './components/Assessment/InitialAssessmentFlow';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState<'assessment' | 'sidekick' | 'documents' | 'markets' | 'profile'>('assessment');
@@ -78,7 +79,7 @@ const App = () => {
             </div>
             
             <div className="chat-wrapper">
-              <Chat />
+              <InitialAssessmentFlow />
             </div>
           </>
         )}

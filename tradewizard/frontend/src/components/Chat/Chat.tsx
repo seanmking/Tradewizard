@@ -88,7 +88,7 @@ const Chat = () => {
   const [assessmentState, setAssessmentState] = React.useState<AssessmentState>({
     currentStep: 'STEP_1_INTRODUCTION',
     completedSteps: [],
-    progress: { completed: 0, total: 4 },
+    progress: { completed: 0, total: 8 },
     extractedInfo: {}
   });
   

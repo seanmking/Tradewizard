@@ -12,6 +12,7 @@
   width: 100%;
   max-width: 800px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative; /* Added to ensure proper positioning of child elements */
 }
 
 .chat-header {
@@ -61,6 +62,8 @@
   flex-direction: column;
   gap: 8px;
   min-height: 200px;
+  scroll-behavior: smooth; /* Added for smooth scrolling */
+  max-height: calc(100% - 60px); /* Ensure it doesn't overflow the container */
 }
 
 .message {
@@ -70,6 +73,8 @@
   position: relative;
   line-height: 1.5;
   font-size: 15px;
+  margin-bottom: 12px; /* Added spacing between messages */
+  white-space: pre-wrap; /* Preserve line breaks */
 }
 
 .user-message {
@@ -84,6 +89,16 @@
   background-color: white;
   color: #1a1a1a;
   border-bottom-left-radius: 4px;
+  /* Improved paragraph layout for assistant messages */
+  text-align: left;
+}
+
+.assistant-message p {
+  margin: 0 0 10px 0; /* Add spacing between paragraphs */
+}
+
+.assistant-message p:last-child {
+  margin-bottom: 0; /* Remove margin from last paragraph */
 }
 
 .message-content {
@@ -147,7 +162,7 @@
 }
 
 .chat-input button:disabled {
-  background-color: #a5a5a5;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -190,6 +205,42 @@
   font-size: 14px;
 }
 
+/* Dropdown styles */
+.dropdown-container {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
+
+.chat-dropdown {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #333;
+  background-color: #f9f9f9;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.chat-dropdown:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.chat-dropdown option {
+  padding: 8px;
+}
+
+.dropdown-submit-button {
+  min-width: 100px;
+}
+
 @media (max-width: 768px) {
   .chat-container {
     height: calc(100vh - 240px);
@@ -217,4 +268,45 @@
   .chat-input button {
     padding: 8px 16px;
   }
+  
+  .dropdown-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .dropdown-submit-button {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* Create account button styling */
+.create-account-button {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.create-account-button:hover {
+  background-color: #4338ca;
+}
+
+/* Readiness report link styling */
+.readiness-report-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: #4f46e5;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.readiness-report-link:hover {
+  color: #4338ca;
 } 

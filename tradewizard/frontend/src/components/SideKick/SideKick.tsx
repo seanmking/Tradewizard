@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { InitialInputForm } from './InitialInputForm';
-import { WhatWeKnowDashboard } from './WhatWeKnowDashboard';
-import { VerificationForm } from './VerificationForm';
-import { ExportPlan } from './ExportPlan';
+import WhatWeKnowDashboard from './WhatWeKnowDashboard';
+import VerificationForm from './VerificationForm';
+import ExportPlan from './ExportPlan';
 import { SimplifiedSideKickService, SimplifiedDashboard, SimplifiedExportPlanType } from '../../services/simplifiedSidekick';
 import './SideKick.css';
 

@@ -1,0 +1,361 @@
+.initial-assessment-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+.chat-container.with-dashboard {
+  flex: 0.4;
+  min-width: 350px;
+  border-right: 1px solid #eaeaea;
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #f5f7fb;
+  scroll-behavior: smooth;
+  max-height: calc(100vh - 350px);
+  min-height: 400px;
+}
+
+.message {
+  max-width: 85%;
+  padding: 14px 18px;
+  border-radius: 12px;
+  line-height: 1.5;
+  font-size: 15px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.message p {
+  margin: 0 0 10px 0;
+}
+
+.message p:last-child {
+  margin-bottom: 0;
+}
+
+.user-message {
+  align-self: flex-end;
+  background-color: #4f46e5;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background-color: white;
+  color: #333;
+  border-bottom-left-radius: 4px;
+}
+
+.message-text {
+  white-space: pre-wrap;
+}
+
+.chat-input-container {
+  border-top: 1px solid #eaeaea;
+  padding: 16px;
+  background-color: #fff;
+}
+
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: white;
+  border-radius: 12px;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.typing-indicator span {
+  height: 8px;
+  width: 8px;
+  margin: 0 2px;
+  background-color: #9e9ea1;
+  border-radius: 50%;
+  display: inline-block;
+  animation: bounce 1.3s linear infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+.dashboard-container {
+  flex: 0.6;
+  overflow: hidden;
+  animation: slideIn 0.5s ease;
+  background-color: #f9fafc;
+}
+
+@keyframes slideIn {
+  from { flex: 0; }
+  to { flex: 0.6; }
+}
+
+.market-selector {
+  margin-top: 16px;
+  animation: fadeIn 0.4s ease;
+}
+
+.market-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.market-option {
+  padding: 15px;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.market-option:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.market-option h4 {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.market-option p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.confidence-indicator {
+  height: 4px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.confidence-level {
+  height: 100%;
+  background-color: #4caf50;
+}
+
+/* Make sure the chat always starts at the top */
+.messages-container:empty::before {
+  content: "";
+  display: block;
+  height: 1px;
+}
+
+.market-select-button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.market-select-button:hover {
+  background-color: #2980b9;
+}
+
+.market-select-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Ensure ChatInput component styling is consistent */
+.chat-input {
+  display: flex;
+  width: 100%;
+}
+
+.chat-input form {
+  display: flex;
+  width: 100%;
+}
+
+.chat-input textarea {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  resize: none;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.chat-input textarea:focus {
+  border-color: #3498db;
+}
+
+.chat-input button {
+  margin-left: 8px;
+  padding: 0 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.chat-input button:hover {
+  background-color: #2980b9;
+}
+
+.chat-input button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .initial-assessment-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .chat-container.with-dashboard {
+    flex: 1;
+    min-width: 100%;
+    max-height: 50vh;
+    border-right: none;
+    border-bottom: 1px solid #eaeaea;
+  }
+  
+  .dashboard-container {
+    flex: 1;
+    min-height: 50vh;
+  }
+}
+
+.market-selection-container {
+  margin-top: 16px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.account-creation-container {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.create-account-button-container {
+  margin-top: 12px;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+}
+
+.readiness-report-link-container {
+  margin-top: 12px;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+}
+
+.create-account-button {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.create-account-button:hover {
+  background-color: #4338ca;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(79, 70, 229, 0.3);
+}
+
+.readiness-report-link {
+  display: inline-block;
+  color: #4f46e5;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.readiness-report-link:hover {
+  color: #4338ca;
+}
+
+.assessment-flow-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Blue overlay button styling */
+.blue-overlay-button {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #4f46e5;
+  color: white;
+  text-align: center;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+  z-index: 10;
+}
+
+.blue-overlay-button:hover {
+  background-color: #4338ca;
+} 

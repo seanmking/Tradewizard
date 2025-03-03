@@ -1,0 +1,73 @@
+{
+  "sean@freshglobalsa.co.za": {
+    "user_id": "6de1ab79-9e7c-4318-938e-9dd4c773f623",
+    "username": "sean@freshglobalsa.co.za",
+    "password_hash": "72da53df3b301b7cc9098ab3c2c1f9da74bf98145f4c2883f886ee31392f805c",
+    "salt": "ae899017d41546b696969e9cc5d89ebf",
+    "created_at": "2025-03-03T10:53:50.170954",
+    "assessment_data": {
+      "business_name": {
+        "confidence": 1,
+        "text": "Global Fresh SA"
+      },
+      "business_name_confidence": 1,
+      "business_name_text": "Global Fresh SA",
+      "confidence": {
+        "confidence": 0.8,
+        "text": 1
+      },
+      "confidence_confidence": 0.8,
+      "confidence_text": 1,
+      "export_experience": {
+        "confidence": 0.8,
+        "text": "No previous export activities"
+      },
+      "export_experience_confidence": 0.8,
+      "export_experience_text": "No previous export activities",
+      "export_motivation": {
+        "confidence": 0.8,
+        "text": "With so many South Africans abroad, the opportunity in some diaspora markets should allow us to get some export opportunities."
+      },
+      "export_motivation_confidence": 0.8,
+      "export_motivation_text": "With so many South Africans abroad, the opportunity in some diaspora markets should allow us to get some export opportunities.",
+      "first_name": {
+        "confidence": 1,
+        "text": "Sean"
+      },
+      "first_name_confidence": 1,
+      "first_name_text": "Sean",
+      "last_name": {
+        "confidence": 1,
+        "text": "King"
+      },
+      "last_name_confidence": 1,
+      "last_name_text": "King",
+      "role": {
+        "confidence": 1,
+        "text": "COO"
+      },
+      "role_confidence": 1,
+      "role_text": "COO",
+      "selected_markets": {
+        "confidence": 0.8,
+        "text": "European Union, United Arab Emirates"
+      },
+      "selected_markets_confidence": 0.8,
+      "selected_markets_text": "European Union, United Arab Emirates",
+      "website_url": {
+        "confidence": 0.8,
+        "text": "https://globalfreshsa.co.za"
+      },
+      "website_url_confidence": 0.8,
+      "website_url_text": "https://globalfreshsa.co.za"
+    }
+  },
+  "sean@globalfreshsa.co.za": {
+    "user_id": "e26e29f0-8007-457c-add8-7f3f3a54de29",
+    "username": "sean@globalfreshsa.co.za",
+    "password_hash": "ca657f6940ca1e1dcb0f93a802d76e0b743267365a7139123cf66eb75d258c89",
+    "salt": "18351331f936408ea0313261bc02488e",
+    "created_at": "2025-03-03T11:17:50.384669",
+    "assessment_data": {}
+  }
+}

@@ -265,19 +265,11 @@ export interface Market {
   selected?: boolean;
 }
 
-export interface RegulatoryRequirements {
+export interface SimpleRegulatoryRequirements {
   certifications: string[];
   import_duties: string;
   documentation: string[];
   confidence_score: number;
-}
-
-export interface Dashboard {
-  company_info: CompanyInfo;
-  market_intelligence: {
-    potential_markets: Market[];
-  };
-  regulatory_requirements: RegulatoryRequirements;
 }
 
 export interface ExportPlanSections {
@@ -301,7 +293,7 @@ export interface ExportPlanType {
 export const SideKickService = {
   processInitialInput: async (companyName: string, businessType: string): Promise<Dashboard> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/sidekick/process-initial-input`, {
+      const response = await axios.post<{dashboard: Dashboard}>(`${API_BASE_URL}/sidekick/process-initial-input`, {
         company_name: companyName,
         business_type: businessType
       });
@@ -314,7 +306,7 @@ export const SideKickService = {
 
   generateExportPlan: async (dashboard: Dashboard): Promise<ExportPlanType> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/sidekick/generate-export-plan`, {
+      const response = await axios.post<{plan: ExportPlanType}>(`${API_BASE_URL}/sidekick/generate-export-plan`, {
         dashboard
       });
       return response.data.plan;
@@ -355,12 +347,12 @@ export interface SimplifiedRegulatoryRequirements {
   confidence_score: number;
 }
 
-export interface SimplifiedDashboard {
-  company_info: SimplifiedCompanyInfo;
+export interface SimplifiedDashboardData {
+  company_info: CompanyInfo;
   market_intelligence: {
-    potential_markets: SimplifiedMarket[];
+    potential_markets: Market[];
   };
-  regulatory_requirements: SimplifiedRegulatoryRequirements;
+  regulatory_requirements: SimpleRegulatoryRequirements;
 }
 
 export interface SimplifiedExportPlanSections {
@@ -382,25 +374,25 @@ export interface SimplifiedExportPlanType {
 
 // Service for the simplified SideKick implementation
 export const SimplifiedSideKickService = {
-  processInitialInput: async (companyName: string, businessType: string): Promise<SimplifiedDashboard> => {
+  processInitialInput: async (companyName: string, businessType: string): Promise<any> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/sidekick/process-initial-input`, {
+      const response = await axios.post<{dashboard: any}>(`${API_BASE_URL}/sidekick/process-initial-input`, {
         company_name: companyName,
         business_type: businessType
       });
-      return response.data.dashboard as SimplifiedDashboard;
+      return response.data.dashboard;
     } catch (error) {
       console.error('Error processing initial input:', error);
       throw error;
     }
   },
 
-  generateExportPlan: async (dashboard: SimplifiedDashboard): Promise<SimplifiedExportPlanType> => {
+  generateExportPlan: async (dashboard: any): Promise<any> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/sidekick/generate-export-plan`, {
+      const response = await axios.post<{plan: any}>(`${API_BASE_URL}/sidekick/generate-export-plan`, {
         dashboard
       });
-      return response.data.plan as SimplifiedExportPlanType;
+      return response.data.plan;
     } catch (error) {
       console.error('Error generating export plan:', error);
       throw error;
