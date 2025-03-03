@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Dashboard } from '../../services/sidekick';
+import { SimplifiedDashboard, SimplifiedMarket } from '../../services/simplifiedSidekick';
 import './WhatWeKnowDashboard.css';
 
 interface WhatWeKnowDashboardProps {
-  dashboard: Dashboard;
+  dashboard: SimplifiedDashboard;
   onProceed: () => void;
   isLoading: boolean;
 }
@@ -19,8 +19,10 @@ const WhatWeKnowDashboard: React.FC<WhatWeKnowDashboardProps> = ({
     regulatory: false,
   });
   
+  // Get the first market from potential_markets array
+  const potentialMarkets = dashboard.market_intelligence.potential_markets;
   const [selectedMarket, setSelectedMarket] = useState<string>(
-    Object.keys(dashboard.market_intelligence)[0] || ''
+    potentialMarkets.length > 0 ? potentialMarkets[0].name : ''
   );
   
   const toggleSection = (section: string) => {
@@ -52,6 +54,9 @@ const WhatWeKnowDashboard: React.FC<WhatWeKnowDashboardProps> = ({
       </div>
     );
   };
+
+  // Find the selected market object
+  const selectedMarketData = potentialMarkets.find(market => market.name === selectedMarket);
   
   return (
     <div className="what-we-know-dashboard">
@@ -73,14 +78,14 @@ const WhatWeKnowDashboard: React.FC<WhatWeKnowDashboardProps> = ({
             <div className="info-card">
               <div className="info-row">
                 <div className="info-label">Company Name</div>
-                <div className="info-value">{dashboard.company_info.company_name}</div>
-                {renderConfidenceIndicator(dashboard.company_info.confidence_scores.company_name || 0)}
+                <div className="info-value">{dashboard.company_info.name}</div>
+                {renderConfidenceIndicator(dashboard.company_info.confidence_score)}
               </div>
               
               <div className="info-row">
                 <div className="info-label">Business Type</div>
                 <div className="info-value">{dashboard.company_info.business_type}</div>
-                {renderConfidenceIndicator(dashboard.company_info.confidence_scores.business_type || 0)}
+                {renderConfidenceIndicator(dashboard.company_info.confidence_score)}
               </div>
               
               <div className="info-row">
@@ -88,50 +93,23 @@ const WhatWeKnowDashboard: React.FC<WhatWeKnowDashboardProps> = ({
                 <div className="info-value">
                   <ul className="product-list">
                     {dashboard.company_info.products.map((product, index) => (
-                      <li key={index}>
-                        <strong>{product.name}</strong>
-                        {product.description && <span> - {product.description}</span>}
-                      </li>
+                      <li key={index}>{product}</li>
                     ))}
                   </ul>
                 </div>
-                {renderConfidenceIndicator(dashboard.company_info.confidence_scores.products || 0)}
+                {renderConfidenceIndicator(dashboard.company_info.confidence_score)}
               </div>
               
               <div className="info-row">
                 <div className="info-label">Capabilities</div>
                 <div className="info-value">
                   <ul className="capabilities-list">
-                    {dashboard.company_info.capabilities.production_capacity && (
-                      <li>
-                        <strong>Production Capacity:</strong>{' '}
-                        {dashboard.company_info.capabilities.production_capacity}
-                      </li>
-                    )}
-                    
-                    {dashboard.company_info.capabilities.certifications && (
-                      <li>
-                        <strong>Certifications:</strong>{' '}
-                        {dashboard.company_info.capabilities.certifications.join(', ')}
-                      </li>
-                    )}
-                    
-                    {dashboard.company_info.capabilities.current_markets && (
-                      <li>
-                        <strong>Current Markets:</strong>{' '}
-                        {dashboard.company_info.capabilities.current_markets.join(', ')}
-                      </li>
-                    )}
-                    
-                    {dashboard.company_info.capabilities.current_retailers && (
-                      <li>
-                        <strong>Current Retailers:</strong>{' '}
-                        {dashboard.company_info.capabilities.current_retailers.join(', ')}
-                      </li>
-                    )}
+                    {dashboard.company_info.capabilities.map((capability, index) => (
+                      <li key={index}>{capability}</li>
+                    ))}
                   </ul>
                 </div>
-                {renderConfidenceIndicator(dashboard.company_info.confidence_scores.capabilities || 0)}
+                {renderConfidenceIndicator(dashboard.company_info.confidence_score)}
               </div>
             </div>
           </div>
@@ -147,126 +125,57 @@ const WhatWeKnowDashboard: React.FC<WhatWeKnowDashboardProps> = ({
         
         {expandedSections.market && (
           <div className="section-content">
-            {Object.keys(dashboard.market_intelligence).length > 0 ? (
+            {potentialMarkets.length > 0 ? (
               <>
                 <div className="market-selector">
-                  {Object.keys(dashboard.market_intelligence).map((market) => (
+                  {potentialMarkets.map((market) => (
                     <button
-                      key={market}
-                      className={`market-button ${selectedMarket === market ? 'active' : ''}`}
-                      onClick={() => setSelectedMarket(market)}
+                      key={market.name}
+                      className={`market-button ${selectedMarket === market.name ? 'active' : ''}`}
+                      onClick={() => setSelectedMarket(market.name)}
                     >
-                      {market}
+                      {market.name}
                     </button>
                   ))}
                 </div>
                 
-                {selectedMarket && dashboard.market_intelligence[selectedMarket] && (
+                {selectedMarketData && (
                   <div className="info-card">
                     <div className="market-header">
-                      <h4>{dashboard.market_intelligence[selectedMarket].country}</h4>
+                      <h4>{selectedMarketData.name}</h4>
                       <div className="market-stats">
                         <div className="stat">
-                          <span className="stat-label">Population:</span>
+                          <span className="stat-label">Market Size:</span>
                           <span className="stat-value">
-                            {dashboard.market_intelligence[selectedMarket].population}
+                            {selectedMarketData.market_size}
                           </span>
                         </div>
                         <div className="stat">
-                          <span className="stat-label">GDP per Capita:</span>
+                          <span className="stat-label">Growth Rate:</span>
                           <span className="stat-value">
-                            {dashboard.market_intelligence[selectedMarket].gdp_per_capita}
+                            {selectedMarketData.growth_rate}
                           </span>
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="info-row">
-                      <div className="info-label">Market Overview</div>
-                      <div className="info-value">
-                        {dashboard.market_intelligence[selectedMarket].market_overview}
-                      </div>
-                      {renderConfidenceIndicator(
-                        dashboard.market_intelligence[selectedMarket].confidence_scores.market_overview || 0
-                      )}
-                    </div>
-                    
-                    <div className="info-row">
-                      <div className="info-label">Distribution Channels</div>
-                      <div className="info-value">
-                        <ul>
-                          {dashboard.market_intelligence[selectedMarket].distribution_channels.map(
-                            (channel, index) => (
-                              <li key={index}>{channel}</li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                      {renderConfidenceIndicator(
-                        dashboard.market_intelligence[selectedMarket].confidence_scores.distribution_channels || 0
-                      )}
-                    </div>
-                    
-                    <div className="info-row">
-                      <div className="info-label">Consumer Preferences</div>
-                      <div className="info-value">
-                        <ul>
-                          {dashboard.market_intelligence[selectedMarket].consumer_preferences.map(
-                            (preference, index) => (
-                              <li key={index}>{preference}</li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                      {renderConfidenceIndicator(
-                        dashboard.market_intelligence[selectedMarket].confidence_scores.consumer_preferences || 0
-                      )}
-                    </div>
-                    
-                    <div className="info-row">
-                      <div className="info-label">Tariffs</div>
-                      <div className="info-value">
-                        <ul>
-                          {Object.entries(dashboard.market_intelligence[selectedMarket].tariffs).map(
-                            ([product, tariff], index) => (
-                              <li key={index}>
-                                <strong>{product}:</strong> {tariff}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                      {renderConfidenceIndicator(
-                        dashboard.market_intelligence[selectedMarket].confidence_scores.tariffs || 0
-                      )}
                     </div>
                     
                     <div className="info-row">
                       <div className="info-label">Competitors</div>
                       <div className="info-value">
                         <div className="competitors-grid">
-                          {dashboard.market_intelligence[selectedMarket].competitors.map(
+                          {selectedMarketData.competitors.map(
                             (competitor, index) => (
                               <div key={index} className="competitor-card">
                                 <div className="competitor-name">{competitor.name}</div>
                                 <div className="competitor-detail">
-                                  <strong>Origin:</strong> {competitor.origin}
-                                </div>
-                                <div className="competitor-detail">
                                   <strong>Market Share:</strong> {competitor.market_share}
-                                </div>
-                                <div className="competitor-detail">
-                                  <strong>Strengths:</strong>{' '}
-                                  {competitor.strengths.join(', ')}
                                 </div>
                               </div>
                             )
                           )}
                         </div>
                       </div>
-                      {renderConfidenceIndicator(
-                        dashboard.market_intelligence[selectedMarket].confidence_scores.competitors || 0
-                      )}
+                      {renderConfidenceIndicator(selectedMarketData.confidence_score)}
                     </div>
                   </div>
                 )}
@@ -287,91 +196,43 @@ const WhatWeKnowDashboard: React.FC<WhatWeKnowDashboardProps> = ({
         
         {expandedSections.regulatory && (
           <div className="section-content">
-            {Object.keys(dashboard.regulatory_requirements).length > 0 ? (
-              <>
-                <div className="market-selector">
-                  {Object.keys(dashboard.regulatory_requirements).map((market) => (
-                    <button
-                      key={market}
-                      className={`market-button ${selectedMarket === market ? 'active' : ''}`}
-                      onClick={() => setSelectedMarket(market)}
-                    >
-                      {market}
-                    </button>
-                  ))}
+            <div className="info-card">
+              <div className="info-row">
+                <div className="info-label">Certifications</div>
+                <div className="info-value">
+                  <ul className="certification-list">
+                    {dashboard.regulatory_requirements.certifications.map(
+                      (certification, index) => (
+                        <li key={index}>{certification}</li>
+                      )
+                    )}
+                  </ul>
                 </div>
-                
-                {selectedMarket && dashboard.regulatory_requirements[selectedMarket] && (
-                  <div className="info-card">
-                    <div className="regulatory-header">
-                      <h4>
-                        {dashboard.regulatory_requirements[selectedMarket].country} -{' '}
-                        {dashboard.regulatory_requirements[selectedMarket].product_category}
-                      </h4>
-                    </div>
-                    
-                    <div className="info-row">
-                      <div className="info-label">Documentation Requirements</div>
-                      <div className="info-value">
-                        <ul className="documentation-list">
-                          {dashboard.regulatory_requirements[selectedMarket].documentation_requirements.map(
-                            (doc, index) => (
-                              <li key={index}>
-                                <strong>{doc.document}</strong>
-                                <div className="doc-details">
-                                  <span>Issuing Authority: {doc.issuing_authority}</span>
-                                  <span>Description: {doc.description}</span>
-                                </div>
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                      {renderConfidenceIndicator(
-                        dashboard.regulatory_requirements[selectedMarket].confidence_scores
-                          .documentation_requirements || 0
-                      )}
-                    </div>
-                    
-                    <div className="info-row">
-                      <div className="info-label">Labeling Requirements</div>
-                      <div className="info-value">
-                        <ul>
-                          {dashboard.regulatory_requirements[selectedMarket].labeling_requirements.map(
-                            (requirement, index) => (
-                              <li key={index}>{requirement}</li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                      {renderConfidenceIndicator(
-                        dashboard.regulatory_requirements[selectedMarket].confidence_scores
-                          .labeling_requirements || 0
-                      )}
-                    </div>
-                    
-                    <div className="info-row">
-                      <div className="info-label">Import Procedures</div>
-                      <div className="info-value">
-                        <ol>
-                          {dashboard.regulatory_requirements[selectedMarket].import_procedures.map(
-                            (procedure, index) => (
-                              <li key={index}>{procedure}</li>
-                            )
-                          )}
-                        </ol>
-                      </div>
-                      {renderConfidenceIndicator(
-                        dashboard.regulatory_requirements[selectedMarket].confidence_scores
-                          .import_procedures || 0
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="no-data-message">No regulatory requirements available</div>
-            )}
+                {renderConfidenceIndicator(dashboard.regulatory_requirements.confidence_score)}
+              </div>
+              
+              <div className="info-row">
+                <div className="info-label">Import Duties</div>
+                <div className="info-value">
+                  {dashboard.regulatory_requirements.import_duties}
+                </div>
+                {renderConfidenceIndicator(dashboard.regulatory_requirements.confidence_score)}
+              </div>
+              
+              <div className="info-row">
+                <div className="info-label">Documentation</div>
+                <div className="info-value">
+                  <ul>
+                    {dashboard.regulatory_requirements.documentation.map(
+                      (doc, index) => (
+                        <li key={index}>{doc}</li>
+                      )
+                    )}
+                  </ul>
+                </div>
+                {renderConfidenceIndicator(dashboard.regulatory_requirements.confidence_score)}
+              </div>
+            </div>
           </div>
         )}
       </div>

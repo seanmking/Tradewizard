@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { ExportPlan as ExportPlanType } from '../../services/sidekick';
+import { SimplifiedExportPlanType } from '../../services/simplifiedSidekick';
 import './ExportPlan.css';
 
 interface ExportPlanProps {
-  plan: ExportPlanType;
+  plan: SimplifiedExportPlanType;
 }
 
 const ExportPlan: React.FC<ExportPlanProps> = ({ plan }) => {
+  // Get the first section title as the default active section
+  const sectionTitles = Object.keys(plan.sections);
   const [activeSection, setActiveSection] = useState<string>(
-    plan.sections.length > 0 ? plan.sections[0].title : ''
+    sectionTitles.length > 0 ? sectionTitles[0] : ''
   );
   
   // Format the date for display
@@ -24,39 +26,33 @@ const ExportPlan: React.FC<ExportPlanProps> = ({ plan }) => {
   return (
     <div className="export-plan">
       <div className="plan-header">
-        <h2>Your Export Plan</h2>
+        <h1>{plan.title}</h1>
         <p className="plan-date">Generated on {formatDate(plan.generated_at)}</p>
       </div>
       
       <div className="plan-content">
         <div className="plan-navigation">
+          <h3>Sections</h3>
           <ul>
-            {plan.sections.map((section) => (
-              <li
-                key={section.title}
-                className={activeSection === section.title ? 'active' : ''}
-                onClick={() => setActiveSection(section.title)}
+            {sectionTitles.map((sectionTitle) => (
+              <li 
+                key={sectionTitle}
+                className={activeSection === sectionTitle ? 'active' : ''}
+                onClick={() => setActiveSection(sectionTitle)}
               >
-                {section.title}
+                {sectionTitle.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </li>
             ))}
           </ul>
         </div>
         
         <div className="plan-section-content">
-          {plan.sections.map((section) => (
-            <div
-              key={section.title}
-              className={`plan-section ${activeSection === section.title ? 'active' : ''}`}
-            >
-              <h3>{section.title}</h3>
-              <div className="section-body">
-                {section.content.split('\n').map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-              </div>
-            </div>
-          ))}
+          <h2>{activeSection.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h2>
+          <div className="section-text">
+            {plan.sections[activeSection as keyof typeof plan.sections].split('\n\n').map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
         </div>
       </div>
       
