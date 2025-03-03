@@ -355,10 +355,6 @@ const InitialAssessmentFlow: React.FC = () => {
   
   return (
     <div className="assessment-flow-container">
-      <div className="assessment-header">
-        <h1>Export Readiness Assessment</h1>
-        <p>Complete this interactive assessment to evaluate your export readiness and receive a personalized action plan for international market entry.</p>
-      </div>
       <div className="messages-container" ref={messagesContainerRef}>
         {messages.map((message, index) => (
           <div 

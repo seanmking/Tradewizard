@@ -28,8 +28,8 @@
   gap: 12px;
   background-color: #f5f7fb;
   scroll-behavior: smooth;
-  height: calc(100vh - 180px);
-  max-height: calc(100vh - 180px);
+  height: calc(100vh - 240px);
+  max-height: calc(100vh - 240px);
   min-height: 300px;
 }
 
@@ -335,7 +335,7 @@
 .assessment-flow-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   width: 100%;
   background-color: #fff;
   border-radius: 12px;
