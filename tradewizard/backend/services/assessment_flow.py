@@ -502,6 +502,12 @@ class AssessmentFlowService:
         # Limited market options as requested - only UAE, EU, and USA
         limited_markets = [
             {
+                "id": "uk", 
+                "name": "United Kingdom", 
+                "description": f"Major market with extensive data on South African exports. Strong demand for {product_category} with established trade relationships and consumer interest in premium South African products. Well-suited for {business_name}'s quality offerings with favorable import regulations.", 
+                "confidence": 0.94
+            },
+            {
                 "id": "us", 
                 "name": "United States", 
                 "description": f"Largest consumer market with high demand for {product_category}. E-commerce friendly with multiple entry strategies available for {product_type}. {business_name}'s premium offerings align well with US consumer preferences for quality and innovation.", 

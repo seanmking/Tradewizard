@@ -48,17 +48,14 @@ const MarketSelectionPanel: React.FC<MarketSelectionPanelProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedMarkets.length > 0) {
+      console.log('Submitting selected markets:', selectedMarkets);
       onSubmit(selectedMarkets);
     }
   };
   
   return (
-    <div className="market-selection-panel">
+    <div className="market-selection-panel-simplified">
       <h3>Select Target Markets</h3>
-      <p className="selection-instruction">
-        Based on your business profile, we've identified these markets as potential opportunities.
-        Select all that interest you:
-      </p>
       
       <form onSubmit={handleSubmit}>
         <div className={`markets-grid ${showScrollIndicator ? 'scrollable' : ''}`} ref={marketsGridRef}>

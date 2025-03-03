@@ -1,0 +1,614 @@
+{
+  "market_size": "USD 23.4B (2023)",
+  "growth_rate": "6.5% CAGR (2023-2030)",
+  "distribution_channels": [
+    {
+      "type": "Mainstream Grocery",
+      "examples": ["Kroger", "Safeway", "Walmart"],
+      "market_share": "44%",
+      "entry_difficulty": "High",
+      "min_volumes_required": "5000+ units/SKU",
+      "lead_time": "6-12 months for listing"
+    },
+    {
+      "type": "Natural/Specialty",
+      "examples": ["Whole Foods", "Sprouts", "Trader Joe's"],
+      "market_share": "26%",
+      "entry_difficulty": "Medium",
+      "min_volumes_required": "1000-2000 units/SKU",
+      "lead_time": "3-6 months for listing"
+    },
+    {
+      "type": "Online",
+      "examples": ["Amazon", "Thrive Market", "Instacart"],
+      "market_share": "30%",
+      "growth": "25% YOY",
+      "entry_difficulty": "Medium-Low",
+      "min_volumes_required": "500-1000 units/SKU",
+      "lead_time": "1-3 months for listing"
+    }
+  ],
+  "price_benchmarks": {
+    "premium_dried_fruits": {
+      "price_range": "$15-22/lb",
+      "high_end_retail": "$25-35/lb",
+      "price_sensitivity": "Medium",
+      "optimal_price_point": "$18.99/lb"
+    },
+    "specialty_nut_mixes": {
+      "price_range": "$12-18/8oz",
+      "high_end_retail": "$20-28/8oz",
+      "price_sensitivity": "Medium-Low",
+      "optimal_price_point": "$14.99/8oz"
+    }
+  },
+  "consumer_trends": [
+    {
+      "trend": "Clean label",
+      "percentage": "76% prioritize natural ingredients",
+      "growth": "14% YOY",
+      "opportunity": "Emphasize no artificial additives, preservatives, or sulfites"
+    },
+    {
+      "trend": "Functional benefits",
+      "percentage": "65% seek health-promoting properties",
+      "growth": "18% YOY",
+      "opportunity": "Highlight antioxidants and other nutritional benefits"
+    },
+    {
+      "trend": "Exotic flavors",
+      "percentage": "42% interested in international varieties",
+      "growth": "22% YOY",
+      "opportunity": "Showcase unique South African fruit varieties and flavors"
+    }
+  ],
+  "key_competitors": [
+    {
+      "name": "Sun-Maid",
+      "market_share": "26%",
+      "product_range": "Raisins and dried fruits",
+      "price_positioning": "Mid-range",
+      "distribution": "National, all channels",
+      "strengths": ["Brand recognition", "Marketing budget", "Wide distribution"],
+      "weaknesses": ["Traditional positioning", "Limited premium offerings"]
+    },
+    {
+      "name": "Trader Joe's Private Label",
+      "market_share": "14%",
+      "product_range": "Diverse dried fruits and mixes",
+      "price_positioning": "Mid-premium",
+      "distribution": "Exclusive to Trader Joe's stores",
+      "strengths": ["Loyal customer base", "Innovative offerings", "Strong value proposition"],
+      "weaknesses": ["Limited to Trader Joe's locations", "Inconsistent inventory"]
+    },
+    {
+      "name": "Made In Nature",
+      "market_share": "8%",
+      "product_range": "Organic dried fruits and snacks",
+      "price_positioning": "Premium",
+      "distribution": "Natural channel and premium grocery",
+      "strengths": ["Organic positioning", "Premium quality", "Innovation"],
+      "weaknesses": ["Higher price point", "Limited conventional distribution"]
+    }
+  ],
+  "seasonality": {
+    "peak_demand": "Sept-Dec (back-to-school and holiday season)",
+    "low_period": "Jan-Feb (post-holiday)",
+    "holiday_effect": "30-45% sales increase during Q4",
+    "promotional_calendar": {
+      "new_year_health": "January",
+      "back_to_school": "August-September",
+      "holiday_baking": "October-December",
+      "summer_snacking": "May-July"
+    }
+  },
+  "niche_opportunities": [
+    {
+      "segment": "Superfood positioning",
+      "growth_rate": "22% CAGR",
+      "market_size": "USD 4.2B",
+      "entry_barrier": "Medium (marketing and education required)",
+      "profit_margin": "25-40% higher than conventional",
+      "key_channels": ["Natural retailers", "Premium conventional", "Direct-to-consumer"]
+    },
+    {
+      "segment": "Children's lunchbox snacks",
+      "market_size": "USD 8.5B lunchbox snack market",
+      "entry_barrier": "Medium-High (requires specific packaging and positioning)",
+      "profit_margin": "15-25% premium potential",
+      "key_channels": ["Mainstream grocery", "Target", "Club stores"]
+    }
+  ],
+  "regulatory_requirements": {
+    "import_license": "FDA Food Facility Registration required",
+    "labeling": [
+      "FDA compliant Nutrition Facts panel",
+      "Ingredient list with allergen declarations",
+      "Net weight in dual declaration (oz and g)",
+      "Country of origin labeling"
+    ],
+    "certifications": [
+      "FSMA Foreign Supplier Verification Program compliance",
+      "HACCP or HARPC implementation",
+      "USDA/APHIS requirements for certain plant products"
+    ],
+    "documentation": [
+      "Commercial Invoice",
+      "Packing List",
+      "Bill of Lading/Airway Bill",
+      "Prior Notice of Imported Food",
+      "Phytosanitary Certificate",
+      "FDA Import Entry Documentation"
+    ],
+    "tariffs": {
+      "dried_fruits": "Variable by product (generally 1.5-8%)",
+      "nut_products": "Variable by product (generally 1-10%)"
+    },
+    "timeline": "2-4 weeks for standard FDA clearance"
+  },
+  "entry_strategy_recommendations": [
+    "Partner with experienced US food importer or distributor",
+    "Develop FDA-compliant packaging and labeling",
+    "Consider natural/specialty channel as entry point",
+    "Highlight South African origin as exotic differentiator",
+    "Invest in trade show presence (Fancy Food Show, Expo West)"
+  ],
+  "market_overview": {
+    "region": "North America",
+    "population": "331.9 million",
+    "gdp": "$23.0 trillion",
+    "gdp_growth": "2.1%",
+    "currency": "US Dollar (USD)",
+    "exchange_rate": "1 USD = 18.2 ZAR",
+    "economic_outlook": "Strong consumer spending with focus on premium food products"
+  },
+  "food_market_data": {
+    "market_size": "$1.77 trillion",
+    "growth_rate": "3.2% annually",
+    "import_dependence": "Medium - imports 15% of food consumed",
+    "south_african_imports": "$350 million annually",
+    "key_trends": [
+      "Increasing demand for healthy and natural snacks",
+      "Growing interest in exotic and international flavors",
+      "Premium positioning for dried fruits and nuts",
+      "Strong e-commerce growth in specialty food sector"
+    ]
+  },
+  "dried_fruit_sector": {
+    "market_size": "$4.89 billion (2024)",
+    "growth_rate": "5.7% CAGR (2024-2029 projected)",
+    "consumption_patterns": "Year-round consumption with emphasis on health-conscious snacking. Growing use in baking, breakfast foods, and trail mixes.",
+    "popular_products": [
+      {
+        "product": "Raisins",
+        "market_share": "23%",
+        "notes": "Domestic production with imports from Turkey, Chile, and South Africa"
+      },
+      {
+        "product": "Cranberries",
+        "market_share": "19%",
+        "notes": "Primarily domestic production (Wisconsin, Massachusetts)"
+      },
+      {
+        "product": "Dates",
+        "market_share": "12%",
+        "notes": "Imports from Middle East and domestic California production"
+      },
+      {
+        "product": "Dried Mango",
+        "market_share": "11%",
+        "notes": "Imports from Mexico, Philippines, Thailand, and South Africa"
+      },
+      {
+        "product": "Prunes",
+        "market_share": "9%",
+        "notes": "Primarily domestic California production"
+      },
+      {
+        "product": "Dried Apricots",
+        "market_share": "8%",
+        "notes": "Imports from Turkey, South Africa, and domestic production"
+      },
+      {
+        "product": "Other Dried Fruits",
+        "market_share": "18%",
+        "notes": "Including figs, apple, pineapple, berries, and exotic varieties"
+      }
+    ],
+    "pricing_trends": [
+      {
+        "segment": "Economy",
+        "price_range": "$3.00-$5.00 per 8oz",
+        "retail_channels": "Mass merchandisers, discount grocery, dollar stores"
+      },
+      {
+        "segment": "Mainstream",
+        "price_range": "$5.00-$8.00 per 8oz",
+        "retail_channels": "Major supermarkets, grocery chains, club stores"
+      },
+      {
+        "segment": "Premium",
+        "price_range": "$8.00-$12.00 per 8oz",
+        "retail_channels": "Natural food stores, specialty grocers, gourmet shops"
+      },
+      {
+        "segment": "Organic/Specialty",
+        "price_range": "$10.00-$16.00 per 8oz",
+        "retail_channels": "Health food stores, organic markets, specialty online retailers"
+      }
+    ],
+    "seasonality": "Relatively consistent year-round with 20-25% increase during holiday baking season (November-December) and 15% increase during back-to-school period (August-September)"
+  },
+  "consumer_insights": {
+    "demographics": {
+      "primary_consumers": "Health-conscious consumers, fitness enthusiasts, millennials, Gen X",
+      "age_groups": "25-55 years (highest consumption)",
+      "income_levels": "Middle and upper-income households"
+    },
+    "purchasing_factors": [
+      {
+        "factor": "Health benefits",
+        "importance": "Very High",
+        "notes": "Nutritional value and perceived health benefits are primary drivers"
+      },
+      {
+        "factor": "Quality and taste",
+        "importance": "High",
+        "notes": "Consistent quality, texture, and flavor profile essential for repeat purchases"
+      },
+      {
+        "factor": "Price",
+        "importance": "Medium",
+        "notes": "Premium segment less price-sensitive for high-quality products"
+      },
+      {
+        "factor": "Sustainability",
+        "importance": "High and growing",
+        "notes": "Environmental impact and ethical sourcing increasingly important to consumers"
+      },
+      {
+        "factor": "Packaging",
+        "importance": "Medium-High",
+        "notes": "Growing preference for eco-friendly and resealable packaging"
+      },
+      {
+        "factor": "Certifications",
+        "importance": "High",
+        "notes": "Organic, non-GMO, and sustainability certifications strongly valued"
+      },
+      {
+        "factor": "Country of origin",
+        "importance": "Medium",
+        "notes": "Exotic origins can be leveraged as premium positioning"
+      }
+    ],
+    "consumption_occasions": [
+      "On-the-go healthy snacking",
+      "Pre/post-workout nutrition",
+      "Office and school snacks",
+      "Baking and cooking ingredients",
+      "Breakfast additions (oatmeal, yogurt, cereal)",
+      "Trail mixes and outdoor activities",
+      "Healthy dessert alternatives"
+    ]
+  },
+  "retail_landscape": {
+    "major_retailers": [
+      {
+        "name": "Whole Foods Market",
+        "market_share": "2.8% of grocery",
+        "store_count": "500+",
+        "notes": "Premium natural and organic focus, Amazon-owned"
+      },
+      {
+        "name": "Kroger",
+        "market_share": "8.5% of grocery",
+        "store_count": "2,700+",
+        "notes": "Largest traditional grocery chain with Simple Truth organic brand"
+      },
+      {
+        "name": "Walmart",
+        "market_share": "18% of grocery",
+        "store_count": "4,700+",
+        "notes": "Mass merchandiser with expanding organic and premium offerings"
+      },
+      {
+        "name": "Trader Joe's",
+        "market_share": "1.5% of grocery",
+        "store_count": "530+",
+        "notes": "Specialty retailer with strong private label focus and loyal customer base"
+      },
+      {
+        "name": "Costco",
+        "market_share": "5.2% of grocery",
+        "store_count": "560+ in US",
+        "notes": "Member-only warehouse club with premium Kirkland Signature line"
+      },
+      {
+        "name": "Target",
+        "market_share": "3.8% of grocery",
+        "store_count": "1,950+",
+        "notes": "Mass merchandiser with expanding Good & Gather food brand"
+      },
+      {
+        "name": "Sprouts Farmers Market",
+        "market_share": "1.2% of grocery",
+        "store_count": "380+",
+        "notes": "Natural foods focus with extensive bulk section"
+      }
+    ],
+    "specialty_channels": [
+      {
+        "name": "Natural Grocers",
+        "description": "Natural food retailer with 160+ stores across 20 states",
+        "product_focus": "100% organic produce, natural and organic specialty foods"
+      },
+      {
+        "name": "The Fresh Market",
+        "description": "Specialty grocer with 159 stores in 22 states",
+        "product_focus": "Gourmet and specialty foods with European market feel"
+      },
+      {
+        "name": "Erewhon",
+        "description": "Ultra-premium natural foods retailer in Southern California",
+        "product_focus": "Organic, biodynamic, and sustainably sourced specialty foods"
+      },
+      {
+        "name": "Independent natural food stores",
+        "description": "Approximately 3,000 independent natural food retailers nationwide",
+        "product_focus": "Organic, specialty, and locally sourced products"
+      }
+    ],
+    "e_commerce": {
+      "market_share": "11.2% of food retail (rapid growth trajectory)",
+      "key_platforms": [
+        "Amazon/Whole Foods",
+        "Walmart.com",
+        "Instacart",
+        "Thrive Market",
+        "Direct-to-consumer specialty sites"
+      ],
+      "growth_rate": "18% CAGR (2023-2028 projected)"
+    }
+  },
+  "competitive_landscape": {
+    "market_leaders": [
+      {
+        "company": "Sun-Maid (USA)",
+        "products": "Raisins and other dried fruits",
+        "market_share": "18%",
+        "strengths": "Strong brand recognition, extensive distribution, domestic production",
+        "pricing_strategy": "Premium mainstream pricing"
+      },
+      {
+        "company": "Sunsweet Growers (USA)",
+        "products": "Prunes and other dried fruits",
+        "market_share": "14%",
+        "strengths": "Category leadership in prunes, quality reputation, innovation",
+        "pricing_strategy": "Premium pricing"
+      },
+      {
+        "company": "Wonderful Pistachios & Almonds (USA)",
+        "products": "Pistachios, almonds, and nut mixes",
+        "market_share": "12% of nut category",
+        "strengths": "Strong marketing, vertical integration, brand recognition",
+        "pricing_strategy": "Premium pricing with heavy promotion"
+      },
+      {
+        "company": "Made in Nature (USA)",
+        "products": "Organic dried fruits and snacks",
+        "market_share": "6% of organic segment",
+        "strengths": "Organic leadership, innovative products, clean label",
+        "pricing_strategy": "Super-premium pricing"
+      },
+      {
+        "company": "Retailer private labels",
+        "products": "Full range of dried fruits and nuts",
+        "market_share": "32% and growing",
+        "strengths": "Competitive pricing, improving quality, retailer support",
+        "pricing_strategy": "Value to premium tiered pricing"
+      }
+    ],
+    "south_african_competitors": [
+      {
+        "company": "Cecilia's Farm",
+        "products": "Premium dried fruits and nuts",
+        "market_presence": "Limited specialty retail and online",
+        "strengths": "Product quality, packaging, South African heritage",
+        "challenges": "Limited brand awareness, distribution constraints"
+      },
+      {
+        "company": "Montagu Dried Fruit",
+        "products": "Dried fruits and nuts",
+        "market_presence": "Minimal direct presence, some private label supply",
+        "strengths": "Production scale, competitive pricing",
+        "challenges": "Limited US market knowledge, brand recognition"
+      },
+      {
+        "company": "Klein River Cheese (SA products in US)",
+        "products": "South African specialty foods including dried fruits",
+        "market_presence": "Specialty grocers and online gourmet retailers",
+        "strengths": "South African heritage positioning, authentic products",
+        "challenges": "Limited scale, distribution challenges"
+      }
+    ],
+    "private_label": {
+      "market_share": "32% and growing rapidly",
+      "key_players": [
+        "Whole Foods 365",
+        "Kroger Simple Truth and Private Selection",
+        "Trader Joe's private label",
+        "Costco Kirkland Signature",
+        "Target Good & Gather"
+      ],
+      "pricing": "Typically tiered: value (25-30% below national brands), standard (15-20% below), premium (comparable to national brands)",
+      "quality_positioning": "Increasingly high quality across all tiers, with premium private labels often exceeding national brands"
+    }
+  },
+  "distribution_channels": {
+    "import_process": {
+      "key_ports": ["Los Angeles/Long Beach", "New York/New Jersey", "Savannah", "Seattle/Tacoma"],
+      "customs_clearance": "2-5 days typical processing time",
+      "documentation": "Electronic filing through Automated Commercial Environment (ACE)",
+      "challenges": "FDA holds for inspection, documentation complexity, container availability"
+    },
+    "distribution_models": [
+      {
+        "model": "Direct to retail",
+        "suitability": "Large volumes to major retailers",
+        "pros": "Higher margins, direct relationships, brand control",
+        "cons": "Complex compliance requirements, high minimums, resource intensive"
+      },
+      {
+        "model": "Specialty food distributor",
+        "suitability": "Most common for premium international brands",
+        "pros": "Market expertise, existing relationships, compliance handling",
+        "cons": "Lower margins, less control over brand positioning"
+      },
+      {
+        "model": "Direct-to-consumer e-commerce",
+        "suitability": "Premium, unique products with strong stories",
+        "pros": "Highest margins, direct consumer relationships, brand control",
+        "cons": "High logistics costs, customer acquisition challenges, fulfillment complexity"
+      },
+      {
+        "model": "Food service distributor",
+        "suitability": "Bulk products for hospitality and food manufacturing",
+        "pros": "Volume potential, fewer packaging requirements",
+        "cons": "Price competitive, limited brand visibility, payment terms"
+      }
+    ],
+    "key_distributors": [
+      {
+        "name": "KeHE Distributors",
+        "specialization": "Natural, organic, specialty foods",
+        "retail_coverage": "National coverage of natural, conventional and specialty retailers",
+        "strengths": "Strong relationships with natural channel, category expertise"
+      },
+      {
+        "name": "UNFI (United Natural Foods)",
+        "specialization": "Natural, organic and specialty foods",
+        "retail_coverage": "National with emphasis on natural channel and Whole Foods",
+        "strengths": "Largest natural foods distributor, comprehensive coverage"
+      },
+      {
+        "name": "Sysco Specialty Foods",
+        "specialization": "Gourmet and specialty foods",
+        "retail_coverage": "Foodservice, specialty retail, and grocery",
+        "strengths": "Extensive national network, strong in foodservice"
+      },
+      {
+        "name": "World Finer Foods",
+        "specialization": "Premium imported specialty foods",
+        "retail_coverage": "Specialty and premium conventional retailers",
+        "strengths": "Experience with premium international brands, category expertise"
+      }
+    ]
+  },
+  "market_entry_considerations": {
+    "opportunities": [
+      {
+        "segment": "Premium dried exotic fruits",
+        "potential": "High",
+        "notes": "Growing demand for unique varieties beyond traditional offerings"
+      },
+      {
+        "segment": "Organic certified",
+        "potential": "Very High",
+        "notes": "18% annual growth in organic dried fruit segment"
+      },
+      {
+        "segment": "Sustainable packaging",
+        "potential": "High",
+        "notes": "Increasing consumer demand for eco-friendly packaging solutions"
+      },
+      {
+        "segment": "Superfood positioning",
+        "potential": "High",
+        "notes": "Strong interest in nutritional benefits and functional ingredients"
+      },
+      {
+        "segment": "Snack packs/portion control",
+        "potential": "Medium-high",
+        "notes": "Growing on-the-go and portion-controlled snacking market"
+      }
+    ],
+    "challenges": [
+      {
+        "challenge": "FDA compliance",
+        "impact": "High",
+        "mitigation": "Partner with experienced importer familiar with FDA requirements"
+      },
+      {
+        "challenge": "Retail slotting fees",
+        "impact": "High",
+        "mitigation": "Start with specialty channel with lower slotting requirements"
+      },
+      {
+        "challenge": "Logistics costs",
+        "impact": "Medium-high",
+        "mitigation": "Optimize packaging for shipping efficiency, consider air freight for initial market entry"
+      },
+      {
+        "challenge": "Brand awareness",
+        "impact": "Medium-high",
+        "mitigation": "Leverage South African heritage, unique flavors, and packaging design"
+      },
+      {
+        "challenge": "Private label competition",
+        "impact": "Medium",
+        "mitigation": "Focus on unique varieties and quality differentiation"
+      }
+    ],
+    "recommended_approach": {
+      "entry_strategy": "Partner with specialty food importer/distributor focused on natural channel",
+      "initial_focus": "Independent natural retailers and specialty grocers",
+      "product_positioning": "Premium, exotic South African dried fruits with unique flavor profiles and sustainable sourcing story",
+      "pricing_strategy": "Premium positioning (15-20% above market average) with distinctive packaging highlighting South African origin",
+      "promotion": "Trade show participation (Fancy Food Show, Natural Products Expo), digital marketing focused on origin and superfood benefits"
+    }
+  },
+  "regulatory_environment": {
+    "import_regulations": {
+      "key_requirements": [
+        "FDA registration required for food facilities",
+        "USDA inspection for certain agricultural products",
+        "Compliance with Food Safety Modernization Act (FSMA)",
+        "Prior Notice of Imported Foods submission"
+      ],
+      "labeling_requirements": [
+        "FDA-compliant Nutrition Facts panel",
+        "Allergen declarations following FDA guidelines",
+        "Country of origin labeling",
+        "Net weight in both metric and imperial units"
+      ]
+    },
+    "tariffs_and_taxes": {
+      "import_duty": "Varies by product (0-10% typical range)",
+      "other_fees": "Harbor maintenance fee, merchandise processing fee"
+    },
+    "recent_changes": [
+      "Implementation of Food Safety Modernization Act (FSMA) Foreign Supplier Verification Program",
+      "Increased focus on food traceability requirements",
+      "New nutrition facts panel format requirements",
+      "Growing emphasis on allergen control and declaration"
+    ]
+  },
+  "future_outlook": {
+    "market_projections": {
+      "5_year_growth": "5.7% CAGR for dried fruits sector",
+      "emerging_segments": [
+        "Functional dried fruits with added nutrients",
+        "Upcycled products addressing food waste",
+        "No added sugar or naturally sweetened varieties",
+        "Ready-to-eat convenience formats",
+        "Indigenous and heirloom fruit varieties"
+      ]
+    },
+    "consumer_trends": [
+      "Growing adoption of plant-based and flexitarian diets",
+      "Increasing focus on immune health and functional benefits",
+      "Rising demand for transparent and ethical supply chains"
+    ]
+  }
+} 

@@ -231,4 +231,24 @@
 .markets-grid.scrollable {
   border-bottom: 1px dashed #cbd5e0;
   padding-bottom: 10px;
+}
+
+.market-selection-panel-simplified {
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+  z-index: 1;
+  border: none;
+  background-color: transparent;
+}
+
+.market-selection-panel-simplified h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+  font-weight: 600;
 } 

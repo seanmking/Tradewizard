@@ -212,8 +212,8 @@
   line-height: 1.4;
   background-color: #f0f2f5;
   transition: border-color 0.2s ease;
-  max-height: 100px;
   min-height: 44px;
+  max-height: 200px; /* Height for approximately 8 lines */
   overflow-y: auto;
 }
 

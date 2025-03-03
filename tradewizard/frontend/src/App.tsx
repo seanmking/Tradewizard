@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Chat from './components/Chat/Chat';
 import { SideKick } from './components/SideKick/SideKick';
 import InitialAssessmentFlow from './components/Assessment/InitialAssessmentFlow';
+import Dashboard from './components/Dashboard/Dashboard';
+import AccountCreation from './components/Auth/AccountCreation';
+import Login from './components/Auth/Login';
+import Profile from './components/Auth/Profile';
+import AuthService from './services/AuthService';
 
 // Simple icon components
 const AssessmentIcon = () => (
@@ -37,6 +42,15 @@ const MarketsIcon = () => (
   </svg>
 );
 
+const DashboardIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7"></rect>
+    <rect x="14" y="3" width="7" height="7"></rect>
+    <rect x="14" y="14" width="7" height="7"></rect>
+    <rect x="3" y="14" width="7" height="7"></rect>
+  </svg>
+);
+
 const ProfileIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -45,7 +59,67 @@ const ProfileIcon = () => (
 );
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState<'assessment' | 'sidekick' | 'documents' | 'markets' | 'profile'>('assessment');
+  type TabType = 'assessment' | 'sidekick' | 'documents' | 'markets' | 'dashboard' | 'profile';
+  
+  // State for managing current user
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>('');
+  const [hasCompletedAssessment, setHasCompletedAssessment] = useState<boolean>(false);
+  const [showAuthModal, setShowAuthModal] = useState<'none' | 'login' | 'register' | 'profile'>('none');
+  
+  const [activeTab, setActiveTab] = useState<TabType>('assessment');
+  
+  // Check authentication state on load
+  useEffect(() => {
+    const user = AuthService.getCurrentUser();
+    if (user) {
+      setIsAuthenticated(true);
+      setUsername(user.username);
+      setHasCompletedAssessment(user.hasCompletedAssessment);
+      
+      // If user has completed assessment, set dashboard as active tab
+      if (user.hasCompletedAssessment) {
+        setActiveTab('dashboard');
+      }
+    }
+  }, []);
+  
+  // Handle successful login
+  const handleLoginSuccess = (username: string) => {
+    setIsAuthenticated(true);
+    setUsername(username);
+    setHasCompletedAssessment(true);
+    setShowAuthModal('none');
+    setActiveTab('dashboard');
+  };
+  
+  // Handle successful account creation
+  const handleAccountCreationSuccess = (username: string) => {
+    setIsAuthenticated(true);
+    setUsername(username);
+    setHasCompletedAssessment(true);
+    setShowAuthModal('none');
+    setActiveTab('dashboard');
+  };
+  
+  // Handle assessment completion
+  const handleAssessmentComplete = () => {
+    setHasCompletedAssessment(true);
+    AuthService.setCompletedAssessment(true);
+    
+    // Show account creation modal if not authenticated
+    if (!isAuthenticated) {
+      setShowAuthModal('register');
+    }
+  };
+  
+  // Handle logout
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setUsername('');
+    setShowAuthModal('none');
+    setActiveTab('assessment');
+  };
   
   return (
     <div className="app-container">
@@ -64,6 +138,27 @@ const App = () => {
           >
             <AssessmentIcon />
             <span>Assessment</span>
+          </a>
+          <a 
+            href="#" 
+            className={activeTab === 'dashboard' ? 'active' : ''}
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('dashboard');
+              
+              // If not authenticated, show login modal
+              if (!isAuthenticated) {
+                if (hasCompletedAssessment) {
+                  setShowAuthModal('login');
+                } else {
+                  // Direct to assessment if not completed
+                  setActiveTab('assessment');
+                }
+              }
+            }}
+          >
+            <DashboardIcon />
+            <span>Dashboard</span>
           </a>
           <a 
             href="#" 
@@ -98,18 +193,27 @@ const App = () => {
             <MarketsIcon />
             <span>Markets</span>
           </a>
+        </nav>
+        
+        {/* Profile section at bottom of sidebar */}
+        <div className="sidebar-profile">
           <a 
             href="#" 
             className={activeTab === 'profile' ? 'active' : ''}
             onClick={(e) => {
               e.preventDefault();
-              setActiveTab('profile');
+              
+              if (isAuthenticated) {
+                setShowAuthModal('profile');
+              } else {
+                setShowAuthModal('login');
+              }
             }}
           >
             <ProfileIcon />
-            <span>Profile</span>
+            <span>{isAuthenticated ? username : 'Login'}</span>
           </a>
-        </nav>
+        </div>
       </div>
       
       <div className="main-content">
@@ -121,7 +225,32 @@ const App = () => {
             </div>
             
             <div className="chat-wrapper">
-              <InitialAssessmentFlow />
+              <InitialAssessmentFlow onComplete={handleAssessmentComplete} />
+            </div>
+          </>
+        )}
+        
+        {activeTab === 'dashboard' && (
+          <>
+            <div className="content-header">
+              <h1>Export Market Dashboard</h1>
+              <p>View your export readiness analysis and market intelligence.</p>
+            </div>
+            
+            <div className="dashboard-wrapper">
+              {isAuthenticated ? (
+                <Dashboard onLogout={handleLogout} />
+              ) : (
+                <div className="empty-feature-placeholder">
+                  <p>Please complete the assessment and create an account to access your dashboard.</p>
+                  <button 
+                    onClick={() => setActiveTab('assessment')}
+                    className="action-button"
+                  >
+                    Go to Assessment
+                  </button>
+                </div>
+              )}
             </div>
           </>
         )}
@@ -162,19 +291,27 @@ const App = () => {
             </div>
           </>
         )}
-        
-        {activeTab === 'profile' && (
-          <>
-            <div className="content-header">
-              <h1>Profile</h1>
-              <p>This feature is coming soon.</p>
-            </div>
-            <div className="empty-feature-placeholder">
-              <p>User profile features will be available in a future update.</p>
-            </div>
-          </>
-        )}
       </div>
+      
+      {/* Authentication Modals */}
+      {showAuthModal === 'login' && (
+        <Login 
+          onSuccess={handleLoginSuccess}
+          onCancel={() => setShowAuthModal('none')}
+          onRegister={() => setShowAuthModal('register')}
+        />
+      )}
+      
+      {showAuthModal === 'register' && (
+        <AccountCreation 
+          onSuccess={handleAccountCreationSuccess}
+          onCancel={() => setShowAuthModal('none')}
+        />
+      )}
+      
+      {showAuthModal === 'profile' && (
+        <Profile onLogout={handleLogout} />
+      )}
     </div>
   );
 };

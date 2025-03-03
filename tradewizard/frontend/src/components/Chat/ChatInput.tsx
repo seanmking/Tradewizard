@@ -49,6 +49,21 @@ const ChatInput: React.FC<ChatInputProps> = ({
     prevLoadingRef.current = isLoading;
   }, [isLoading]);
 
+  // Auto-resize textarea based on content
+  const handleResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const textarea = e.target;
+    
+    // Reset height to auto to get the correct scrollHeight
+    textarea.style.height = 'auto';
+    
+    // Calculate new height based on scrollHeight, capped at max height (8 lines ≈ 200px)
+    const newHeight = Math.min(textarea.scrollHeight, 200);
+    textarea.style.height = `${newHeight}px`;
+    
+    // Update input state
+    setInput(textarea.value);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -61,6 +76,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
     if (!input.trim() || isLoading || disableInput) return;
     onSubmit(input.trim());
     setInput('');
+    
+    // Reset textarea height after submission
+    if (actualInputRef.current) {
+      actualInputRef.current.style.height = 'auto';
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -107,11 +127,17 @@ const ChatInput: React.FC<ChatInputProps> = ({
             <textarea
               ref={actualInputRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleResize}
               onKeyPress={handleKeyPress}
               placeholder={disableInput ? "Please use the selection options above..." : "Type your message..."}
               disabled={isLoading || disableInput}
               rows={1}
+              style={{
+                minHeight: '40px',
+                maxHeight: '200px', // Height for approximately 8 lines
+                overflowY: 'auto', // Add scrollbar when content exceeds height
+                resize: 'none' // Prevent manual resizing
+              }}
               autoFocus={true}
             />
             <button 

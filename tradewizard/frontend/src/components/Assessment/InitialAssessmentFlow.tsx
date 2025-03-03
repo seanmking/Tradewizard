@@ -22,6 +22,10 @@ interface Message {
   };
 }
 
+interface InitialAssessmentFlowProps {
+  onComplete?: () => void;
+}
+
 const TypingIndicator = () => (
   <div className="typing-indicator">
     <span></span>
@@ -30,7 +34,7 @@ const TypingIndicator = () => (
   </div>
 );
 
-const InitialAssessmentFlow: React.FC = () => {
+const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplete }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [currentStep, setCurrentStep] = useState<AssessmentStep | null>(null);
@@ -127,8 +131,22 @@ const InitialAssessmentFlow: React.FC = () => {
         userData
       );
       
-      // Update user data
-      setUserData(response.user_data);
+      // Update user data but preserve our selectedMarkets if they exist
+      setUserData(prevUserData => {
+        const preservedSelectedMarkets = prevUserData.selectedMarkets;
+        
+        // Create new userData object from the response
+        const newUserData = {
+          ...response.user_data,
+          // Preserve our selectedMarkets array if it exists
+          ...(preservedSelectedMarkets && { selectedMarkets: preservedSelectedMarkets })
+        };
+        
+        console.log('Preserved selected markets:', preservedSelectedMarkets);
+        console.log('Updated userData:', newUserData);
+        
+        return newUserData;
+      });
       
       // Only show dashboard after target markets have been selected
       if (response.next_step.id === 'summary' && response.user_data.selected_markets) {
@@ -205,7 +223,20 @@ const InitialAssessmentFlow: React.FC = () => {
       return [];
     }
     
-    return currentStep.marketOptions.map(option => ({
+    // Make sure UK is in the list of market options
+    const marketOptions = [...currentStep.marketOptions];
+    const hasUK = marketOptions.some(option => option.name === 'United Kingdom' || option.id === 'uk');
+    
+    if (!hasUK) {
+      marketOptions.unshift({
+        id: 'uk',
+        name: 'United Kingdom',
+        description: 'Major market with extensive data on South African exports. Strong trade relationships and consumer interest in premium South African products.',
+        confidence: 0.94
+      });
+    }
+    
+    return marketOptions.map(option => ({
       id: option.id,
       label: option.name,
       value: option.name
@@ -225,6 +256,12 @@ const InitialAssessmentFlow: React.FC = () => {
         timestamp: Date.now()
       }
     ]);
+    
+    // Store the selected markets in userData directly
+    setUserData(prev => ({
+      ...prev,
+      selectedMarkets: selectedMarkets // Store as array
+    }));
     
     // Then process the response
     handleSubmit(selectedMarkets.join(', '));
@@ -277,6 +314,11 @@ const InitialAssessmentFlow: React.FC = () => {
   };
 
   const handleGoToDashboard = () => {
+    // Call the onComplete callback if provided
+    if (onComplete) {
+      onComplete();
+    }
+    
     setShowReadinessReport(false);
     
     // If dashboardData is not set, create mock data
@@ -378,23 +420,13 @@ const InitialAssessmentFlow: React.FC = () => {
           </div>
           
           {showMarketSelection && (
-            <>
-              <div className="step-transition-indicator">
-                <div className="step-indicator-line"></div>
-                <div className="step-indicator-text">Market Selection</div>
-                <div className="step-indicator-line"></div>
-              </div>
-              <div className="market-selection-intro">
-                <p>Please select the target markets you're interested in exploring:</p>
-              </div>
-              <div className="market-selection-container">
-                <MarketSelectionPanel 
-                  markets={message.metadata?.marketOptions || []} 
-                  onSubmit={handleMarketsSubmit}
-                  isLoading={isTyping}
-                />
-              </div>
-            </>
+            <div className="market-selection-container-simplified">
+              <MarketSelectionPanel 
+                markets={message.metadata?.marketOptions || []} 
+                onSubmit={handleMarketsSubmit}
+                isLoading={isTyping}
+              />
+            </div>
           )}
 
           {/* Render account creation button if this is the summary step */}
@@ -430,6 +462,15 @@ const InitialAssessmentFlow: React.FC = () => {
     });
   };
   
+  // Add debugging for report rendering
+  useEffect(() => {
+    if (showReadinessReport) {
+      console.log('Rendering report with complete userData:', userData);
+      console.log('selectedMarkets value:', userData.selectedMarkets);
+      console.log('selected_markets value:', userData.selected_markets);
+    }
+  }, [showReadinessReport, userData]);
+
   return (
     <div className="assessment-flow-container">
       <div className="initial-assessment-container">
@@ -472,7 +513,7 @@ const InitialAssessmentFlow: React.FC = () => {
         <ExportReadinessReport
           userData={{
             companyName: 'Global Fresh SA',
-            selectedMarkets: userData.selectedMarkets || ['European Union', 'United Arab Emirates']
+            selectedMarkets: userData.selectedMarkets
           }}
           onClose={handleCloseReport}
           onGoToDashboard={handleGoToDashboard}

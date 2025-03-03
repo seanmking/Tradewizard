@@ -127,11 +127,12 @@
   font-size: 15px;
   resize: none;
   min-height: 40px;
-  max-height: 100px;
+  max-height: 200px; /* Height for approximately 8 lines */
   outline: none;
   transition: border-color 0.2s ease;
   box-shadow: none;
   background-color: transparent; /* Ensure this is transparent */
+  overflow-y: auto;
 }
 
 .chat-input button {
@@ -517,4 +518,13 @@
   padding: 5px 0;
   font-size: 0.8rem;
   color: #888;
+}
+
+.market-selection-container-simplified {
+  width: 100%;
+  margin: 16px 0;
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
+  box-shadow: none;
+  border: none;
 } 

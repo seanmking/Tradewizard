@@ -1,0 +1,474 @@
+{
+  "market_overview": {
+    "region": "European Union",
+    "population": "447 million (2025)",
+    "gdp": "€17.9 trillion (2025)",
+    "gdp_growth": "1.7% (2024-2025 projected)",
+    "currency": "Euro (EUR) in most member states",
+    "exchange_rate": "1 EUR = 22.5 ZAR (fluctuating)",
+    "key_countries": ["Germany", "France", "Italy", "Spain", "Netherlands", "Poland"],
+    "economic_outlook": "Moderate growth with emphasis on sustainability and climate initiatives. Consumer spending focused on health and wellness products. Increased regulatory focus on environmental standards."
+  },
+  "food_market_data": {
+    "market_size": "€1.2 trillion (2023)",
+    "growth_rate": "2.3% CAGR (2023-2028 projected)",
+    "import_dependence": "Varies by country, approximately 20% food import dependence overall",
+    "south_african_imports": "€580 million (2023)",
+    "key_trends": [
+      "Strong focus on sustainability and environmental impact",
+      "Rising demand for plant-based and vegan products",
+      "Increasing importance of local and regional sourcing",
+      "Growing preference for minimal processing and clean labels",
+      "Heightened concern about ethical production and fair trade"
+    ]
+  },
+  "dried_fruit_sector": {
+    "market_size": "€3.8 billion (2024)",
+    "growth_rate": "3.8% CAGR (2024-2029 projected)",
+    "consumption_patterns": "Year-round consumption with regional variations. Popular in baking, breakfast, and as healthy snacks. Growing use in plant-based cuisines.",
+    "popular_products": [
+      {
+        "product": "Raisins",
+        "market_share": "24%",
+        "notes": "Imports from Turkey, South Africa, and USA"
+      },
+      {
+        "product": "Dried Dates",
+        "market_share": "16%",
+        "notes": "Imports from Tunisia, Israel, Algeria, and UAE"
+      },
+      {
+        "product": "Dried Apricots",
+        "market_share": "15%",
+        "notes": "Imports from Turkey, South Africa, and regional production"
+      },
+      {
+        "product": "Prunes",
+        "market_share": "11%",
+        "notes": "Primarily imports from USA, Chile, and France"
+      },
+      {
+        "product": "Dried Figs",
+        "market_share": "8%",
+        "notes": "Imports from Turkey, Greece, and regional production"
+      },
+      {
+        "product": "Dried Mango",
+        "market_share": "6%",
+        "notes": "Imports from Thailand, Philippines, and South Africa"
+      },
+      {
+        "product": "Other Dried Fruits",
+        "market_share": "20%",
+        "notes": "Including berries, apple, pineapple, papaya, and exotic varieties"
+      }
+    ],
+    "pricing_trends": [
+      {
+        "segment": "Economy",
+        "price_range": "€8-€12 per kg",
+        "retail_channels": "Discount retailers (Lidl, Aldi), value ranges in supermarkets"
+      },
+      {
+        "segment": "Mainstream",
+        "price_range": "€12-€18 per kg",
+        "retail_channels": "Major supermarkets, hypermarkets"
+      },
+      {
+        "segment": "Premium",
+        "price_range": "€18-€25 per kg",
+        "retail_channels": "Premium retailers, specialty food stores, organic shops"
+      },
+      {
+        "segment": "Organic/Specialty",
+        "price_range": "€20-€35 per kg",
+        "retail_channels": "Organic markets, health food stores, specialty retailers"
+      }
+    ],
+    "seasonality": "Relatively stable year-round with 30-40% increase during Christmas baking season (October-December) and 10-15% increase during the Lenten period in predominantly Catholic countries"
+  },
+  "consumer_insights": {
+    "demographics": {
+      "primary_consumers": "Health-conscious consumers, families, older demographics (45+)",
+      "age_groups": "30-65 years (highest consumption), growing among health-conscious younger consumers",
+      "income_levels": "Middle and upper-middle income households"
+    },
+    "purchasing_factors": [
+      {
+        "factor": "Quality and taste",
+        "importance": "Very High",
+        "notes": "European consumers place high value on sensory experience and consistent quality"
+      },
+      {
+        "factor": "Sustainability",
+        "importance": "High and growing",
+        "notes": "Environmental impact increasingly critical in purchasing decisions"
+      },
+      {
+        "factor": "Organic certification",
+        "importance": "High",
+        "notes": "Particularly important in Northern European markets (Germany, Scandinavia)"
+      },
+      {
+        "factor": "Price",
+        "importance": "Medium-High",
+        "notes": "Price sensitivity varies by country (higher in Southern/Eastern European markets)"
+      },
+      {
+        "factor": "Provenance",
+        "importance": "Medium-High",
+        "notes": "Origin story and authenticity increasingly important selling points"
+      },
+      {
+        "factor": "Packaging",
+        "importance": "High",
+        "notes": "Strong preference for environmentally friendly packaging solutions"
+      },
+      {
+        "factor": "Health claims",
+        "importance": "Medium-High",
+        "notes": "Growing interest in functional benefits but strict regulation of claims"
+      }
+    ],
+    "consumption_occasions": [
+      "Daily healthy snacking",
+      "Breakfast (with muesli, yogurt, porridge)",
+      "Baking and cooking",
+      "Children's lunchboxes",
+      "Aperitif/social gatherings",
+      "Sports and outdoor activities",
+      "Afternoon tea/coffee accompaniment"
+    ]
+  },
+  "retail_landscape": {
+    "major_retailers": [
+      {
+        "name": "Lidl",
+        "market_share": "Cross-European presence",
+        "store_count": "11,500+ across Europe",
+        "notes": "Discount retailer with growing premium and organic ranges"
+      },
+      {
+        "name": "Carrefour",
+        "market_share": "Strong in France, Spain, Italy",
+        "store_count": "10,500+ across Europe",
+        "notes": "Multi-format retailer with sustainability initiatives"
+      },
+      {
+        "name": "Aldi",
+        "market_share": "Strong in Germany, expanding across Europe",
+        "store_count": "11,000+ across Europe",
+        "notes": "Discount retailer with improving premium offerings"
+      },
+      {
+        "name": "Tesco",
+        "market_share": "UK, Ireland, Central Europe",
+        "store_count": "4,500+ across Europe",
+        "notes": "Strong private label program, sustainability focus"
+      },
+      {
+        "name": "Edeka",
+        "market_share": "Germany's largest supermarket",
+        "store_count": "11,300+ in Germany",
+        "notes": "Quality positioning with strong regional focus"
+      },
+      {
+        "name": "Ahold Delhaize",
+        "market_share": "Strong in Netherlands, Belgium, Central Europe",
+        "store_count": "7,000+ across Europe",
+        "notes": "Multi-banner operation with strong online presence"
+      }
+    ],
+    "specialty_channels": [
+      {
+        "name": "Organic supermarkets",
+        "description": "Specialized chains (Denn's, Bio Company, Naturalia)",
+        "product_focus": "Certified organic and ecological products"
+      },
+      {
+        "name": "Traditional markets",
+        "description": "Weekly farmers/food markets in most European cities",
+        "product_focus": "Local, specialty, and artisanal foods"
+      },
+      {
+        "name": "Zero-waste shops",
+        "description": "Growing channel focused on packaging-free shopping",
+        "product_focus": "Bulk dried fruits and nuts, minimal packaging"
+      },
+      {
+        "name": "Department store food halls",
+        "description": "Premium food sections in department stores",
+        "product_focus": "Gourmet and gift-oriented specialty foods"
+      }
+    ],
+    "e_commerce": {
+      "market_share": "7.4% of food retail (varies significantly by country)",
+      "key_platforms": [
+        "Amazon EU",
+        "Ocado (UK)",
+        "Carrefour Online",
+        "National grocery platforms",
+        "Specialty food e-tailers"
+      ],
+      "growth_rate": "15% CAGR (2023-2028 projected)"
+    }
+  },
+  "competitive_landscape": {
+    "market_leaders": [
+      {
+        "company": "Seeberger (Germany)",
+        "products": "Premium dried fruits and nuts",
+        "market_share": "12% premium segment",
+        "strengths": "Quality reputation, brand recognition, distribution strength",
+        "pricing_strategy": "Premium positioning"
+      },
+      {
+        "company": "Mariani (Italy)",
+        "products": "Dried fruits and fruit snacks",
+        "market_share": "9% overall market",
+        "strengths": "Italian heritage, quality products, innovation",
+        "pricing_strategy": "Premium to super-premium"
+      },
+      {
+        "company": "Whitworths (UK)",
+        "products": "Dried fruits, baking products, snack packs",
+        "market_share": "15% UK market",
+        "strengths": "Strong UK presence, diverse product line, convenience formats",
+        "pricing_strategy": "Mid-range to premium"
+      },
+      {
+        "company": "Dole Packaged Foods Europe",
+        "products": "Dried tropical fruits",
+        "market_share": "7% regional",
+        "strengths": "Brand recognition, distribution network, product quality",
+        "pricing_strategy": "Mid-premium positioning"
+      },
+      {
+        "company": "Private label (multiple retailers)",
+        "products": "Full range of dried fruits",
+        "market_share": "45% combined",
+        "strengths": "Price competitiveness, retailer backing, improving quality",
+        "pricing_strategy": "Tiered approach from economy to premium"
+      }
+    ],
+    "south_african_competitors": [
+      {
+        "company": "Cecilia's Farm",
+        "products": "Premium South African dried fruits",
+        "market_presence": "Growing in specialty segment",
+        "strengths": "Product quality, provenance story, premium packaging",
+        "challenges": "Limited distribution, brand awareness, logistics costs"
+      },
+      {
+        "company": "Safari Dried Fruit",
+        "products": "Dried fruits and nuts",
+        "market_presence": "Predominantly UK and Germany",
+        "strengths": "Established export operation, competitive pricing",
+        "challenges": "Generic positioning, limited marketing investment"
+      },
+      {
+        "company": "Montagu Dried Fruits and Nuts",
+        "products": "Diverse dried fruit range",
+        "market_presence": "Limited direct marketing",
+        "strengths": "Production scale, quality, some fair trade positioning",
+        "challenges": "Limited brand recognition, commodity perception"
+      }
+    ],
+    "private_label": {
+      "market_share": "45% with significant growth",
+      "key_players": [
+        "Delhaize 365",
+        "Carrefour Selection",
+        "Tesco Finest",
+        "Lidl Deluxe",
+        "Edeka Bio"
+      ],
+      "pricing": "Tiered strategies with premium lines competing with brands",
+      "quality_positioning": "Improving across all segments, premium tiers often matching or exceeding branded quality"
+    }
+  },
+  "distribution_channels": {
+    "import_process": {
+      "key_ports": ["Rotterdam", "Antwerp", "Hamburg", "Marseille", "Barcelona"],
+      "customs_clearance": "2-7 days typical processing time",
+      "documentation": "Electronic processing through EU customs systems",
+      "challenges": "Post-Brexit complications, varying efficiency between member states"
+    },
+    "distribution_models": [
+      {
+        "model": "European importer/distributor",
+        "suitability": "Most common for new market entrants",
+        "pros": "Market knowledge, existing relationships, handles compliance",
+        "cons": "Lower margins, less control over brand positioning"
+      },
+      {
+        "model": "Country-specific distributors",
+        "suitability": "Targeted approach to specific markets",
+        "pros": "Deep local knowledge, specialized relationships",
+        "cons": "Limited geographic reach, management complexity"
+      },
+      {
+        "model": "Direct to retail",
+        "suitability": "Established brands with volume capabilities",
+        "pros": "Higher margins, relationship building, brand control",
+        "cons": "Resource intensive, complex regulatory environment"
+      },
+      {
+        "model": "Online direct-to-consumer",
+        "suitability": "Premium unique products",
+        "pros": "Brand control, higher margins, customer data access",
+        "cons": "Logistical challenges, tax complexities, marketing costs"
+      }
+    ],
+    "key_distributors": [
+      {
+        "name": "Greenyard Fresh",
+        "specialization": "Fresh and dried fruits",
+        "retail_coverage": "Pan-European",
+        "strengths": "Comprehensive distribution network, sustainability focus"
+      },
+      {
+        "name": "Catz International",
+        "specialization": "Dried fruits and nuts",
+        "retail_coverage": "EU-wide, strong in Northern Europe",
+        "strengths": "Long-established relationships, global sourcing expertise"
+      },
+      {
+        "name": "Global Fruit Point",
+        "specialization": "Premium fruit imports",
+        "retail_coverage": "Germany, Austria, Switzerland",
+        "strengths": "Quality positioning, strong German retail relationships"
+      },
+      {
+        "name": "Univeg",
+        "specialization": "Fresh and dried fruits",
+        "retail_coverage": "Cross-European",
+        "strengths": "Integrated supply chain, strong retail relationships"
+      }
+    ]
+  },
+  "market_entry_considerations": {
+    "opportunities": [
+      {
+        "segment": "Organic certified dried fruits",
+        "potential": "High",
+        "notes": "15-20% annual growth in organic segment"
+      },
+      {
+        "segment": "Sustainable packaging solutions",
+        "potential": "Very High",
+        "notes": "Strong regulatory and consumer pressure to reduce plastic packaging"
+      },
+      {
+        "segment": "Snack packs/portion control",
+        "potential": "Medium-High",
+        "notes": "Growing on-the-go and portion-controlled snacking trend"
+      },
+      {
+        "segment": "Exotic South African varieties",
+        "potential": "Medium-High",
+        "notes": "Differentiation through unique fruits and flavor profiles"
+      },
+      {
+        "segment": "Fair Trade positioning",
+        "potential": "High",
+        "notes": "Strong consumer interest in ethical sourcing and production"
+      }
+    ],
+    "challenges": [
+      {
+        "challenge": "Complex EU regulations",
+        "impact": "High",
+        "mitigation": "Partner with experienced importers familiar with EU requirements"
+      },
+      {
+        "challenge": "Sustainability expectations",
+        "impact": "High",
+        "mitigation": "Invest in sustainable packaging and production certifications"
+      },
+      {
+        "challenge": "Market fragmentation",
+        "impact": "Medium-High",
+        "mitigation": "Focused approach on key markets or partner with pan-European distributor"
+      },
+      {
+        "challenge": "Logistics and carbon footprint",
+        "impact": "Medium-High",
+        "mitigation": "Optimize shipping methods, consider carbon offset programs"
+      },
+      {
+        "challenge": "Private label dominance",
+        "impact": "Medium",
+        "mitigation": "Focus on premium differentiation or consider private label supply alongside branded approach"
+      }
+    ],
+    "recommended_approach": {
+      "entry_strategy": "Partner with established EU distributor with focus on natural/organic channel",
+      "initial_focus": "Northern European markets (Germany, Netherlands, Scandinavia) with stronger organic demand",
+      "product_positioning": "Premium South African dried fruits with sustainable and ethical credentials",
+      "pricing_strategy": "Premium positioning with distinctive packaging highlighting South African origin and sustainability",
+      "promotion": "Trade show presence (ANUGA, SIAL, Biofach), digital marketing, in-store demonstrations"
+    }
+  },
+  "regulatory_environment": {
+    "import_regulations": {
+      "governing_body": "European Commission (DG SANTE) and European Food Safety Authority (EFSA)",
+      "key_requirements": [
+        "Compliance with EU General Food Law",
+        "Adherence to food hygiene regulations",
+        "HACCP implementation",
+        "Registration in TRACES system",
+        "Phytosanitary certification for certain products",
+        "Maximum Residue Levels (MRLs) compliance"
+      ],
+      "labeling_requirements": [
+        "Mandatory nutrition declaration",
+        "Ingredient list with QUID declarations",
+        "Allergen highlighting",
+        "Country of origin",
+        "Net quantity",
+        "Use-by or best-before date",
+        "Storage conditions",
+        "Name/address of food business operator",
+        "Lot marking"
+      ]
+    },
+    "tariffs_and_taxes": {
+      "import_duty": "Typically 0-12% depending on product classification",
+      "vat": "Varies by member state (5-25% on food products)",
+      "preferential_rates": "EU-South Africa Economic Partnership Agreement provides reduced tariffs for qualifying products"
+    },
+    "recent_changes": [
+      "Implementation of Single-Use Plastics Directive",
+      "Farm to Fork Strategy driving sustainability requirements",
+      "New organic regulation implementation",
+      "Strengthened supply chain due diligence expectations"
+    ]
+  },
+  "future_outlook": {
+    "market_projections": {
+      "5_year_growth": "3.8% CAGR for dried fruits sector",
+      "emerging_segments": [
+        "Plastic-free packaging solutions",
+        "Carbon-neutral products",
+        "Regenerative agriculture certification",
+        "Upcycled fruit products",
+        "Novel processing technologies for nutrient retention"
+      ]
+    },
+    "consumer_trends": [
+      "Increasing emphasis on health and immunity benefits",
+      "Growing demand for transparency and traceability",
+      "Rising focus on planetary health alongside personal health",
+      "Continuing shift toward plant-based eating patterns",
+      "Search for authentic products with genuine narratives"
+    ],
+    "innovation_opportunities": [
+      "Biodegradable and compostable packaging",
+      "Digital transparency solutions (QR codes, blockchain)",
+      "Novel preservation techniques for improved flavor and nutrition",
+      "South African indigenous fruits with unique health properties",
+      "Reduced sugar processing methods"
+    ]
+  }
+} 

@@ -1,0 +1,477 @@
+{
+  "market_overview": {
+    "country": "United States of America",
+    "population": "331.9 million (2023)",
+    "gdp": "$25.46 trillion (2022)",
+    "gdp_growth": "2.1% (2022)",
+    "currency": "US Dollar (USD)",
+    "exchange_rate": "Base currency",
+    "key_cities": ["New York", "Los Angeles", "Chicago", "Houston", "Dallas", "San Francisco", "Miami"],
+    "economic_outlook": "Moderate growth with inflation concerns moderating. Consumer spending remains robust with growing focus on health and wellness products. Food sector showing resilience with premium and health-oriented segments outperforming."
+  },
+  "food_market_data": {
+    "market_size": "$1.8 trillion (2022)",
+    "growth_rate": "4.0% CAGR (2022-2027 projected)",
+    "import_dependence": "Approximately 15% of food consumed is imported, higher in specialty categories",
+    "south_african_imports": "$287 million (2022)",
+    "key_trends": [
+      "Strong growth in natural, organic, and clean-label products",
+      "Increasing demand for functional foods and health benefits",
+      "E-commerce transformation accelerating across all food categories",
+      "Growing interest in global flavors and authentic ethnic foods",
+      "Sustainability and ethical sourcing becoming mainstream requirements"
+    ]
+  },
+  "dried_fruit_sector": {
+    "market_size": "$23.4 billion (2022)",
+    "growth_rate": "6.5% CAGR (2022-2027 projected)",
+    "consumption_patterns": "Year-round consumption with growth in snacking categories. Seasonal peaks during holiday baking season (November-December) and back-to-school period (August-September).",
+    "popular_products": [
+      {
+        "product": "Raisins",
+        "market_share": "28%",
+        "notes": "Dominated by California production, some imports including South Africa"
+      },
+      {
+        "product": "Dried Cranberries",
+        "market_share": "18%",
+        "notes": "Strong US production (Wisconsin, Massachusetts), popular in trail mixes"
+      },
+      {
+        "product": "Dates",
+        "market_share": "12%",
+        "notes": "Domestic production (California) and imports from Middle East"
+      },
+      {
+        "product": "Dried Tropical Fruits",
+        "market_share": "14%",
+        "notes": "Primarily imported, includes mango, pineapple, papaya"
+      },
+      {
+        "product": "Dried Apricots",
+        "market_share": "8%",
+        "notes": "Imports from Turkey, South Africa, and domestic production"
+      },
+      {
+        "product": "Prunes",
+        "market_share": "7%",
+        "notes": "Primarily California production with some imports"
+      },
+      {
+        "product": "Other Dried Fruits",
+        "market_share": "13%",
+        "notes": "Including apple, banana, berries, and specialty varieties"
+      }
+    ],
+    "pricing_trends": [
+      {
+        "segment": "Conventional/Economy",
+        "price_range": "$6-12 per pound",
+        "retail_channels": "Mass merchandisers, conventional supermarkets, club stores"
+      },
+      {
+        "segment": "Premium Conventional",
+        "price_range": "$12-18 per pound",
+        "retail_channels": "Mainstream supermarkets, specialty grocers"
+      },
+      {
+        "segment": "Organic",
+        "price_range": "$14-25 per pound",
+        "retail_channels": "Natural retailers, premium supermarkets, online"
+      },
+      {
+        "segment": "Specialty/Exotic",
+        "price_range": "$18-35 per pound",
+        "retail_channels": "Specialty food stores, premium retailers, direct-to-consumer"
+      }
+    ],
+    "seasonality": "Holiday baking season (October-December, 35% of annual sales), back-to-school (August-September, 20%), steady baseline with summer outdoor recreation uptick"
+  },
+  "consumer_insights": {
+    "demographics": {
+      "primary_consumers": "Health-conscious consumers, active lifestyle segment, families, boomers and millennials",
+      "age_groups": "35-65 years (highest consumption), growing 25-34 segment",
+      "income_levels": "Middle and upper-income households"
+    },
+    "purchasing_factors": [
+      {
+        "factor": "Health benefits",
+        "importance": "Very high",
+        "notes": "Strong awareness of nutritional benefits driving purchase decisions"
+      },
+      {
+        "factor": "Taste and quality",
+        "importance": "Very high",
+        "notes": "Flavor profiles and consistent quality are primary drivers"
+      },
+      {
+        "factor": "Clean label",
+        "importance": "High",
+        "notes": "Growing demand for products without added sugars, preservatives, or sulfites"
+      },
+      {
+        "factor": "Price",
+        "importance": "Medium-high",
+        "notes": "Price sensitivity varies by segment, premium products gaining share"
+      },
+      {
+        "factor": "Organic certification",
+        "importance": "Medium-high",
+        "notes": "Important in natural channel and growing in conventional"
+      },
+      {
+        "factor": "Packaging convenience",
+        "importance": "Medium-high",
+        "notes": "On-the-go formats and resealable packaging highly valued"
+      },
+      {
+        "factor": "Sustainability",
+        "importance": "Medium and growing",
+        "notes": "Increasingly important, especially among younger consumers"
+      }
+    ],
+    "consumption_occasions": [
+      "Healthy snacking (on-the-go and at home)",
+      "Baking and cooking",
+      "Breakfast (with cereals, oatmeal, yogurt)",
+      "Children's lunchboxes",
+      "Outdoor activities and sports nutrition",
+      "Office and workplace snacking"
+    ]
+  },
+  "retail_landscape": {
+    "major_retailers": [
+      {
+        "name": "Walmart",
+        "market_share": "21.4% of grocery",
+        "store_count": "4,700+",
+        "notes": "Price leader with expanding organic and premium offerings"
+      },
+      {
+        "name": "Kroger",
+        "market_share": "9.9% of grocery",
+        "store_count": "2,800+",
+        "notes": "Strong private label program and health focus"
+      },
+      {
+        "name": "Albertsons/Safeway",
+        "market_share": "5.7% of grocery",
+        "store_count": "2,200+",
+        "notes": "Traditional supermarket with regional banners"
+      },
+      {
+        "name": "Costco",
+        "market_share": "5.5% of grocery",
+        "store_count": "550+ in US",
+        "notes": "Club store format, bulk sales, strong organic presence"
+      },
+      {
+        "name": "Whole Foods Market",
+        "market_share": "1.6% of grocery, 9.2% of natural/organic",
+        "store_count": "500+",
+        "notes": "Premium natural/organic retailer, Amazon-owned"
+      },
+      {
+        "name": "Target",
+        "market_share": "2.7% of grocery",
+        "store_count": "1,950+",
+        "notes": "Growing grocery presence, strong in urban markets"
+      }
+    ],
+    "specialty_channels": [
+      {
+        "name": "Natural food retailers",
+        "description": "Sprouts Farmers Market, Natural Grocers, regional chains",
+        "product_focus": "Organic, natural, specialty dried fruits"
+      },
+      {
+        "name": "Specialty food stores",
+        "description": "Trader Joe's, specialty food shops, ethnic markets",
+        "product_focus": "Unique varieties, global options, premium products"
+      },
+      {
+        "name": "Convenience health",
+        "description": "Fresh Market, smaller format premium grocers",
+        "product_focus": "Convenience-oriented premium dried fruits"
+      },
+      {
+        "name": "Food co-ops and independent health stores",
+        "description": "Community-owned grocery stores and small chains",
+        "product_focus": "Bulk bins, organic options, local when possible"
+      }
+    ],
+    "e_commerce": {
+      "market_share": "13.5% of grocery (rapidly growing)",
+      "key_platforms": [
+        "Amazon/Whole Foods",
+        "Walmart.com",
+        "Instacart",
+        "Thrive Market",
+        "Direct-to-consumer brand sites",
+        "Specialty e-commerce (e.g., Nuts.com)"
+      ],
+      "growth_rate": "25% CAGR (2022-2027 projected)"
+    }
+  },
+  "competitive_landscape": {
+    "market_leaders": [
+      {
+        "company": "Sun-Maid (USA)",
+        "products": "Raisins and other dried fruits",
+        "market_share": "16% of total market",
+        "strengths": "Brand recognition, distribution, marketing power",
+        "pricing_strategy": "Premium within conventional segment"
+      },
+      {
+        "company": "Sunsweet Growers (USA)",
+        "products": "Prunes and specialty dried fruits",
+        "market_share": "11% of total market",
+        "strengths": "Category leadership in prunes, strong marketing",
+        "pricing_strategy": "Premium positioning, quality focus"
+      },
+      {
+        "company": "Mariani Dried Fruits (USA)",
+        "products": "Full range of dried fruits",
+        "market_share": "8% of total market",
+        "strengths": "Broad product line, strong distribution",
+        "pricing_strategy": "Mid-range with premium lines"
+      },
+      {
+        "company": "Ocean Spray (USA)",
+        "products": "Dried cranberries",
+        "market_share": "6% of total market",
+        "strengths": "Brand recognition, marketing, innovation",
+        "pricing_strategy": "Premium positioning"
+      },
+      {
+        "company": "Private label",
+        "products": "Full range of dried fruits",
+        "market_share": "35% combined",
+        "strengths": "Price competitiveness, improving quality",
+        "pricing_strategy": "Value to mid-market positioning"
+      }
+    ],
+    "south_african_competitors": [
+      {
+        "company": "Cecilia's Farm",
+        "products": "Premium dried fruits",
+        "market_presence": "Limited but growing in specialty retail",
+        "strengths": "Quality positioning, attractive packaging",
+        "challenges": "Limited distribution, brand awareness"
+      },
+      {
+        "company": "Klein River Farms",
+        "products": "Organic dried fruits",
+        "market_presence": "Minimal direct presence",
+        "strengths": "Organic certification, quality",
+        "challenges": "Limited market penetration, logistics costs"
+      },
+      {
+        "company": "South African bulk suppliers",
+        "products": "Various dried fruits for processing and private label",
+        "market_presence": "B2B supply chain primarily",
+        "strengths": "Competitive pricing, counter-seasonal advantage",
+        "challenges": "Commodity positioning, limited consumer brand recognition"
+      }
+    ],
+    "natural_channel_leaders": [
+      {
+        "company": "Made In Nature (USA)",
+        "products": "Organic dried fruits and snacks",
+        "market_presence": "Strong in natural channel",
+        "strengths": "Organic leadership, innovation, premium packaging",
+        "pricing_strategy": "Premium organic positioning"
+      },
+      {
+        "company": "Mavuno Harvest",
+        "products": "African dried fruits, direct trade",
+        "market_presence": "Growing in natural and specialty retail",
+        "strengths": "Ethical sourcing story, unique product range",
+        "pricing_strategy": "Premium with ethical positioning"
+      }
+    ]
+  },
+  "distribution_channels": {
+    "import_process": {
+      "key_ports": ["Los Angeles/Long Beach", "New York/New Jersey", "Savannah", "Houston", "Seattle"],
+      "customs_clearance": "2-5 days typical processing",
+      "documentation": "Electronic processing through FDA systems",
+      "challenges": "Increasing food safety scrutiny, occasional port congestion"
+    },
+    "distribution_models": [
+      {
+        "model": "Direct to retail",
+        "suitability": "Largest volume products to major retailers",
+        "pros": "Higher margins, direct relationship with retailers",
+        "cons": "High service level requirements, high barriers to entry"
+      },
+      {
+        "model": "National distributor",
+        "suitability": "Broad market reach",
+        "pros": "Comprehensive coverage, back-office functions handled",
+        "cons": "Lower margins, less control over positioning"
+      },
+      {
+        "model": "Regional distributors",
+        "suitability": "Targeted regional approach",
+        "pros": "Stronger relationships, regional focus",
+        "cons": "Limited geographic coverage"
+      },
+      {
+        "model": "Natural/specialty distributors",
+        "suitability": "Premium, organic, specialty products",
+        "pros": "Channel expertise, aligned customer base",
+        "cons": "Limited to natural/specialty channel"
+      },
+      {
+        "model": "Direct-to-consumer e-commerce",
+        "suitability": "Premium, unique products",
+        "pros": "Highest margins, direct consumer relationships",
+        "cons": "High marketing costs, fulfillment complexity"
+      }
+    ],
+    "key_distributors": [
+      {
+        "name": "UNFI (United Natural Foods Inc.)",
+        "specialization": "Natural, organic and specialty foods",
+        "retail_coverage": "National, strong in natural channel",
+        "strengths": "Comprehensive distribution, category expertise"
+      },
+      {
+        "name": "KeHE Distributors",
+        "specialization": "Natural, organic and specialty foods",
+        "retail_coverage": "National, conventional and natural",
+        "strengths": "Strong specialty food focus, growing conventional presence"
+      },
+      {
+        "name": "Sysco",
+        "specialization": "Foodservice distribution",
+        "retail_coverage": "National foodservice",
+        "strengths": "Comprehensive foodservice coverage"
+      },
+      {
+        "name": "C&S Wholesale Grocers",
+        "specialization": "Full-line grocery wholesaler",
+        "retail_coverage": "National conventional grocery",
+        "strengths": "Broad conventional grocery distribution"
+      }
+    ]
+  },
+  "market_entry_considerations": {
+    "opportunities": [
+      {
+        "segment": "Premium dried fruits with provenance",
+        "potential": "High",
+        "notes": "Growing demand for premium products with clear origin story"
+      },
+      {
+        "segment": "Organic certified",
+        "potential": "High",
+        "notes": "Strong growth with significant price premium"
+      },
+      {
+        "segment": "No added sugar/unsulfured",
+        "potential": "High",
+        "notes": "Strong demand for clean label products without additives"
+      },
+      {
+        "segment": "Convenient packaging formats",
+        "potential": "Medium-high",
+        "notes": "On-the-go snacking driving demand for portable options"
+      },
+      {
+        "segment": "Unique South African varieties",
+        "potential": "Medium-high",
+        "notes": "Differentiation through exotic varieties and flavor profiles"
+      }
+    ],
+    "challenges": [
+      {
+        "challenge": "FDA compliance requirements",
+        "impact": "High",
+        "mitigation": "Partner with experienced importers, confirm FSMA compliance"
+      },
+      {
+        "challenge": "Retail slotting fees",
+        "impact": "High",
+        "mitigation": "Budget for placement costs or focus on channels with lower fees"
+      },
+      {
+        "challenge": "Logistics and supply chain costs",
+        "impact": "Medium-high",
+        "mitigation": "Optimize shipping methods, consider co-packing in US"
+      },
+      {
+        "challenge": "Brand building costs",
+        "impact": "Medium-high",
+        "mitigation": "Focused regional or channel approach before national expansion"
+      },
+      {
+        "challenge": "Competitive saturation",
+        "impact": "Medium",
+        "mitigation": "Clear differentiation strategy, unique South African positioning"
+      }
+    ],
+    "recommended_approach": {
+      "entry_strategy": "Partner with specialty/natural distributor for initial market entry",
+      "initial_focus": "Natural and specialty retail channel in key urban markets",
+      "product_positioning": "Premium South African dried fruits with sustainability story",
+      "pricing_strategy": "Premium positioning (20-30% above category average)",
+      "promotion": "Trade show presence (Fancy Food Show, Expo West), in-store demos, targeted digital marketing"
+    }
+  },
+  "regulatory_environment": {
+    "import_regulations": {
+      "governing_body": "FDA (Food and Drug Administration) and USDA",
+      "key_requirements": [
+        "FDA registration of foreign facility",
+        "Prior Notice of Imported Food",
+        "FSMA (Food Safety Modernization Act) compliance",
+        "Country of origin labeling",
+        "Phytosanitary certificates for certain plant products"
+      ],
+      "labeling_requirements": [
+        "FDA Nutrition Facts panel",
+        "Ingredient statement with allergen declarations",
+        "Net weight statement (dual declaration in metric and US)",
+        "Manufacturer/distributor statement",
+        "Country of origin",
+        "Health and nutrient claims compliance"
+      ]
+    },
+    "tariffs_and_taxes": {
+      "import_duty": "Varies by product (generally 1-10% for dried fruits)",
+      "other_fees": "Harbor maintenance fee, merchandise processing fee",
+      "preferential_rates": "Possible under AGOA (African Growth and Opportunity Act) for qualifying products"
+    },
+    "recent_changes": [
+      "Implementation of FSMA Foreign Supplier Verification Program",
+      "Increasing focus on food defense and supply chain security",
+      "FDA's New Era of Smarter Food Safety initiative",
+      "Updated nutrition labeling requirements"
+    ]
+  },
+  "future_outlook": {
+    "market_projections": {
+      "5_year_growth": "6.5% CAGR for dried fruits sector",
+      "emerging_segments": [
+        "Functional dried fruits with added benefits",
+        "Upcycled products from food waste streams",
+        "Innovative convenient formats for on-the-go consumption",
+        "Single-origin premium dried fruits with traceability"
+      ]
+    },
+    "consumer_trends": [
+      "Growing focus on immunity and functional benefits",
+      "Increasing emphasis on sustainability credentials",
+      "Rising interest in global flavors and varieties",
+      "Demand for transparent supply chains and ethical sourcing"
+    ],
+    "innovation_opportunities": [
+      "Novel drying technologies preserving more nutrients",
+      "Sustainable packaging solutions",
+      "Unique South African fruit varieties with distinctive flavor profiles",
+      "Blockchain or digital traceability solutions"
+    ]
+  }
+} 

@@ -151,5 +151,42 @@
     "Invest in UK-compliant packaging with clear nutritional information",
     "Consider third-party logistics provider with UK customs expertise",
     "Target September entry for holiday season sales cycle"
-  ]
+  ],
+  "market_overview": {
+    "region": "Western Europe",
+    "population": "67.2 million",
+    "gdp": "$2.7 trillion",
+    "gdp_growth": "1.2%",
+    "currency": "British Pound (GBP)",
+    "exchange_rate": "1 GBP = 23.5 ZAR",
+    "economic_outlook": "Stable growth with focus on post-Brexit trade relationships"
+  },
+  "food_market_data": {
+    "market_size": "$258 billion",
+    "growth_rate": "2.8% annually",
+    "import_dependence": "High - imports 48% of food consumed",
+    "south_african_imports": "$420 million annually",
+    "key_trends": [
+      "Growing demand for premium and exotic fruit products",
+      "Increasing focus on sustainable and ethical sourcing",
+      "Rising popularity of healthy snacking options",
+      "Strong market for organic and natural products"
+    ]
+  },
+  "regulatory_environment": {
+    "import_regulations": {
+      "key_requirements": [
+        "UK Global Tariff (UKGT) applies post-Brexit",
+        "Phytosanitary certificates required for all fresh produce",
+        "Compliance with UK Food Safety standards",
+        "Product labeling must meet UK regulations"
+      ],
+      "labeling_requirements": [
+        "English language labeling required",
+        "Nutritional information in UK format",
+        "Country of origin clearly marked",
+        "Allergen information prominently displayed"
+      ]
+    }
+  }
 } 
