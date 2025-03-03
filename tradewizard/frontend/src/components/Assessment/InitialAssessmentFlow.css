@@ -50,7 +50,7 @@
 }
 
 .message {
-  max-width: 85%; /* Increased from 75% to allow wider messages */
+  max-width: 90%; /* Increased from 85% to allow wider messages */
   padding: 8px 12px;
   border-radius: 8px;
   line-height: 1.5;
@@ -76,6 +76,7 @@
   border-top-left-radius: 8px;
   border-bottom-left-radius: 0;
   margin-right: auto;
+  max-width: 90%; /* Use max-width instead of fixed width */
 }
 
 .input-container {
@@ -121,7 +122,7 @@
   outline: none;
   transition: border-color 0.2s ease;
   box-shadow: none;
-  background-color: white;
+  background-color: transparent; /* Changed from white to transparent */
 }
 
 .chat-input button {
