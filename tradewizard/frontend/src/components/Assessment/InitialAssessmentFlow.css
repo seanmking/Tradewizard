@@ -25,7 +25,7 @@
 .messages-container {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 40px; /* Increased horizontal padding */
+  padding: 16px 20px; /* Reduced horizontal padding to allow more space for messages */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -50,7 +50,7 @@
 }
 
 .message {
-  max-width: 90%; /* Increased from 85% to allow wider messages */
+  max-width: 95%; /* Dramatically increased from 90% to allow much wider messages */
   padding: 8px 12px;
   border-radius: 8px;
   line-height: 1.5;
@@ -76,11 +76,20 @@
   border-top-left-radius: 8px;
   border-bottom-left-radius: 0;
   margin-right: auto;
-  max-width: 90%; /* Use max-width instead of fixed width */
+  max-width: 95%; /* Dramatically increased to match message max-width */
+  width: auto; /* Allow the message to size naturally based on content */
+}
+
+/* Add styles to center the first message from the assistant */
+.assistant-wrapper:first-child .assistant-message {
+  margin: 0 auto;
+  max-width: 80%;
+  border-radius: 8px;
+  text-align: center;
 }
 
 .input-container {
-  padding: 10px 40px; /* Increased horizontal padding */
+  padding: 10px 20px; /* Reduced horizontal padding to match messages container */
   background-color: #f0f0f0;
   position: fixed;
   bottom: 0;
@@ -122,7 +131,7 @@
   outline: none;
   transition: border-color 0.2s ease;
   box-shadow: none;
-  background-color: transparent; /* Changed from white to transparent */
+  background-color: transparent; /* Ensure this is transparent */
 }
 
 .chat-input button {
