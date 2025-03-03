@@ -2,50 +2,71 @@
   background-color: #f8f9fa;
   border-radius: 12px;
   padding: 20px;
-  margin: 10px 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin: 20px 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   max-width: 100%;
   position: relative;
   z-index: 1;
+  border: 1px solid #e0e4e8;
 }
 
 .market-selection-panel h3 {
   margin-top: 0;
   color: #2c3e50;
-  font-size: 1.3rem;
-  margin-bottom: 10px;
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .selection-instruction {
-  margin-bottom: 15px;
+  margin-bottom: 18px;
   color: #5a6268;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .markets-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 12px;
-  margin-bottom: 15px;
-  max-height: 300px;
+  gap: 15px;
+  margin-bottom: 20px;
+  max-height: 350px;
   overflow-y: auto;
-  padding-right: 5px;
+  padding-right: 8px;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f8f9fa;
+}
+
+.markets-grid::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to top, rgba(248, 249, 250, 0.9), rgba(248, 249, 250, 0));
+  pointer-events: none;
+  opacity: 0.8;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .market-card {
   background-color: white;
   border-radius: 8px;
-  padding: 14px;
+  padding: 16px;
   border: 2px solid #e9ecef;
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .market-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  border-color: #d0d7de;
 }
 
 .market-card.selected {
@@ -160,4 +181,51 @@
   .submit-selection {
     width: 100%;
   }
+}
+
+.scroll-indicator {
+  text-align: center;
+  margin: -5px 0 15px;
+  color: #4f46e5;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: pulse 2s infinite;
+}
+
+.scroll-arrow {
+  font-size: 1.2rem;
+  margin-top: 3px;
+  animation: bounce 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+.markets-grid.scrollable {
+  border-bottom: 1px dashed #cbd5e0;
+  padding-bottom: 10px;
 } 

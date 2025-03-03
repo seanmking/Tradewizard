@@ -370,13 +370,18 @@ const InitialAssessmentFlow: React.FC = () => {
             {message.role === 'assistant' && 
              message.metadata?.step === 'target_markets' && 
              index === messages.length - 1 && (
-              <div className="market-selection-container">
-                <MarketSelectionPanel
-                  markets={message.metadata?.marketOptions || []}
-                  onSubmit={handleMarketsSubmit}
-                  isLoading={isTyping}
-                />
-              </div>
+              <>
+                <div className="market-selection-intro">
+                  <p>Please select your target markets below:</p>
+                </div>
+                <div className="market-selection-container">
+                  <MarketSelectionPanel
+                    markets={message.metadata?.marketOptions || []}
+                    onSubmit={handleMarketsSubmit}
+                    isLoading={isTyping}
+                  />
+                </div>
+              </>
             )}
             
             {/* Render account creation button if this is the summary step */}

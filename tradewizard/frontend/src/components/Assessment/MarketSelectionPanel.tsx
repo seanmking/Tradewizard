@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MarketOption } from '../../services/assessment-api';
 import './MarketSelectionPanel.css';
 
@@ -14,6 +14,25 @@ const MarketSelectionPanel: React.FC<MarketSelectionPanelProps> = ({
   isLoading
 }) => {
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const marketsGridRef = useRef<HTMLDivElement>(null);
+  
+  // Check if scrolling is needed
+  useEffect(() => {
+    const checkScrollable = () => {
+      if (marketsGridRef.current) {
+        const { scrollHeight, clientHeight } = marketsGridRef.current;
+        setShowScrollIndicator(scrollHeight > clientHeight);
+      }
+    };
+    
+    checkScrollable();
+    window.addEventListener('resize', checkScrollable);
+    
+    return () => {
+      window.removeEventListener('resize', checkScrollable);
+    };
+  }, [markets]);
   
   // Debug log to check if markets are being received
   console.log('MarketSelectionPanel received markets:', markets);
@@ -42,7 +61,7 @@ const MarketSelectionPanel: React.FC<MarketSelectionPanelProps> = ({
       </p>
       
       <form onSubmit={handleSubmit}>
-        <div className="markets-grid">
+        <div className={`markets-grid ${showScrollIndicator ? 'scrollable' : ''}`} ref={marketsGridRef}>
           {markets.map(market => (
             <div 
               key={market.id} 
@@ -66,6 +85,13 @@ const MarketSelectionPanel: React.FC<MarketSelectionPanelProps> = ({
             </div>
           ))}
         </div>
+        
+        {showScrollIndicator && (
+          <div className="scroll-indicator">
+            <span>Scroll to see more markets</span>
+            <div className="scroll-arrow">↓</div>
+          </div>
+        )}
         
         <div className="selection-actions">
           <div className="selected-count">
