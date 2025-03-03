@@ -353,128 +353,128 @@ const InitialAssessmentFlow: React.FC = () => {
     setShowDashboard(true);
   };
   
+  const getInputPlaceholder = () => {
+    if (isTyping) return "Sarah is typing...";
+    if (currentStep?.type === 'market_selection') return "Please select markets above...";
+    return "Type your message...";
+  };
+  
+  const renderMessages = () => {
+    return messages.map((message, index) => {
+      const isLastMessage = index === messages.length - 1;
+      const showMarketSelection = 
+        message.role === 'assistant' && 
+        message.metadata?.step === 'target_markets' && 
+        isLastMessage;
+      
+      return (
+        <div key={message.timestamp} className={`message-wrapper ${message.role}-wrapper`}>
+          <div className={`message ${message.role}-message`}>
+            <div className="message-text">
+              {message.content.split('\n\n').map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
+              ))}
+            </div>
+          </div>
+          
+          {showMarketSelection && (
+            <>
+              <div className="step-transition-indicator">
+                <div className="step-indicator-line"></div>
+                <div className="step-indicator-text">Market Selection</div>
+                <div className="step-indicator-line"></div>
+              </div>
+              <div className="market-selection-intro">
+                <p>Please select the target markets you're interested in exploring:</p>
+              </div>
+              <div className="market-selection-container">
+                <MarketSelectionPanel 
+                  markets={message.metadata?.marketOptions || []} 
+                  onSubmit={handleMarketsSubmit}
+                  isLoading={isTyping}
+                />
+              </div>
+            </>
+          )}
+
+          {/* Render account creation button if this is the summary step */}
+          {message.role === 'assistant' && 
+           message.metadata?.step === 'summary' && 
+           isLastMessage && 
+           !accountCreated && (
+            <div className="create-account-button-container">
+              <button 
+                className="create-account-button"
+                onClick={() => setShowAccountCreation(true)}
+              >
+                Create account and access Export-readiness report
+              </button>
+            </div>
+          )}
+          
+          {/* Render download report button if account has been created */}
+          {message.role === 'assistant' && 
+           message.metadata?.step === 'account_created' && 
+           isLastMessage && (
+            <div className="readiness-report-link-container">
+              <a 
+                className="readiness-report-link"
+                onClick={handleAccessReport}
+              >
+                Access your Export-readiness report
+              </a>
+            </div>
+          )}
+        </div>
+      );
+    });
+  };
+  
   return (
     <div className="assessment-flow-container">
-      <div className="messages-container" ref={messagesContainerRef}>
-        {messages.map((message, index) => (
-          <div 
-            key={index} 
-            className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}
-          >
-            {/* Format the message content with proper paragraph breaks */}
-            {message.content.split('\n\n').map((paragraph, i) => (
-              <p key={i}>{paragraph}</p>
-            ))}
-            
-            {/* Render market selection panel if this is a market selection step */}
-            {message.role === 'assistant' && 
-             message.metadata?.step === 'target_markets' && 
-             index === messages.length - 1 && (
-              <>
-                <div className="market-selection-intro">
-                  <p>Please select your target markets below:</p>
-                </div>
-                <div className="market-selection-container">
-                  <MarketSelectionPanel
-                    markets={message.metadata?.marketOptions || []}
-                    onSubmit={handleMarketsSubmit}
-                    isLoading={isTyping}
-                  />
-                </div>
-              </>
-            )}
-            
-            {/* Render account creation button if this is the summary step */}
-            {message.role === 'assistant' && 
-             message.metadata?.step === 'summary' && 
-             index === messages.length - 1 && 
-             !accountCreated && (
-              <div className="create-account-button-container">
-                <button 
-                  className="create-account-button"
-                  onClick={() => setShowAccountCreation(true)}
-                >
-                  Create account and access Export-readiness report
-                </button>
-              </div>
-            )}
-            
-            {/* Render download report button if account has been created */}
-            {message.role === 'assistant' && 
-             message.metadata?.step === 'account_created' && 
-             index === messages.length - 1 && (
-              <div className="readiness-report-link-container">
-                <a 
-                  className="readiness-report-link"
-                  onClick={handleAccessReport}
-                >
-                  Access your Export-readiness report
-                </a>
-              </div>
-            )}
+      <div className="initial-assessment-container">
+        <div className={`chat-container ${showDashboard ? 'with-dashboard' : ''}`}>
+          <div className="messages-container" ref={messagesContainerRef}>
+            {renderMessages()}
+            <div ref={messagesEndRef} />
+            {isTyping && <div className="message assistant-message"><TypingIndicator /></div>}
           </div>
-        ))}
-        
-        {isTyping && (
-          <div className="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
+          <div className="input-container">
+            <ChatInput 
+              onSubmit={handleSubmit} 
+              isLoading={isTyping}
+              disableInput={!currentStep || currentStep.type === 'final' || currentStep.type === 'market_selection' || showDashboard}
+              dropdownOptions={getDropdownOptions()}
+              inputRef={inputRef}
+            />
           </div>
+        </div>
+        {showDashboard && dashboardData && (
+          <MarketIntelligenceDashboard 
+            dashboardData={dashboardData} 
+            userData={userData}
+            onClose={handleCloseDashboard}
+          />
         )}
-        
-        <div ref={messagesEndRef} />
-      </div>
-      
-      <div className="input-container">
-        <ChatInput
-          onSubmit={handleSubmit}
-          isLoading={isTyping}
-          disableInput={!currentStep || currentStep.type === 'final' || currentStep.type === 'market_selection' || showDashboard}
-          dropdownOptions={[]} // We're not using the dropdown in ChatInput anymore for market selection
-          inputRef={inputRef}
-        />
-        
-        {/* Add create account button when at final step */}
-        {currentStep && currentStep.type === 'final' && !accountCreated && (
-          <div className="create-account-button-container" style={{ marginTop: '15px', textAlign: 'center' }}>
-            <button 
-              className="create-account-button"
-              onClick={() => setShowAccountCreation(true)}
-            >
-              Create account and access Export-readiness report
-            </button>
-          </div>
+        {/* Account creation modal */}
+        {showAccountCreation && (
+          <AccountCreation
+            onSuccess={handleAccountCreationSuccess}
+            onCancel={handleAccountCreationCancel}
+          />
+        )}
+        {/* Export readiness report modal */}
+        {showReadinessReport && (
+          <ExportReadinessReport
+            userData={{
+              companyName: 'Global Fresh SA',
+              selectedMarkets: userData.selectedMarkets || ['European Union', 'United Arab Emirates']
+            }}
+            onClose={handleCloseReport}
+            onGoToDashboard={handleGoToDashboard}
+          />
         )}
       </div>
-      
-      {showDashboard && dashboardData && (
-        <MarketIntelligenceDashboard 
-          dashboardData={dashboardData} 
-          userData={userData}
-          onClose={handleCloseDashboard}
-        />
-      )}
-      
-      {/* Account creation modal */}
-      {showAccountCreation && (
-        <AccountCreation
-          onSuccess={handleAccountCreationSuccess}
-          onCancel={handleAccountCreationCancel}
-        />
-      )}
-      
-      {/* Export readiness report modal */}
-      {showReadinessReport && (
-        <ExportReadinessReport
-          userData={{
-            companyName: 'Global Fresh SA',
-            selectedMarkets: userData.selectedMarkets || ['European Union', 'United Arab Emirates']
-          }}
-          onClose={handleCloseReport}
-          onGoToDashboard={handleGoToDashboard}
-        />
-      )}
     </div>
   );
 };
