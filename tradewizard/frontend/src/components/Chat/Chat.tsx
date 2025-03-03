@@ -719,7 +719,7 @@ const Chat = () => {
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}
+              className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'} ${index === 0 ? 'first-message' : ''}`}
             >
               <div className="message-content">{message.content}</div>
             </div>
