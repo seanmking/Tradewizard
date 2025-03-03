@@ -95,6 +95,10 @@ const Chat = () => {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
 
+  // State for tracking scrolling and showing new message indicator
+  const [showNewMessageIndicator, setShowNewMessageIndicator] = React.useState(false);
+  const messagesContainerRef = React.useRef<HTMLDivElement>(null);
+
   // Focus input when component mounts and after loading states change
   React.useEffect(() => {
     const focusInput = () => {
@@ -112,30 +116,64 @@ const Chat = () => {
     return () => clearTimeout(timeoutId);
   }, [isLoading, showVerificationForm]);
 
-  // Scroll to better position when new messages appear
+  // Advanced scroll behavior with message visibility detection
   const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      // Find the last assistant message or UI component that should be shown
-      const assistantMessages = document.querySelectorAll('.assistant-message');
-      const marketSelectionPanel = document.querySelector('.market-selection-panel');
+    if (messagesEndRef.current && messagesContainerRef.current) {
+      // Calculate if user is already at the bottom before scrolling
+      const container = messagesContainerRef.current;
+      const isAtBottom = 
+        Math.abs((container.scrollHeight - container.scrollTop) - container.clientHeight) < 50;
       
-      if (marketSelectionPanel) {
-        // If there's a market selection panel, scroll to show it at the top
-        marketSelectionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else if (assistantMessages.length > 0) {
-        // If there are assistant messages, scroll to show the last one from the top
-        const lastAssistantMessage = assistantMessages[assistantMessages.length - 1];
-        lastAssistantMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (isAtBottom) {
+        // If at bottom, find specific elements to scroll to
+        const marketSelectionPanel = document.querySelector('.market-selection-panel');
+        const assistantMessages = document.querySelectorAll('.assistant-message');
+        
+        if (marketSelectionPanel) {
+          // If there's a market selection panel, scroll to show it from the top
+          marketSelectionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (assistantMessages.length > 0) {
+          // If there are assistant messages, scroll to show the last one from the top
+          const lastAssistantMessage = assistantMessages[assistantMessages.length - 1];
+          lastAssistantMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          // Default fallback - scroll to bottom
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        setShowNewMessageIndicator(false);
       } else {
-        // Default fallback - scroll to bottom
-        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        // If user has scrolled up, show indicator but don't auto-scroll
+        setShowNewMessageIndicator(true);
       }
     }
   };
 
+  // Add scroll event listener to detect user scrolling
   React.useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const container = messagesContainerRef.current;
+    
+    const handleScroll = () => {
+      if (container) {
+        const isAtBottom = 
+          Math.abs((container.scrollHeight - container.scrollTop) - container.clientHeight) < 50;
+        
+        if (isAtBottom) {
+          setShowNewMessageIndicator(false);
+        }
+      }
+    };
+    
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
+  const handleScrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setShowNewMessageIndicator(false);
+  };
 
   // Initialize chat session only once
   React.useEffect(() => {
@@ -660,12 +698,10 @@ const Chat = () => {
       {assessmentState.progress.completed > 0 && (
         <div className="chat-header">
           <div className="progress-container">
-            <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
+            <div 
+              className="progress-bar"
+              style={{ width: `${progressPercentage}%` }}
+            />
             <div className="progress-label">
               Step {assessmentState.progress.completed} of {assessmentState.progress.total}
             </div>
@@ -673,39 +709,51 @@ const Chat = () => {
         </div>
       )}
 
-      <div className="messages-container">
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}
-          >
-            <div className="message-content">{message.content}</div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="message assistant-message">
-            <TypingIndicator />
-          </div>
-        )}
-        {showVerificationButton && (
-          <div className="verification-button-container">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleProceedToVerification}
-              sx={{ mt: 2, mb: 2 }}
+      <div className="messages-container" ref={messagesContainerRef}>
+        <div className="messages-content">
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}
             >
-              Proceed to Business Verification
-            </Button>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+              <div className="message-content">{message.content}</div>
+            </div>
+          ))}
+          {isLoading && (
+            <div className="message assistant-message">
+              <TypingIndicator />
+            </div>
+          )}
+          {showVerificationButton && (
+            <div className="verification-button-container">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleProceedToVerification}
+                sx={{ mt: 2, mb: 2 }}
+              >
+                Proceed to Business Verification
+              </Button>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
+      
+      {/* New message indicator */}
+      {showNewMessageIndicator && (
+        <div className="new-message-indicator visible" onClick={handleScrollToBottom}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 14l-7 7m0 0l-7-7m7 7V3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span style={{ marginLeft: '4px' }}>New message</span>
+        </div>
+      )}
       
       <div className="chat-input">
         <form onSubmit={handleSubmit}>
@@ -714,7 +762,6 @@ const Chat = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
             placeholder="Type your message..."
             disabled={isLoading}
             rows={1}

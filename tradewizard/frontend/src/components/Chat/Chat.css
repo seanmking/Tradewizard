@@ -4,7 +4,8 @@
   height: calc(100vh - 280px); /* Adjusted to account for page header, title, and description */
   min-height: 400px;
   max-height: 800px;
-  background-color: #f0f2f5; /* WhatsApp background color */
+  background-color: #e5ddd5; /* WhatsApp background pattern background */
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%23bdbdbd' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
   border-radius: 12px;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -41,9 +42,14 @@
   background-color: #e0e0e0;
   border-radius: 2px;
   overflow: hidden;
+  position: relative;
 }
 
-.progress-fill {
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
   background-color: #4f46e5;
   transition: width 0.3s ease;
@@ -64,27 +70,35 @@
   min-height: 200px;
   scroll-behavior: smooth;
   max-height: calc(100% - 60px);
-  background-color: #f0f2f5; /* WhatsApp background color */
   width: 100%;
 }
 
+/* Create a centered container for messages with max width */
+.messages-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 .message {
-  max-width: 70%; /* Reduced to ensure proper spacing */
+  max-width: 60%; /* WhatsApp-style width constraint */
   padding: 12px 16px;
   border-radius: 8px;
   position: relative;
   line-height: 1.5;
   font-size: 15px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   white-space: pre-wrap;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  width: fit-content; /* Use only as much width as needed */
+  width: fit-content;
 }
 
 .user-message {
   align-self: flex-end;
   background-color: #dcf8c6; /* WhatsApp user message color */
-  color: #333;
+  color: #303030;
   border-bottom-right-radius: 0;
   margin-left: auto;
 }
@@ -92,26 +106,53 @@
 .assistant-message {
   align-self: flex-start;
   background-color: white;
-  color: #333;
+  color: #303030;
   border-bottom-left-radius: 0;
   margin-right: auto;
   text-align: left;
 }
 
-/* Remove the centered styling for first assistant message */
+/* Make all assistant messages consistent - no centering */
 .messages-container .assistant-message:first-child {
   align-self: flex-start;
+  max-width: 60%;
   margin-right: auto;
+  text-align: left;
   border-radius: 8px;
   border-bottom-left-radius: 0;
 }
 
+/* Message tails for chat bubbles */
+.user-message::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background-color: #dcf8c6;
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  border-bottom-left-radius: 4px;
+}
+
+.assistant-message::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -10px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  border-bottom-right-radius: 4px;
+}
+
 .assistant-message p {
-  margin: 0 0 10px 0; /* Add spacing between paragraphs */
+  margin: 0 0 8px 0;
 }
 
 .assistant-message p:last-child {
-  margin-bottom: 0; /* Remove margin from last paragraph */
+  margin-bottom: 0;
 }
 
 .message-content {
@@ -121,6 +162,7 @@
 .message-metadata {
   font-size: 12px;
   opacity: 0.7;
+  text-align: right;
 }
 
 .chat-input {
@@ -283,7 +325,7 @@
   }
 
   .message {
-    max-width: 90%;
+    max-width: 75%; /* More width on mobile */
   }
   
   .chat-input {
@@ -311,6 +353,10 @@
   .dropdown-submit-button {
     width: 100%;
     min-width: unset;
+  }
+
+  .messages-container .assistant-message:first-child {
+    max-width: 75%;
   }
 }
 
@@ -348,19 +394,47 @@
 /* Market selection panel container modifications */
 .market-selection-panel {
   width: 100%;
-  max-width: 100%;
-  padding: 15px;
-  margin: 10px 0;
+  max-width: 900px;
+  margin: 15px auto;
+  padding: 12px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .markets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
   width: 100%;
 }
 
 .market-card {
   width: 100%;
   height: 100%;
+}
+
+/* New message indicator for when user has scrolled up */
+.new-message-indicator {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  background-color: #4ade80;
+  color: white;
+  border-radius: 24px;
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.new-message-indicator.visible {
+  opacity: 1;
+  transform: translateY(0);
 } 

@@ -1,10 +1,11 @@
 .market-selection-panel {
-  background-color: #f8f9fa;
+  background-color: white;
   border-radius: 12px;
-  padding: 12px;
-  margin: 10px 0;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  margin: 12px auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 100%;
+  max-width: 900px;
   position: relative;
   z-index: 1;
   border: 1px solid #e0e4e8;
@@ -19,7 +20,7 @@
 }
 
 .selection-instruction {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: #5a6268;
   font-size: 0.85rem;
   line-height: 1.4;
@@ -27,16 +28,14 @@
 
 .markets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 12px;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
+  width: 100%;
+  position: relative;
   max-height: 350px;
   overflow-y: auto;
   padding-right: 8px;
-  width: 100%;
-  position: relative;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e0 #f8f9fa;
 }
 
 .markets-grid::after {
@@ -62,6 +61,9 @@
   position: relative;
   transition: all 0.2s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .market-card:hover {
