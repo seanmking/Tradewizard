@@ -271,6 +271,11 @@ const InitialAssessmentFlow: React.FC = () => {
   const handleCloseReport = () => {
     setShowReadinessReport(false);
   };
+
+  const handleGoToDashboard = () => {
+    setShowReadinessReport(false);
+    setShowDashboard(true);
+  };
   
   return (
     <div className="assessment-flow-container">
@@ -373,6 +378,7 @@ const InitialAssessmentFlow: React.FC = () => {
             selectedMarkets: userData.selectedMarkets || ['European Union', 'United Arab Emirates']
           }}
           onClose={handleCloseReport}
+          onGoToDashboard={handleGoToDashboard}
         />
       )}
     </div>

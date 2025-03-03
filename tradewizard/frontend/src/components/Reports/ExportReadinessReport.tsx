@@ -15,14 +15,14 @@ interface MarketInsights {
 interface ExportReadinessReportProps {
   userData: Record<string, any>;
   onClose: () => void;
+  onGoToDashboard?: () => void;
 }
 
-const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData, onClose }) => {
+const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData, onClose, onGoToDashboard }) => {
   // Mock data for the report
   const reportData = {
     companyName: userData.companyName || 'Global Fresh SA',
     selectedMarkets: userData.selectedMarkets || ['European Union', 'United Arab Emirates'],
-    readinessScore: 78,
     strengths: [
       'HACCP Level 1 certification',
       'Premium product positioning',
@@ -106,18 +106,6 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData,
             <h2>Company Overview</h2>
             <p><strong>Company:</strong> {reportData.companyName}</p>
             <p><strong>Target Markets:</strong> {reportData.selectedMarkets.join(', ')}</p>
-            <div className="readiness-score">
-              <h3>Export Readiness Score</h3>
-              <div className="score-container">
-                <div className="score-circle">
-                  <span className="score-value">{reportData.readinessScore}%</span>
-                </div>
-                <div className="score-label">
-                  {reportData.readinessScore >= 75 ? 'Ready with minor adjustments' : 
-                   reportData.readinessScore >= 50 ? 'Moderately ready' : 'Needs significant preparation'}
-                </div>
-              </div>
-            </div>
           </div>
           
           <div className="report-section strengths-weaknesses">
@@ -200,7 +188,13 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData,
         
         <div className="report-footer">
           <button className="download-pdf-button">Download PDF Report</button>
-          <button className="close-report-button" onClick={onClose}>Close Report</button>
+          {onGoToDashboard ? (
+            <button className="go-to-dashboard-button" onClick={onGoToDashboard}>
+              Go to your Dashboard
+            </button>
+          ) : (
+            <button className="close-report-button" onClick={onClose}>Close Report</button>
+          )}
         </div>
       </div>
     </div>

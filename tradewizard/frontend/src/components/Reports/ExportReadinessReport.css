@@ -102,59 +102,6 @@
   font-size: 16px;
 }
 
-.readiness-score {
-  margin-top: 20px;
-  background-color: #f7fafc;
-  padding: 20px;
-  border-radius: 10px;
-}
-
-.readiness-score h3 {
-  margin-top: 0;
-  color: #4a5568;
-  font-size: 18px;
-}
-
-.score-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.score-circle {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: conic-gradient(#4f46e5 0% 78%, #e2e8f0 78% 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.score-circle::before {
-  content: '';
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background-color: white;
-}
-
-.score-value {
-  position: relative;
-  z-index: 1;
-  font-size: 24px;
-  font-weight: bold;
-  color: #2d3748;
-}
-
-.score-label {
-  font-size: 18px;
-  font-weight: 500;
-  color: #4f46e5;
-}
-
 .strengths-weaknesses {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -319,32 +266,43 @@
   justify-content: space-between;
 }
 
-.download-pdf-button, .close-report-button {
+.download-pdf-button, .close-report-button, .go-to-dashboard-button {
   padding: 10px 20px;
   border-radius: 6px;
-  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  border: none;
 }
 
 .download-pdf-button {
-  background-color: #4f46e5;
-  color: white;
+  background-color: white;
+  color: #4f46e5;
+  border: 1px solid #4f46e5;
 }
 
 .download-pdf-button:hover {
-  background-color: #4338ca;
+  background-color: #f5f5ff;
 }
 
 .close-report-button {
   background-color: #e2e8f0;
   color: #4a5568;
+  border: none;
 }
 
 .close-report-button:hover {
   background-color: #cbd5e0;
+}
+
+.go-to-dashboard-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+.go-to-dashboard-button:hover {
+  background-color: #4338ca;
 }
 
 @media (max-width: 768px) {
@@ -372,7 +330,7 @@
     gap: 10px;
   }
   
-  .download-pdf-button, .close-report-button {
+  .download-pdf-button, .close-report-button, .go-to-dashboard-button {
     width: 100%;
   }
 } 
