@@ -28,8 +28,9 @@
   gap: 12px;
   background-color: #f5f7fb;
   scroll-behavior: smooth;
-  max-height: calc(100vh - 350px);
-  min-height: 400px;
+  height: calc(100vh - 180px);
+  max-height: calc(100vh - 180px);
+  min-height: 300px;
 }
 
 .message {
@@ -286,6 +287,8 @@
   display: inline-block;
   position: relative;
   z-index: 1;
+  text-align: center;
+  width: 100%;
 }
 
 .readiness-report-link-container {
@@ -297,16 +300,17 @@
 
 .create-account-button {
   display: inline-block;
-  padding: 8px 16px;
+  padding: 12px 24px;
   background-color: #4f46e5;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+  margin: 0 auto;
 }
 
 .create-account-button:hover {
@@ -331,7 +335,7 @@
 .assessment-flow-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
   width: 100%;
   background-color: #fff;
   border-radius: 12px;
@@ -358,4 +362,14 @@
 
 .blue-overlay-button:hover {
   background-color: #4338ca;
+}
+
+.input-container {
+  padding: 15px;
+  border-top: 1px solid #eaeaea;
+  background-color: #fff;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  z-index: 10;
 } 
