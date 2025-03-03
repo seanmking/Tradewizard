@@ -432,6 +432,15 @@ const InitialAssessmentFlow: React.FC = () => {
   
   return (
     <div className="assessment-flow-container">
+      {/* Header with reduced height */}
+      <div className="export-readiness-header">
+        <h1>Export Readiness Assessment</h1>
+      </div>
+      <div className="export-readiness-subheader">
+        Complete this interactive assessment to evaluate your export readiness and
+        receive a personalized action plan for international market entry.
+      </div>
+
       <div className="initial-assessment-container">
         <div className={`chat-container ${showDashboard ? 'with-dashboard' : ''}`}>
           <div className="messages-container" ref={messagesContainerRef}>
@@ -449,31 +458,39 @@ const InitialAssessmentFlow: React.FC = () => {
             />
           </div>
         </div>
+        
         {showDashboard && dashboardData && (
           <MarketIntelligenceDashboard 
-            dashboardData={dashboardData} 
+            dashboardData={dashboardData}
             userData={userData}
             onClose={handleCloseDashboard}
           />
         )}
-        {/* Account creation modal */}
-        {showAccountCreation && (
-          <AccountCreation
-            onSuccess={handleAccountCreationSuccess}
-            onCancel={handleAccountCreationCancel}
-          />
-        )}
-        {/* Export readiness report modal */}
-        {showReadinessReport && (
-          <ExportReadinessReport
-            userData={{
-              companyName: 'Global Fresh SA',
-              selectedMarkets: userData.selectedMarkets || ['European Union', 'United Arab Emirates']
-            }}
-            onClose={handleCloseReport}
-            onGoToDashboard={handleGoToDashboard}
-          />
-        )}
+      </div>
+
+      {/* Account creation modal */}
+      {showAccountCreation && (
+        <AccountCreation
+          onSuccess={handleAccountCreationSuccess}
+          onCancel={handleAccountCreationCancel}
+        />
+      )}
+
+      {/* Export readiness report modal */}
+      {showReadinessReport && (
+        <ExportReadinessReport
+          userData={{
+            companyName: 'Global Fresh SA',
+            selectedMarkets: userData.selectedMarkets || ['European Union', 'United Arab Emirates']
+          }}
+          onClose={handleCloseReport}
+          onGoToDashboard={handleGoToDashboard}
+        />
+      )}
+
+      {/* Footer with reduced height */}
+      <div className="app-footer">
+        © {new Date().getFullYear()} TradeWizard. All rights reserved.
       </div>
     </div>
   );
