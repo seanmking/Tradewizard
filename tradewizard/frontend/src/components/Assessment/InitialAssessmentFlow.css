@@ -1,11 +1,13 @@
 .initial-assessment-container {
   display: flex;
+  flex-direction: column;
   height: 100%;
   width: 100%;
   background-color: transparent;
   overflow: hidden;
   border: none;
   box-shadow: none;
+  position: relative;
 }
 
 .chat-container {
@@ -13,6 +15,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: 100%;
   background-color: transparent;
   position: relative;
   overflow: hidden;
@@ -28,12 +31,12 @@
   gap: 12px;
   background-color: transparent;
   scroll-behavior: smooth;
-  height: calc(100% - 60px);
   position: relative;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   border: none;
   margin: 0;
+  padding-bottom: 70px; /* Add padding to ensure messages don't get hidden behind input */
 }
 
 .message-wrapper {
@@ -77,17 +80,27 @@
 .input-container {
   padding: 10px 16px;
   background-color: #f0f0f0;
-  position: sticky;
+  position: fixed;
   bottom: 0;
-  width: 100%;
-  z-index: 10;
+  left: 280px; /* Width of the sidebar */
+  right: 0;
+  z-index: 100;
   border-top: 1px solid #e0e0e0;
-  box-shadow: none;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Adjust for mobile */
+@media (max-width: 768px) {
+  .input-container {
+    left: 70px; /* Width of the collapsed sidebar */
+  }
 }
 
 .chat-input {
   width: 100%;
   position: relative;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .chat-input form {
