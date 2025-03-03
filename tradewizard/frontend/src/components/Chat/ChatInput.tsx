@@ -97,8 +97,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
               type="submit" 
               disabled={isLoading || !selectedOption}
               className="dropdown-submit-button"
+              aria-label="Send"
             >
-              {isLoading ? 'Sending...' : 'Send'}
+              {/* Icon is added via CSS */}
             </button>
           </div>
         ) : (
@@ -110,15 +111,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
               onKeyPress={handleKeyPress}
               placeholder={disableInput ? "Please use the selection options above..." : "Type your message..."}
               disabled={isLoading || disableInput}
-              rows={3}
+              rows={1}
               autoFocus={true}
             />
             <button 
               type="submit" 
               disabled={isLoading || disableInput || !input.trim()}
               onClick={handleSubmit}
+              aria-label="Send"
             >
-              {isLoading ? 'Sending...' : 'Send'}
+              {/* Icon is added via CSS */}
             </button>
           </>
         )}
