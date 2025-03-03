@@ -704,8 +704,8 @@ const Chat = () => {
             rows={1}
             autoFocus
           />
-          <button type="submit" disabled={isLoading || !input.trim()}>
-            {isLoading ? 'Sending...' : 'Send'}
+          <button type="submit" disabled={isLoading || !input.trim()} aria-label="Send">
+            {/* Icon is added via CSS */}
           </button>
         </form>
       </div>

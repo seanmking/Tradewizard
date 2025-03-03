@@ -146,24 +146,46 @@
 }
 
 .chat-input button {
-  padding: 8px 24px;
-  background-color: #4f46e5;
+  background-color: #00a884; /* WhatsApp green */
   color: white;
   border: none;
-  border-radius: 24px;
-  font-size: 15px;
-  font-weight: 500;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  margin-left: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  font-size: 0;
+  overflow: hidden;
 }
 
 .chat-input button:hover:not(:disabled) {
-  background-color: #4338ca;
+  background-color: #008f72; /* Darker green on hover */
 }
 
 .chat-input button:disabled {
-  opacity: 0.5;
+  background-color: #c7c7c7;
   cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+/* Add a send icon for the button */
+.chat-input button::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M2.01 21L23 12 2.01 3 2 10l15 2-15 2z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .typing-indicator {
