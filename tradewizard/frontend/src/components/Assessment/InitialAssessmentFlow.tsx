@@ -3,6 +3,7 @@ import ChatInput, { DropdownOption } from '../Chat/ChatInput';
 import MarketIntelligenceDashboard from '../Dashboard/MarketIntelligenceDashboard';
 import MarketSelectionPanel from './MarketSelectionPanel';
 import AccountCreation from '../Auth/AccountCreation';
+import ExportReadinessReport from '../Reports/ExportReadinessReport';
 import { 
   processAssessmentResponse, 
   getInitialQuestion, 
@@ -39,6 +40,7 @@ const InitialAssessmentFlow: React.FC = () => {
   const [showAccountCreation, setShowAccountCreation] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
   const [username, setUsername] = useState('');
+  const [showReadinessReport, setShowReadinessReport] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -258,8 +260,12 @@ const InitialAssessmentFlow: React.FC = () => {
   
   // Handle accessing the export readiness report
   const handleAccessReport = () => {
-    // In a real application, this would navigate to the report page or open a modal
-    alert('In a real application, this would open your export readiness report with detailed market analysis and next steps.');
+    setShowReadinessReport(true);
+  };
+  
+  // Handle closing the export readiness report
+  const handleCloseReport = () => {
+    setShowReadinessReport(false);
   };
   
   return (
@@ -352,6 +358,17 @@ const InitialAssessmentFlow: React.FC = () => {
         <AccountCreation
           onSuccess={handleAccountCreationSuccess}
           onCancel={handleAccountCreationCancel}
+        />
+      )}
+      
+      {/* Export readiness report modal */}
+      {showReadinessReport && (
+        <ExportReadinessReport
+          userData={{
+            companyName: 'Global Fresh SA',
+            selectedMarkets: userData.selectedMarkets || ['European Union', 'United Arab Emirates']
+          }}
+          onClose={handleCloseReport}
         />
       )}
     </div>
