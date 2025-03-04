@@ -64,6 +64,11 @@ export const CustomDraggable: React.FC<{
   disableInteractiveElementBlocking = false,
   shouldRespectForcePress = true
 }) => {
+  // Log the draggableId for debugging
+  React.useEffect(() => {
+    console.log(`Draggable component mounted with ID: ${draggableId}`);
+  }, [draggableId]);
+
   return (
     <Draggable
       draggableId={draggableId}

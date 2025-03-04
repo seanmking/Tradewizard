@@ -311,8 +311,10 @@ const ExportTimeline: React.FC<ExportTimelineProps> = ({ onContinue }) => {
       
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Button 
+          variant="outlined"
           disabled={activeStep === 0}
           onClick={handleBack}
+          sx={{ minWidth: '80px' }}
         >
           Back
         </Button>

@@ -63,21 +63,17 @@
   height: 20px;
 }
 
+/* Remove special styling for assessment tab */
 .sidebar-nav a.assessment-tab {
-  background-color: #4f46e5;
-  color: white;
-  font-weight: bold;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  margin: 5px 10px 15px 10px;
+  /* No special styling to make it uniform with other tabs */
 }
 
 .sidebar-nav a.assessment-tab:hover {
-  background-color: #3c37b5;
+  /* Use the default hover style */
 }
 
 .sidebar-nav a.assessment-tab svg {
-  color: white;
+  /* Use the default svg style */
 }
 
 .main-content {

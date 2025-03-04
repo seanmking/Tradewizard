@@ -27,7 +27,7 @@ interface MarketPrioritizationProps {
 // Mock market data
 const mockMarketData: Record<string, MarketData> = {
   "United Kingdom": {
-    id: "uk",
+    id: "united-kingdom",
     name: "United Kingdom",
     match_score: 85,
     market_size: "$24.5 billion",
@@ -37,7 +37,7 @@ const mockMarketData: Record<string, MarketData> = {
     strengths: ['Strong consumer demand', 'Favorable trade agreements', 'English language market']
   },
   "Germany": {
-    id: "de",
+    id: "germany",
     name: "Germany",
     match_score: 70,
     market_size: "$31.8 billion",
@@ -57,14 +57,14 @@ const mockMarketData: Record<string, MarketData> = {
     strengths: ['Growing demand', 'Sophisticated consumer base', 'Strategic location']
   },
   "United Arab Emirates": {
-    id: "uae",
+    id: "united-arab-emirates",
     name: "United Arab Emirates",
-    match_score: 75,
-    market_size: "$9.7 billion",
-    growth_rate: 6.8,
+    match_score: 65,
+    market_size: "$12.3 billion",
+    growth_rate: 4.5,
     entry_barriers: 'Medium',
-    regulatory_complexity: 'Low',
-    strengths: ['High disposable income', 'Growing market', 'Gateway to Middle East']
+    regulatory_complexity: 'High',
+    strengths: ['Growing market', 'High purchasing power', 'Gateway to Middle East']
   },
   "United States": {
     id: "us",
@@ -89,7 +89,14 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
     return validMarkets.map(market => mockMarketData[market]);
   });
 
+  // Ensure all market IDs are lowercase for consistency
+  React.useEffect(() => {
+    // Log the market IDs for debugging
+    console.log("Market IDs:", prioritizedMarkets.map(market => market.id));
+  }, [prioritizedMarkets]);
+
   const handleDragEnd = (result: DropResult) => {
+    console.log("Drag result:", result);
     if (!result.destination) {
       return;
     }
@@ -105,6 +112,9 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
     <Box sx={{ width: '100%', maxWidth: 1200, mb: 4, mt: 2 }}>
       <Typography variant="h5" gutterBottom>
         Market Prioritization
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+        Prioritize your target markets to focus your export strategy effectively. The order of markets will determine resource allocation and timeline planning.
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
         Drag and drop markets to prioritize them based on your export strategy. Markets at the top will be prioritized in your export planning.
