@@ -113,8 +113,11 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
       <Typography variant="h5" gutterBottom>
         Market Prioritization
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
         Prioritize your target markets to focus your export strategy effectively. The order of markets will determine resource allocation and timeline planning.
+      </Typography>
+      <Typography variant="body1" sx={{ mb: 3, fontWeight: 'bold', color: '#1a73e8' }}>
+        INSTRUCTIONS: Use the drag handles (≡) to reorder the markets below. Drag the most important markets to the top of the list. When finished, click the "Continue" button at the bottom.
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
         Drag and drop markets to prioritize them based on your export strategy. Markets at the top will be prioritized in your export planning.
@@ -156,8 +159,19 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
                           >
                             <CardHeader
                               avatar={
-                                <Box {...provided.dragHandleProps}>
-                                  <DragIndicatorIcon color="action" />
+                                <Box 
+                                  {...provided.dragHandleProps}
+                                  sx={{ 
+                                    bgcolor: '#f0f4ff', 
+                                    p: 1, 
+                                    borderRadius: 1,
+                                    cursor: 'grab',
+                                    '&:hover': {
+                                      bgcolor: '#e0e7ff',
+                                    }
+                                  }}
+                                >
+                                  <DragIndicatorIcon color="primary" fontSize="medium" />
                                 </Box>
                               }
                               title={
@@ -266,12 +280,24 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
         </Grid>
       </Grid>
       
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4 }}>
+        <Typography variant="body2" color="text.secondary">
+          Your market prioritization will be saved when you continue.
+        </Typography>
         <Button 
           variant="contained" 
           color="primary" 
+          size="large"
           endIcon={<KeyboardArrowRightIcon />}
           onClick={() => onContinue()}
+          sx={{ 
+            px: 4, 
+            py: 1.5,
+            boxShadow: 3,
+            '&:hover': {
+              boxShadow: 5,
+            }
+          }}
         >
           Continue to Export Timeline
         </Button>
