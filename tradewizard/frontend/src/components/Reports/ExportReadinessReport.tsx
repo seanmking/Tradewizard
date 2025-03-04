@@ -9,6 +9,32 @@ interface ExportReadinessReportProps {
   standalone?: boolean;
 }
 
+// Helper function to safely render any value as a string
+const safeRender = (value: any): string => {
+  if (value === null || value === undefined) {
+    return 'N/A';
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return value.toString();
+  }
+  if (typeof value === 'object') {
+    // Handle objects with confidence and text properties
+    if (value.text !== undefined) {
+      return value.text.toString();
+    }
+    // Handle arrays
+    if (Array.isArray(value)) {
+      return value.map(item => safeRender(item)).join(', ');
+    }
+    // Handle other objects
+    return JSON.stringify(value);
+  }
+  return String(value);
+};
+
 const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ 
   userData, 
   onClose, 
@@ -239,7 +265,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
           {selectedMarketsList.length > 0 ? (
             selectedMarketsList.map((market, index) => (
               <div key={index} className="market-item">
-                <span className="market-name">{market}</span>
+                <span className="market-name">{safeRender(market)}</span>
               </div>
             ))
           ) : (
@@ -255,7 +281,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
             <h4>Strengths</h4>
             <ul className="strengths-list">
               {reportData.strengths.map((strength, index) => (
-                <li key={index}>{strength}</li>
+                <li key={index}>{safeRender(strength)}</li>
               ))}
             </ul>
           </div>
@@ -263,7 +289,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
             <h4>Areas for Improvement</h4>
             <ul className="improvement-list">
               {reportData.areas_for_improvement.map((area, index) => (
-                <li key={index}>{area}</li>
+                <li key={index}>{safeRender(area)}</li>
               ))}
             </ul>
           </div>
@@ -308,7 +334,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
           <div className="market-insights">
             {Object.keys(marketInsights).map((market, index) => (
               <div key={index} className="market-insight-card">
-                <h4>{market}</h4>
+                <h4>{safeRender(market)}</h4>
                 <div className="market-data">
                   {/* Diaspora Information */}
                   <div className="data-section diaspora-section">
@@ -337,11 +363,11 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                     <>
                       <div className="data-row">
                         <span className="data-label">Population:</span>
-                        <span className="data-value">{marketInsights[market]?.market_overview?.population || 'N/A'}</span>
+                        <span className="data-value">{safeRender(marketInsights[market]?.market_overview?.population) || 'N/A'}</span>
                       </div>
                       <div className="data-row">
                         <span className="data-label">GDP:</span>
-                        <span className="data-value">{marketInsights[market]?.market_overview?.gdp || 'N/A'}</span>
+                        <span className="data-value">{safeRender(marketInsights[market]?.market_overview?.gdp) || 'N/A'}</span>
                       </div>
                     </>
                   )}
@@ -351,11 +377,11 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                     <>
                       <div className="data-row">
                         <span className="data-label">Market Size:</span>
-                        <span className="data-value">{marketInsights[market]?.food_market_data?.market_size || 'N/A'}</span>
+                        <span className="data-value">{safeRender(marketInsights[market]?.food_market_data?.market_size) || 'N/A'}</span>
                       </div>
                       <div className="data-row">
                         <span className="data-label">Growth Rate:</span>
-                        <span className="data-value">{marketInsights[market]?.food_market_data?.growth_rate || 'N/A'}</span>
+                        <span className="data-value">{safeRender(marketInsights[market]?.food_market_data?.growth_rate) || 'N/A'}</span>
                       </div>
                     </>
                   )}
@@ -365,11 +391,11 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                     <>
                       <div className="data-row">
                         <span className="data-label">Market Size:</span>
-                        <span className="data-value">{marketInsights[market]?.market_size || 'N/A'}</span>
+                        <span className="data-value">{safeRender(marketInsights[market]?.market_size) || 'N/A'}</span>
                       </div>
                       <div className="data-row">
                         <span className="data-label">Growth Rate:</span>
-                        <span className="data-value">{marketInsights[market]?.growth_rate || 'N/A'}</span>
+                        <span className="data-value">{safeRender(marketInsights[market]?.growth_rate) || 'N/A'}</span>
                       </div>
                     </>
                   )}
@@ -425,7 +451,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                         
                         if (trends && trends.length > 0) {
                           return trends.slice(0, 4).map((trend: any, i: number) => (
-                            <li key={i}>{typeof trend === 'string' ? trend : JSON.stringify(trend)}</li>
+                            <li key={i}>{safeRender(trend)}</li>
                           ));
                         }
                         return <li>No trend data available</li>;
@@ -444,7 +470,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                         
                         if (reqs && reqs.length > 0) {
                           return reqs.slice(0, 4).map((req: any, i: number) => (
-                            <li key={i}>{typeof req === 'string' ? req : JSON.stringify(req)}</li>
+                            <li key={i}>{safeRender(req)}</li>
                           ));
                         }
                         return <li>No regulatory data available</li>;
@@ -472,10 +498,10 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
           {reportData.next_steps.map((step, index) => (
             <div key={index} className="next-step-card">
               <div className="next-step-header">
-                <h4>{step.title}</h4>
-                <span className="timeframe">{step.timeframe}</span>
+                <h4>{safeRender(step.title)}</h4>
+                <span className="timeframe">{safeRender(step.timeframe)}</span>
               </div>
-              <p>{step.description}</p>
+              <p>{safeRender(step.description)}</p>
             </div>
           ))}
         </div>

@@ -108,6 +108,32 @@ const Panel: React.FC<{
   );
 };
 
+// Helper function to safely render any value as a string
+const safeRender = (value: any): string => {
+  if (value === null || value === undefined) {
+    return 'N/A';
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return value.toString();
+  }
+  if (typeof value === 'object') {
+    // Handle objects with confidence and text properties
+    if (value.text !== undefined) {
+      return value.text.toString();
+    }
+    // Handle arrays
+    if (Array.isArray(value)) {
+      return value.map(item => safeRender(item)).join(', ');
+    }
+    // Handle other objects
+    return JSON.stringify(value);
+  }
+  return String(value);
+};
+
 const BusinessProfilePanel: React.FC<{ 
   businessProfile: MarketIntelligenceDashboardProps['dashboardData']['business_profile'],
   userData: UserData
@@ -118,15 +144,15 @@ const BusinessProfilePanel: React.FC<{
     <Panel title="Business Profile" confidence={businessProfile.products?.confidence}>
       <div className="profile-content">
         <div className="profile-header">
-          <h2>{userData.business_name || 'Your Business'}</h2>
-          <p>{businessProfile.business_details?.estimated_size} business, operating for {businessProfile.business_details?.years_operating}</p>
+          <h2>{safeRender(userData.business_name) || 'Your Business'}</h2>
+          <p>{safeRender(businessProfile.business_details?.estimated_size)} business, operating for {safeRender(businessProfile.business_details?.years_operating)}</p>
         </div>
         
         <div className="profile-section">
           <h4>Product Categories</h4>
           <ul className="tag-list">
             {businessProfile.products?.categories.map((category, index) => (
-              <li key={index} className="tag">{category}</li>
+              <li key={index} className="tag">{safeRender(category)}</li>
             ))}
           </ul>
         </div>
@@ -135,7 +161,7 @@ const BusinessProfilePanel: React.FC<{
           <h4>Current Markets</h4>
           <ul className="tag-list">
             {businessProfile.current_markets?.countries.map((country, index) => (
-              <li key={index} className="tag">{country}</li>
+              <li key={index} className="tag">{safeRender(country)}</li>
             ))}
           </ul>
         </div>
@@ -145,7 +171,7 @@ const BusinessProfilePanel: React.FC<{
             <h4>Certifications</h4>
             <ul className="tag-list">
               {businessProfile.certifications?.items.map((cert, index) => (
-                <li key={index} className="tag">{cert}</li>
+                <li key={index} className="tag">{safeRender(cert)}</li>
               ))}
             </ul>
           </div>
@@ -164,23 +190,23 @@ const MarketIntelligencePanel: React.FC<{
   return (
     <Panel title="Market Intelligence" confidence={marketIntelligence.market_size?.confidence}>
       <div className="market-intelligence-content">
-        <h3>{selectedMarket} Market Opportunity</h3>
+        <h3>{safeRender(selectedMarket)} Market Opportunity</h3>
         
         <div className="market-stats">
           <div className="stat-item">
             <h4>Market Size</h4>
-            <div className="stat-value">{marketIntelligence.market_size?.value || 'Unknown'}</div>
+            <div className="stat-value">{safeRender(marketIntelligence.market_size?.value) || 'Unknown'}</div>
           </div>
           
           <div className="stat-item">
             <h4>Growth Rate</h4>
-            <div className="stat-value">{marketIntelligence.growth_rate?.value || 'Unknown'}</div>
+            <div className="stat-value">{safeRender(marketIntelligence.growth_rate?.value) || 'Unknown'}</div>
           </div>
           
           <div className="stat-item">
             <h4>Entry Timeline</h4>
             <div className="stat-value">
-              ~{marketIntelligence.opportunity_timeline?.months || '?'} months
+              ~{safeRender(marketIntelligence.opportunity_timeline?.months) || '?'} months
             </div>
           </div>
         </div>
@@ -211,7 +237,7 @@ const RegulatoryPanel: React.FC<{
             {regulations.map((regulation, index) => (
               <li key={index} className="regulatory-item">
                 <div className="requirement-icon">📋</div>
-                <div className="requirement-text">{regulation}</div>
+                <div className="requirement-text">{safeRender(regulation)}</div>
               </li>
             ))}
           </ul>
@@ -279,7 +305,7 @@ const TimelinePanel: React.FC<{
           <div className="timeline-point export locked">
             <div className="point-label">First Export</div>
             <div className="point-marker"></div>
-            <div className="point-time">Month {months}</div>
+            <div className="point-time">Month {safeRender(months)}</div>
             <div className="lock-icon">🔒</div>
           </div>
         </div>
@@ -320,7 +346,7 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
     <div className="market-intelligence-dashboard">
       <div className="dashboard-header">
         <h2>Market Intelligence Dashboard</h2>
-        <p>Export opportunities for {userData.business_name || 'your business'}</p>
+        <p>Export opportunities for {safeRender(userData.business_name) || 'your business'}</p>
         {onClose && (
           <button className="close-dashboard-button" onClick={onClose}>×</button>
         )}
@@ -334,11 +360,11 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
         
         <MarketIntelligencePanel 
           marketIntelligence={dashboardData.market_intelligence} 
-          selectedMarket={selectedMarket}
+          selectedMarket={safeRender(selectedMarket)}
         />
         
         <RegulatoryPanel 
-          regulations={dashboardData.market_intelligence?.regulations?.items || []} 
+          regulations={dashboardData.market_intelligence?.regulations?.items.map(item => safeRender(item)) || []} 
           confidence={dashboardData.market_intelligence?.regulations?.confidence || 0.7}
         />
         
