@@ -253,7 +253,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
         <div className="assessment-grid">
           <div className="assessment-column">
             <h4>Strengths</h4>
-            <ul>
+            <ul className="strengths-list">
               {reportData.strengths.map((strength, index) => (
                 <li key={index}>{strength}</li>
               ))}
@@ -261,11 +261,43 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
           </div>
           <div className="assessment-column">
             <h4>Areas for Improvement</h4>
-            <ul>
+            <ul className="improvement-list">
               {reportData.areas_for_improvement.map((area, index) => (
                 <li key={index}>{area}</li>
               ))}
             </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="report-section">
+        <h3>Export Goals</h3>
+        <div className="export-goals-container">
+          <div className="export-goals-content">
+            <p className="export-vision">
+              <strong>Our Vision:</strong> To share South Africa's unique flavors and premium food products with the global market, 
+              particularly focusing on reaching the South African diaspora who cherish authentic tastes from home.
+            </p>
+            <p>
+              With our exceptional product quality and distinctive South African flavor profiles, we aim to establish 
+              Global Fresh SA as a recognized brand in international markets. By leveraging our sustainable packaging initiatives 
+              and premium positioning, we will create export channels that not only drive business growth but also 
+              connect South Africans abroad with the authentic tastes they miss.
+            </p>
+            <div className="export-goals-highlights">
+              <div className="goal-highlight">
+                <span className="goal-icon">🌍</span>
+                <span className="goal-text">Connect with South African diaspora communities</span>
+              </div>
+              <div className="goal-highlight">
+                <span className="goal-icon">🌱</span>
+                <span className="goal-text">Promote sustainable South African food products globally</span>
+              </div>
+              <div className="goal-highlight">
+                <span className="goal-icon">🚀</span>
+                <span className="goal-text">Establish premium positioning in selected international markets</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -278,6 +310,29 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
               <div key={index} className="market-insight-card">
                 <h4>{market}</h4>
                 <div className="market-data">
+                  {/* Diaspora Information */}
+                  <div className="data-section diaspora-section">
+                    <span className="data-label">South African Diaspora:</span>
+                    <div className="diaspora-info">
+                      {market === 'United Kingdom' && (
+                        <p>Approximately 220,000 South Africans live in the UK, with major communities in London, Manchester, and Edinburgh.</p>
+                      )}
+                      {market === 'United Arab Emirates' && (
+                        <p>Around 100,000 South Africans reside in the UAE, primarily in Dubai and Abu Dhabi, forming one of the largest expat communities.</p>
+                      )}
+                      {market === 'United States' && (
+                        <p>An estimated 85,000 South Africans live in the US, with significant communities in New York, California, and Texas.</p>
+                      )}
+                      {market === 'European Union' && (
+                        <p>Over 150,000 South Africans are spread across EU countries, with notable communities in the Netherlands, Germany, and Portugal.</p>
+                      )}
+                      {!['United Kingdom', 'United Arab Emirates', 'United States', 'European Union'].includes(market) && (
+                        <p>South African diaspora data not available for this market.</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Market Overview */}
                   {marketInsights[market]?.market_overview && (
                     <>
                       <div className="data-row">
@@ -291,6 +346,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                     </>
                   )}
                   
+                  {/* Food Market Data */}
                   {marketInsights[market]?.food_market_data && (
                     <>
                       <div className="data-row">
@@ -318,6 +374,47 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                     </>
                   )}
                   
+                  {/* Market Opportunities Section */}
+                  <div className="data-section">
+                    <span className="data-label">Market Opportunities:</span>
+                    <div className="market-opportunities">
+                      {market === 'United Kingdom' && (
+                        <ul>
+                          <li><strong>Specialty Food Stores:</strong> Growing demand for South African products in specialty stores frequented by expatriates.</li>
+                          <li><strong>Gift Packaging:</strong> Opportunity to market products as gift packages for South Africans to send to family and friends.</li>
+                          <li><strong>Online Retail:</strong> Strong e-commerce market allows for direct-to-consumer sales to diaspora communities.</li>
+                        </ul>
+                      )}
+                      {market === 'United Arab Emirates' && (
+                        <ul>
+                          <li><strong>Premium Positioning:</strong> High-income South African expatriates seeking premium products from home.</li>
+                          <li><strong>Cultural Events:</strong> Opportunities to showcase products at South African cultural events in Dubai and Abu Dhabi.</li>
+                          <li><strong>Luxury Gift Market:</strong> Potential for high-end gift packages featuring South African delicacies.</li>
+                        </ul>
+                      )}
+                      {market === 'United States' && (
+                        <ul>
+                          <li><strong>Ethnic Food Sections:</strong> Growing presence of international foods in mainstream supermarkets.</li>
+                          <li><strong>Subscription Boxes:</strong> Potential for "Taste of South Africa" subscription services targeting diaspora.</li>
+                          <li><strong>Health Food Market:</strong> Position South African products within the growing health food segment.</li>
+                        </ul>
+                      )}
+                      {market === 'European Union' && (
+                        <ul>
+                          <li><strong>Sustainable Packaging:</strong> Leverage your sustainable initiatives to appeal to environmentally conscious European consumers.</li>
+                          <li><strong>Diaspora Networks:</strong> Utilize South African community networks for product distribution and marketing.</li>
+                          <li><strong>African Cuisine Trend:</strong> Growing interest in authentic African flavors among European consumers.</li>
+                        </ul>
+                      )}
+                      {!['United Kingdom', 'United Arab Emirates', 'United States', 'European Union'].includes(market) && (
+                        <ul>
+                          <li>Market opportunity data not available for this region.</li>
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Key Trends Section */}
                   <div className="data-section">
                     <span className="data-label">Key Trends:</span>
                     <ul>
@@ -336,6 +433,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                     </ul>
                   </div>
                   
+                  {/* Regulatory Requirements Section */}
                   <div className="data-section">
                     <span className="data-label">Regulatory Requirements:</span>
                     <ul>
