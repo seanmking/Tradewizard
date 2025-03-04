@@ -103,3 +103,45 @@ The backend provides the following API endpoints:
 - `POST /api/chat/message` - Send a message in a chat session
 - `GET /api/chat/history/{chat_id}` - Get the history of a chat session
 - `GET /api/health` - Health check endpoint 
+
+## Development and Showcase Workflows
+
+TradeWizard uses Git branches to maintain a stable showcase version alongside ongoing development.
+
+### Showcase Version (for investor presentations)
+
+We maintain a dedicated `showcase` branch for investor presentations that is always in a stable, demo-ready state.
+
+To quickly switch to the showcase version:
+
+```bash
+# Switch to showcase mode and build the application
+./showcase.sh
+```
+
+This will:
+1. Switch to the `showcase` branch
+2. Build the frontend application
+3. Prepare the system for demonstration
+
+### Development Workflow
+
+Development work happens on the `main` branch. To switch back to development mode:
+
+```bash
+# Switch to development mode
+./development.sh
+```
+
+### Managing the Showcase Version
+
+When you have a stable version ready for demonstrations:
+
+1. Test thoroughly on the `main` branch
+2. Run: `git checkout showcase`
+3. Run: `git merge main`
+4. Test the merged version
+5. Commit: `git commit -am "Update showcase with latest stable features"`
+6. Return to development: `git checkout main`
+
+This workflow ensures you always have a stable version ready for investor presentations while allowing ongoing development. 
