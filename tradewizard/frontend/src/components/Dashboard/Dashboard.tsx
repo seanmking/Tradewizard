@@ -2,6 +2,30 @@ import React, { useState, useEffect } from 'react';
 import MarketIntelligenceDashboard from './MarketIntelligenceDashboard';
 import AuthService from '../../services/AuthService';
 
+// Add an error boundary component for the Dashboard
+class DashboardErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Dashboard error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <div className="dashboard-error">Something went wrong with the dashboard. Please try refreshing the page.</div>;
+    }
+
+    return this.props.children;
+  }
+}
+
 // Mock data for the dashboard - in a real app, this would come from an API
 const mockDashboardData = {
   business_profile: {
@@ -80,29 +104,55 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [username, setUsername] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
-    // Get the current user information
-    const user = AuthService.getCurrentUser();
-    if (user) {
-      setUsername(user.username);
+    try {
+      // Get the current user information
+      const user = AuthService.getCurrentUser();
+      if (user) {
+        setUsername(user.username);
+      }
+      
+      // Ensure the app container is visible
+      const appContainer = document.querySelector('.app-container');
+      if (appContainer) {
+        (appContainer as HTMLElement).style.display = 'flex';
+      }
+      
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error loading dashboard:', err);
+      setError('Failed to load dashboard. Please try refreshing the page.');
+      setIsLoading(false);
     }
   }, []);
 
+  if (isLoading) {
+    return <div className="dashboard-loading">Loading your dashboard...</div>;
+  }
+  
+  if (error) {
+    return <div className="dashboard-error">{error}</div>;
+  }
+
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>Export Market Dashboard</h1>
-        <p>Welcome, {username || 'User'}! Here's your export market intelligence.</p>
+    <DashboardErrorBoundary>
+      <div className="dashboard-container">
+        <div className="dashboard-header">
+          <h1>Export Market Dashboard</h1>
+          <p>Welcome, {username || 'User'}! Here's your export market intelligence.</p>
+        </div>
+        
+        <div className="dashboard-content">
+          <MarketIntelligenceDashboard 
+            dashboardData={mockDashboardData} 
+            userData={mockUserData} 
+          />
+        </div>
       </div>
-      
-      <div className="dashboard-content">
-        <MarketIntelligenceDashboard 
-          dashboardData={mockDashboardData} 
-          userData={mockUserData} 
-        />
-      </div>
-    </div>
+    </DashboardErrorBoundary>
   );
 };
 

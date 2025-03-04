@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './AccountCreation.css'; // We can reuse the CSS from account creation
+import AuthService from '../../services/AuthService';
 
 interface LoginProps {
   onSuccess: (username: string) => void;
@@ -31,10 +32,8 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onCancel, onRegister }) => {
       // For POC, bypass the API call and simulate success
       // In a real implementation, this would call an API endpoint
       setTimeout(() => {
-        // Login successful
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('username', email);
-        localStorage.setItem('hasCompletedAssessment', 'true');
+        // Login successful using AuthService
+        AuthService.login(email);
         onSuccess(email);
         setIsLoading(false);
       }, 1000);
@@ -124,7 +123,11 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onCancel, onRegister }) => {
           </div>
           
           <div className="register-link">
-            <p>Don't have an account? <button type="button" onClick={onRegister}>Register</button></p>
+            <p>Don't have an account? <button type="button" onClick={() => {
+              onCancel(); // Close the login modal
+              // This will navigate to the assessment tab
+              window.dispatchEvent(new CustomEvent('navigateToAssessment'));
+            }}>Complete the assessment</button></p>
           </div>
         </form>
       </div>

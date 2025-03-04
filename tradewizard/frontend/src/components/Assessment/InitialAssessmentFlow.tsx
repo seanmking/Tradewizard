@@ -73,6 +73,13 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
   useEffect(() => {
     const fetchInitialQuestion = async () => {
       try {
+        // Check if we're on the assessment tab
+        const activeTab = localStorage.getItem('activeTab');
+        if (activeTab && activeTab !== 'assessment') {
+          console.log('Not on assessment tab, skipping API call');
+          return;
+        }
+        
         setIsTyping(true);
         const response = await getInitialQuestion();
         setCurrentStep({

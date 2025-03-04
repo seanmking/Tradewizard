@@ -1,5 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MarketIntelligenceDashboard.css';
+
+// ErrorBoundary component to catch errors in the dashboard
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, errorMessage: string}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { 
+      hasError: false,
+      errorMessage: ''
+    };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    // Update state so the next render will show the fallback UI
+    return { 
+      hasError: true,
+      errorMessage: error.message || 'Something went wrong'
+    };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // You can also log the error to an error reporting service
+    console.error('Dashboard error caught by ErrorBoundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // You can render any custom fallback UI
+      return (
+        <div className="dashboard-error">
+          <h3>Dashboard Error</h3>
+          <p>There was a problem loading the dashboard: {this.state.errorMessage}</p>
+          <p>Try refreshing the page or contact support if the problem persists.</p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 interface DashboardData {
   business_profile?: {
@@ -329,6 +368,11 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
     timeline: false,
   });
   
+  // Check that we have valid data before rendering
+  if (!dashboardData || !userData) {
+    return <div className="dashboard-error">Unable to load dashboard data. Please try again later.</div>;
+  }
+  
   const selectedMarket = typeof userData.selected_markets === 'string' 
     ? userData.selected_markets.split(',')[0].trim() 
     : (Array.isArray(userData.selected_markets) 
@@ -343,43 +387,45 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
   };
   
   return (
-    <div className="market-intelligence-dashboard">
-      <div className="dashboard-header">
-        <h2>Market Intelligence Dashboard</h2>
-        <p>Export opportunities for {safeRender(userData.business_name) || 'your business'}</p>
-        {onClose && (
-          <button className="close-dashboard-button" onClick={onClose}>×</button>
-        )}
+    <ErrorBoundary>
+      <div className="market-intelligence-dashboard">
+        <div className="dashboard-header">
+          <h2>Market Intelligence Dashboard</h2>
+          <p>Export opportunities for {safeRender(userData.business_name) || 'your business'}</p>
+          {onClose && (
+            <button className="close-dashboard-button" onClick={onClose}>×</button>
+          )}
+        </div>
+        
+        <div className="dashboard-content">
+          <BusinessProfilePanel 
+            businessProfile={dashboardData.business_profile} 
+            userData={userData}
+          />
+          
+          <MarketIntelligencePanel 
+            marketIntelligence={dashboardData.market_intelligence} 
+            selectedMarket={safeRender(selectedMarket)}
+          />
+          
+          <RegulatoryPanel 
+            regulations={dashboardData.market_intelligence?.regulations?.items.map(item => safeRender(item)) || []} 
+            confidence={dashboardData.market_intelligence?.regulations?.confidence || 0.7}
+          />
+          
+          <CompetitorPanel />
+          
+          <TimelinePanel 
+            months={dashboardData.market_intelligence?.opportunity_timeline?.months || 6}
+            confidence={dashboardData.market_intelligence?.opportunity_timeline?.confidence || 0.75}
+          />
+        </div>
+        
+        <div className="dashboard-footer">
+          <button className="signup-button">Create Account for Full Analysis</button>
+        </div>
       </div>
-      
-      <div className="dashboard-content">
-        <BusinessProfilePanel 
-          businessProfile={dashboardData.business_profile} 
-          userData={userData}
-        />
-        
-        <MarketIntelligencePanel 
-          marketIntelligence={dashboardData.market_intelligence} 
-          selectedMarket={safeRender(selectedMarket)}
-        />
-        
-        <RegulatoryPanel 
-          regulations={dashboardData.market_intelligence?.regulations?.items.map(item => safeRender(item)) || []} 
-          confidence={dashboardData.market_intelligence?.regulations?.confidence || 0.7}
-        />
-        
-        <CompetitorPanel />
-        
-        <TimelinePanel 
-          months={dashboardData.market_intelligence?.opportunity_timeline?.months || 6}
-          confidence={dashboardData.market_intelligence?.opportunity_timeline?.confidence || 0.75}
-        />
-      </div>
-      
-      <div className="dashboard-footer">
-        <button className="signup-button">Create Account for Full Analysis</button>
-      </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 

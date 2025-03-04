@@ -81,8 +81,35 @@ const App = () => {
       if (user.hasCompletedAssessment) {
         setActiveTab('dashboard');
       }
+      
+      // Store the current active tab in localStorage
+      const savedTab = localStorage.getItem('activeTab');
+      if (savedTab && ['assessment', 'dashboard', 'sidekick', 'documents', 'markets', 'profile'].includes(savedTab)) {
+        setActiveTab(savedTab as TabType);
+      }
     }
-  }, []);
+    
+    // Add event listener for navigating to assessment
+    const handleNavigateToAssessment = () => {
+      setActiveTab('assessment');
+      localStorage.setItem('activeTab', 'assessment');
+    };
+    
+    window.addEventListener('navigateToAssessment', handleNavigateToAssessment);
+    
+    // Set up beforeunload event to save the active tab
+    const handleBeforeUnload = () => {
+      localStorage.setItem('activeTab', activeTab);
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Clean up event listeners
+    return () => {
+      window.removeEventListener('navigateToAssessment', handleNavigateToAssessment);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [activeTab]);
   
   // Handle successful login
   const handleLoginSuccess = (username: string) => {
@@ -91,6 +118,9 @@ const App = () => {
     setHasCompletedAssessment(true);
     setShowAuthModal('none');
     setActiveTab('dashboard');
+    
+    // Ensure the user is marked as having completed the assessment
+    AuthService.setCompletedAssessment(true);
   };
   
   // Handle successful account creation
@@ -134,6 +164,7 @@ const App = () => {
             onClick={(e) => {
               e.preventDefault();
               setActiveTab('assessment');
+              localStorage.setItem('activeTab', 'assessment');
             }}
           >
             <AssessmentIcon />
@@ -144,16 +175,17 @@ const App = () => {
             className={activeTab === 'dashboard' ? 'active' : ''}
             onClick={(e) => {
               e.preventDefault();
+              
+              // Store the previous tab
+              const previousTab = activeTab;
+              
+              // Update active tab
               setActiveTab('dashboard');
+              localStorage.setItem('activeTab', 'dashboard');
               
               // If not authenticated, show login modal
               if (!isAuthenticated) {
-                if (hasCompletedAssessment) {
-                  setShowAuthModal('login');
-                } else {
-                  // Direct to assessment if not completed
-                  setActiveTab('assessment');
-                }
+                setShowAuthModal('login');
               }
             }}
           >
@@ -242,13 +274,24 @@ const App = () => {
                 <Dashboard onLogout={handleLogout} />
               ) : (
                 <div className="empty-feature-placeholder">
-                  <p>Please complete the assessment and create an account to access your dashboard.</p>
-                  <button 
-                    onClick={() => setActiveTab('assessment')}
-                    className="action-button"
-                  >
-                    Go to Assessment
-                  </button>
+                  <p>Please log in to access your dashboard.</p>
+                  <div className="button-group">
+                    <button 
+                      onClick={() => setShowAuthModal('login')}
+                      className="action-button"
+                    >
+                      Log In
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setActiveTab('assessment');
+                      }}
+                      className="secondary-button"
+                      style={{ marginLeft: '10px' }}
+                    >
+                      Complete Assessment
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -297,7 +340,14 @@ const App = () => {
       {showAuthModal === 'login' && (
         <Login 
           onSuccess={handleLoginSuccess}
-          onCancel={() => setShowAuthModal('none')}
+          onCancel={() => {
+            setShowAuthModal('none');
+            // If on dashboard tab without authentication, redirect to assessment
+            if (activeTab === 'dashboard' && !isAuthenticated) {
+              setActiveTab('assessment');
+              localStorage.setItem('activeTab', 'assessment');
+            }
+          }}
           onRegister={() => setShowAuthModal('register')}
         />
       )}

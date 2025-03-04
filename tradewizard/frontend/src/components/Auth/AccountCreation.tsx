@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './AccountCreation.css';
+import AuthService from '../../services/AuthService';
 
 interface AccountCreationProps {
   onSuccess: (username: string) => void;
@@ -42,7 +43,8 @@ const AccountCreation: React.FC<AccountCreationProps> = ({ onSuccess, onCancel }
       
       // For POC, bypass the API call and simulate success
       setTimeout(() => {
-        // Account created successfully
+        // Account created successfully using AuthService
+        AuthService.register(email);
         onSuccess(email);
         setIsLoading(false);
       }, 1000);
