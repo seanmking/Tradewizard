@@ -47,7 +47,7 @@ const mockMarketData: Record<string, MarketData> = {
     strengths: ['Large consumer base', 'Strong economy', 'Central European location']
   },
   "France": {
-    id: "fr",
+    id: "france",
     name: "France",
     match_score: 68,
     market_size: "$22.3 billion",
@@ -67,7 +67,7 @@ const mockMarketData: Record<string, MarketData> = {
     strengths: ['Growing market', 'High purchasing power', 'Gateway to Middle East']
   },
   "United States": {
-    id: "us",
+    id: "united-states",
     name: "United States",
     match_score: 82,
     market_size: "$156.2 billion",
@@ -82,17 +82,34 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
   // Initialize with defaults if markets aren't in our mock data
   const [prioritizedMarkets, setPrioritizedMarkets] = useState<MarketData[]>(() => {
     const validMarkets = markets.filter(market => mockMarketData[market] !== undefined);
+    console.log("Valid markets:", validMarkets);
+    
     if (validMarkets.length === 0) {
       // Fallback to all markets if none of the provided markets are valid
+      console.log("Using all markets as fallback");
       return Object.values(mockMarketData);
     }
-    return validMarkets.map(market => mockMarketData[market]);
+    
+    const marketData = validMarkets.map(market => mockMarketData[market]);
+    console.log("Initial market data:", marketData);
+    return marketData;
   });
 
-  // Ensure all market IDs are lowercase for consistency
+  // Ensure all market IDs are valid for drag and drop
   React.useEffect(() => {
     // Log the market IDs for debugging
     console.log("Market IDs:", prioritizedMarkets.map(market => market.id));
+    
+    // Validate that all IDs are strings without spaces or special characters
+    const hasInvalidId = prioritizedMarkets.some(market => 
+      typeof market.id !== 'string' || 
+      market.id.includes(' ') || 
+      !/^[a-z0-9-]+$/.test(market.id)
+    );
+    
+    if (hasInvalidId) {
+      console.warn("Warning: Some market IDs may not be valid for drag and drop operations");
+    }
   }, [prioritizedMarkets]);
 
   const handleDragEnd = (result: DropResult) => {
@@ -118,9 +135,6 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
       </Typography>
       <Typography variant="body1" sx={{ mb: 3, fontWeight: 'bold', color: '#1a73e8' }}>
         INSTRUCTIONS: Use the drag handles (≡) to reorder the markets below. Drag the most important markets to the top of the list. When finished, click the "Continue" button at the bottom.
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Drag and drop markets to prioritize them based on your export strategy. Markets at the top will be prioritized in your export planning.
       </Typography>
       
       <Grid container spacing={3}>

@@ -389,7 +389,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     switch(setupStep) {
       case 'market_prioritization':
         return (
-          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                width: '100%', 
+                p: 3, 
+                mb: 4, 
+                bgcolor: '#f8f9fa', 
+                borderRadius: 2,
+                border: '1px solid #e0e4e8'
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                Export Readiness Setup
+              </Typography>
+              <Typography variant="body1">
+                Let's assess {dashboardData.business_profile.name}'s basics in order to create a detailed export-readiness workflow. We will focus on three areas: Market Prioritization, your Export Timeline, and a quick Regulatory Assessment. This will give you a clear understanding of resource requirements.
+              </Typography>
+            </Paper>
             <MarketPrioritization 
               markets={dashboardData.selected_markets || ["United Kingdom", "Germany", "United Arab Emirates", "United States"]} 
               onContinue={handleNextSetupStep} 
