@@ -311,17 +311,6 @@ const App = () => {
             <div className="content-header">
               <h1>Export Market Dashboard</h1>
               <p>View your export readiness analysis and market intelligence.</p>
-              <button 
-                onClick={() => {
-                  setActiveTab('assessment');
-                  localStorage.setItem('activeTab', 'assessment');
-                  // Reset assessment for demo
-                  window.dispatchEvent(new CustomEvent(RESET_ASSESSMENT_EVENT));
-                }}
-                className="return-to-assessment-button"
-              >
-                Return to Assessment
-              </button>
             </div>
             
             <div className="dashboard-wrapper">

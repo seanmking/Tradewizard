@@ -1,11 +1,43 @@
 import React from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { 
+  DragDropContext, 
+  Droppable, 
+  Draggable, 
+  DropResult,
+  DroppableProvided,
+  DroppableStateSnapshot,
+  DraggableProvided,
+  DraggableStateSnapshot
+} from 'react-beautiful-dnd';
 
-// Custom wrapper for DragDropContext to handle default props
-export const CustomDragDropContext: React.FC<{
+// Interface definitions
+interface CustomDragDropContextProps {
   onDragEnd: (result: DropResult) => void;
   children: React.ReactNode;
-}> = ({ onDragEnd, children }) => {
+}
+
+interface CustomDroppableProps {
+  droppableId: string;
+  children: (provided: DroppableProvided, snapshot: DroppableStateSnapshot) => React.ReactElement;
+  type?: string;
+  direction?: 'vertical' | 'horizontal';
+  ignoreContainerClipping?: boolean;
+  isDropDisabled?: boolean;
+  isCombineEnabled?: boolean;
+  mode?: 'standard' | 'virtual';
+}
+
+interface CustomDraggableProps {
+  draggableId: string;
+  index: number;
+  children: (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => React.ReactElement;
+  isDragDisabled?: boolean;
+  disableInteractiveElementBlocking?: boolean;
+  shouldRespectForcePress?: boolean;
+}
+
+// Custom wrapper for DragDropContext
+export const CustomDragDropContext = ({ onDragEnd, children }: CustomDragDropContextProps) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {children}
@@ -13,17 +45,8 @@ export const CustomDragDropContext: React.FC<{
   );
 };
 
-// Custom wrapper for Droppable to handle default props
-export const CustomDroppable: React.FC<{
-  droppableId: string;
-  children: any;
-  type?: string;
-  direction?: 'vertical' | 'horizontal';
-  ignoreContainerClipping?: boolean;
-  isDropDisabled?: boolean;
-  isCombineEnabled?: boolean;
-  mode?: 'standard' | 'virtual';
-}> = ({ 
+// Custom wrapper for Droppable
+export const CustomDroppable = ({ 
   droppableId, 
   children, 
   type = 'DEFAULT', 
@@ -32,7 +55,7 @@ export const CustomDroppable: React.FC<{
   isDropDisabled = false,
   isCombineEnabled = false,
   mode = 'standard'
-}) => {
+}: CustomDroppableProps) => {
   return (
     <Droppable 
       droppableId={droppableId}
@@ -48,22 +71,15 @@ export const CustomDroppable: React.FC<{
   );
 };
 
-// Custom wrapper for Draggable to handle default props
-export const CustomDraggable: React.FC<{
-  draggableId: string;
-  index: number;
-  children: any;
-  isDragDisabled?: boolean;
-  disableInteractiveElementBlocking?: boolean;
-  shouldRespectForcePress?: boolean;
-}> = ({
+// Custom wrapper for Draggable
+export const CustomDraggable = ({
   draggableId,
   index,
   children,
   isDragDisabled = false,
   disableInteractiveElementBlocking = false,
   shouldRespectForcePress = true
-}) => {
+}: CustomDraggableProps) => {
   // Log the draggableId for debugging
   React.useEffect(() => {
     console.log(`Draggable component mounted with ID: ${draggableId}`);
