@@ -95,7 +95,14 @@ const App = () => {
       localStorage.setItem('activeTab', 'assessment');
     };
     
+    // Add event listener for navigating to dashboard
+    const handleNavigateToDashboard = () => {
+      setActiveTab('dashboard');
+      localStorage.setItem('activeTab', 'dashboard');
+    };
+    
     window.addEventListener('navigateToAssessment', handleNavigateToAssessment);
+    window.addEventListener('navigateToDashboard', handleNavigateToDashboard);
     
     // Set up beforeunload event to save the active tab
     const handleBeforeUnload = () => {
@@ -107,6 +114,7 @@ const App = () => {
     // Clean up event listeners
     return () => {
       window.removeEventListener('navigateToAssessment', handleNavigateToAssessment);
+      window.removeEventListener('navigateToDashboard', handleNavigateToDashboard);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [activeTab]);

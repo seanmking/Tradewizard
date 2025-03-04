@@ -325,78 +325,15 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
     setShowReadinessReport(false);
     setShowStandaloneReport(false);
     
-    // If dashboardData is not set, create mock data
-    if (!dashboardData) {
-      const mockDashboardData = {
-        business_profile: {
-          products: {
-            categories: ['Dried Fruits', 'Nuts', 'Specialty Foods'],
-            items: ['Dried Mango', 'Dried Apricots', 'Macadamia Nuts', 'Specialty Rooibos Tea'],
-            confidence: 0.9
-          },
-          current_markets: {
-            countries: ['South Africa'],
-            confidence: 0.95
-          },
-          certifications: {
-            items: ['HACCP Level 1', 'Local Food Safety Certification'],
-            confidence: 0.85
-          },
-          business_details: {
-            estimated_size: 'Medium Enterprise',
-            years_operating: '8 years',
-            confidence: 0.9
-          }
-        },
-        market_intelligence: {
-          market_size: {
-            value: 'EU: €42.7 billion, UAE: $1.2 billion',
-            confidence: 0.8
-          },
-          growth_rate: {
-            value: 'EU: 5.8% annually, UAE: 7.2% annually',
-            confidence: 0.75
-          },
-          regulations: {
-            items: [
-              'EU Food Safety Regulations (EC 178/2002)',
-              'Packaging and labeling directives',
-              'Halal certification (UAE)',
-              'UAE.S GSO 9/2013 labeling standard'
-            ],
-            confidence: 0.85
-          },
-          opportunity_timeline: {
-            months: 6,
-            confidence: 0.7
-          }
-        },
-        competitor_landscape: {
-          competitors: [
-            {
-              name: 'Global Fruits Co.',
-              market_share: '12%',
-              strengths: ['Established distribution network', 'Wide product range']
-            },
-            {
-              name: 'Premium Organics Ltd.',
-              market_share: '8%',
-              strengths: ['Strong organic certification', 'Premium brand positioning']
-            },
-            {
-              name: 'Exotic Tastes Inc.',
-              market_share: '5%',
-              strengths: ['Innovative packaging', 'Strong online presence']
-            }
-          ],
-          confidence: 0.65
-        }
-      };
-      
-      setDashboardData(mockDashboardData);
-    }
+    // Navigate to the dashboard tab
+    setShowDashboard(false);
     
-    setShowDashboard(true);
+    // Use localStorage to update the active tab
+    localStorage.setItem('activeTab', 'dashboard');
+    
+    // Create and dispatch a custom event to notify the App component
+    const navigateToDashboardEvent = new CustomEvent('navigateToDashboard');
+    window.dispatchEvent(navigateToDashboardEvent);
   };
   
   // Toggle standalone report visibility

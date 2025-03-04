@@ -328,9 +328,15 @@
 .report-footer {
   padding: 20px 30px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  border-top: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.button-container {
+  display: flex;
   gap: 15px;
-  border-top: 1px solid #e0e0e0;
+  align-items: center;
 }
 
 .promotional-message {
