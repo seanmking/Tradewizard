@@ -323,6 +323,23 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   };
 
+  // Add handler for going back to previous step
+  const handlePreviousSetupStep = () => {
+    switch (setupStep) {
+      case 'export_timeline':
+        setSetupStep('market_prioritization');
+        break;
+      case 'regulatory_assessment':
+        setSetupStep('export_timeline');
+        break;
+      case 'resource_planning':
+        setSetupStep('regulatory_assessment');
+        break;
+      default:
+        break;
+    }
+  };
+
   const handlePillarChange = (pillar: PillarType) => {
     setActivePillar(pillar);
   };
@@ -415,11 +432,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           </Box>
         );
       case 'export_timeline':
-        return <ExportTimeline onContinue={handleNextSetupStep} />;
+        return <ExportTimeline 
+                onContinue={handleNextSetupStep}
+                onBack={handlePreviousSetupStep}
+              />;
       case 'regulatory_assessment':
-        return <RegulatoryAssessment markets={dashboardData.selected_markets} onContinue={handleNextSetupStep} />;
+        return <RegulatoryAssessment 
+                markets={dashboardData.selected_markets} 
+                onContinue={handleNextSetupStep}
+                onBack={handlePreviousSetupStep}
+              />;
       case 'resource_planning':
-        return <ResourcePlanning onContinue={handleNextSetupStep} />;
+        return <ResourcePlanning 
+                onContinue={handleNextSetupStep}
+                onBack={handlePreviousSetupStep}
+              />;
       case 'complete':
         return <Typography>Setup complete</Typography>;
       default:

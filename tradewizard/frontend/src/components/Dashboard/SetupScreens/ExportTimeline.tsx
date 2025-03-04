@@ -23,7 +23,9 @@ import {
   Anchor as ShippingIcon,
   LocalShipping as LogisticsIcon,
   Gavel as RegulatoryIcon,
-  TrendingUp as TrendingUpIcon
+  TrendingUp as TrendingUpIcon,
+  ArrowBack as ArrowBackIcon,
+  ArrowForward as ArrowForwardIcon
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -44,9 +46,10 @@ interface TimelineOption {
 
 interface ExportTimelineProps {
   onContinue: () => void;
+  onBack?: () => void;
 }
 
-const ExportTimeline: React.FC<ExportTimelineProps> = ({ onContinue }) => {
+const ExportTimeline: React.FC<ExportTimelineProps> = ({ onContinue, onBack }) => {
   const [selectedOption, setSelectedOption] = useState<string>('standard');
   const [activeStep, setActiveStep] = useState(0);
   const [customDate, setCustomDate] = useState<moment.Moment | null>(moment().add(6, 'months'));
@@ -83,7 +86,7 @@ const ExportTimeline: React.FC<ExportTimelineProps> = ({ onContinue }) => {
         { label: 'Logistics & Distribution Setup', duration: '4-6 weeks' },
         { label: 'First Shipment', duration: '2 weeks' }
       ],
-      image: '/images/timeline-standard.jpg'
+      image: '/images/timeline-standard.svg'
     },
     {
       id: 'accelerated',
@@ -96,7 +99,7 @@ const ExportTimeline: React.FC<ExportTimelineProps> = ({ onContinue }) => {
         { label: 'Rapid Logistics Setup', duration: '2-3 weeks' },
         { label: 'First Shipment', duration: '1-2 weeks' }
       ],
-      image: '/images/timeline-accelerated.jpg'
+      image: '/images/timeline-accelerated.svg'
     },
     {
       id: 'comprehensive',
@@ -110,7 +113,7 @@ const ExportTimeline: React.FC<ExportTimelineProps> = ({ onContinue }) => {
         { label: 'Distribution Network Setup', duration: '4-6 weeks' },
         { label: 'First Shipment', duration: '2-3 weeks' }
       ],
-      image: '/images/timeline-comprehensive.jpg'
+      image: '/images/timeline-comprehensive.svg'
     }
   ];
   
@@ -156,7 +159,7 @@ const ExportTimeline: React.FC<ExportTimelineProps> = ({ onContinue }) => {
                 >
                   <CardMedia
                     sx={{ height: 140 }}
-                    image={option.image || '/images/timeline-default.jpg'}
+                    image={option.image || '/images/timeline-default.svg'}
                     title={option.title}
                   />
                   <CardContent>
@@ -309,33 +312,24 @@ const ExportTimeline: React.FC<ExportTimelineProps> = ({ onContinue }) => {
         {steps[activeStep].content}
       </Box>
       
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4, gap: 2 }}>
+        {onBack && (
+          <Button
+            variant="outlined"
+            onClick={onBack}
+            startIcon={<ArrowBackIcon />}
+          >
+            Back
+          </Button>
+        )}
         <Button 
-          variant="outlined"
-          disabled={activeStep === 0}
-          onClick={handleBack}
-          sx={{ minWidth: '80px' }}
+          variant="contained" 
+          onClick={onContinue}
+          endIcon={<ArrowForwardIcon />}
+          sx={{ ml: onBack ? 0 : 'auto' }}
         >
-          Back
+          Continue
         </Button>
-        
-        <Box>
-          {activeStep < steps.length - 1 ? (
-            <Button 
-              variant="contained" 
-              onClick={handleNext}
-            >
-              Next
-            </Button>
-          ) : (
-            <Button 
-              variant="contained" 
-              onClick={handleContinue}
-            >
-              Continue
-            </Button>
-          )}
-        </Box>
       </Box>
     </Box>
   );

@@ -203,9 +203,10 @@ const marketDocuments: MarketDocuments = {
 interface RegulatoryAssessmentProps {
   markets: string[];
   onContinue: () => void;
+  onBack?: () => void;
 }
 
-const RegulatoryAssessment: React.FC<RegulatoryAssessmentProps> = ({ markets, onContinue }) => {
+const RegulatoryAssessment: React.FC<RegulatoryAssessmentProps> = ({ markets, onContinue, onBack }) => {
   const [activeMarket, setActiveMarket] = useState<string>(markets[0] || 'United Kingdom');
   const [documents, setDocuments] = useState<Document[]>([]);
   const [ownedDocuments, setOwnedDocuments] = useState<Record<string, boolean>>({});
@@ -439,11 +440,19 @@ const RegulatoryAssessment: React.FC<RegulatoryAssessmentProps> = ({ markets, on
         </Box>
         
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+          {onBack && (
+            <Button 
+              variant="outlined"
+              onClick={onBack}
+            >
+              Back
+            </Button>
+          )}
           <Button 
             variant="contained" 
             endIcon={<ArrowForwardIcon />}
             onClick={onContinue}
-            sx={{ ml: 'auto' }}
+            sx={{ ml: onBack ? 0 : 'auto' }}
           >
             Continue
           </Button>

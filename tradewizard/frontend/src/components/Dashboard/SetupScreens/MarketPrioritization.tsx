@@ -5,8 +5,6 @@ import {
 } from '@mui/material';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { DropResult, DroppableProvided, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
-import { CustomDragDropContext, CustomDroppable, CustomDraggable } from '../../../components/DragDrop/DraggableWrapper';
 
 interface MarketData {
   id: string;
@@ -95,34 +93,57 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
     return marketData;
   });
 
-  // Ensure all market IDs are valid for drag and drop
-  React.useEffect(() => {
-    // Log the market IDs for debugging
-    console.log("Market IDs:", prioritizedMarkets.map(market => market.id));
-    
-    // Validate that all IDs are strings without spaces or special characters
-    const hasInvalidId = prioritizedMarkets.some(market => 
-      typeof market.id !== 'string' || 
-      market.id.includes(' ') || 
-      !/^[a-z0-9-]+$/.test(market.id)
-    );
-    
-    if (hasInvalidId) {
-      console.warn("Warning: Some market IDs may not be valid for drag and drop operations");
-    }
-  }, [prioritizedMarkets]);
+  // Track the currently dragged market
+  const [draggedMarket, setDraggedMarket] = useState<MarketData | null>(null);
+  const [dragOverMarket, setDragOverMarket] = useState<string | null>(null);
 
-  const handleDragEnd = (result: DropResult) => {
-    console.log("Drag result:", result);
-    if (!result.destination) {
+  // Handle start of drag
+  const handleDragStart = (market: MarketData) => {
+    console.log(`Started dragging ${market.name}`);
+    setDraggedMarket(market);
+  };
+
+  // Handle drag over another market
+  const handleDragOver = (e: React.DragEvent, marketId: string) => {
+    e.preventDefault();
+    if (draggedMarket && draggedMarket.id !== marketId) {
+      setDragOverMarket(marketId);
+    }
+  };
+
+  // Handle drop
+  const handleDrop = (e: React.DragEvent, targetMarketId: string) => {
+    e.preventDefault();
+    
+    if (!draggedMarket) return;
+    
+    console.log(`Dropping ${draggedMarket.name} onto ${targetMarketId}`);
+    
+    // Find the indices
+    const sourceIndex = prioritizedMarkets.findIndex(m => m.id === draggedMarket.id);
+    const destinationIndex = prioritizedMarkets.findIndex(m => m.id === targetMarketId);
+    
+    if (sourceIndex === -1 || destinationIndex === -1 || sourceIndex === destinationIndex) {
       return;
     }
+    
+    // Create a new array and reorder
+    const newMarkets = [...prioritizedMarkets];
+    const [removedMarket] = newMarkets.splice(sourceIndex, 1);
+    newMarkets.splice(destinationIndex, 0, removedMarket);
+    
+    console.log(`Moved market from position ${sourceIndex} to ${destinationIndex}`);
+    console.log("New market order:", newMarkets.map(m => m.name));
+    
+    setPrioritizedMarkets(newMarkets);
+    setDraggedMarket(null);
+    setDragOverMarket(null);
+  };
 
-    const items = Array.from(prioritizedMarkets);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setPrioritizedMarkets(items);
+  // Handle end of drag
+  const handleDragEnd = () => {
+    setDraggedMarket(null);
+    setDragOverMarket(null);
   };
   
   return (
@@ -139,181 +160,171 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
       
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <CustomDragDropContext onDragEnd={handleDragEnd}>
-            <CustomDroppable droppableId="markets">
-              {(provided: DroppableProvided) => (
-                <Box
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  sx={{ width: '100%' }}
-                >
-                  {prioritizedMarkets.map((market, index) => (
-                    <CustomDraggable 
-                      key={market.id} 
-                      draggableId={market.id}
-                      index={index}
+          {prioritizedMarkets.map((market) => (
+            <Box 
+              key={market.id}
+              draggable
+              onDragStart={() => handleDragStart(market)}
+              onDragOver={(e) => handleDragOver(e, market.id)}
+              onDrop={(e) => handleDrop(e, market.id)}
+              onDragEnd={handleDragEnd}
+              sx={{ 
+                mb: 2, 
+                width: '100%',
+                opacity: draggedMarket?.id === market.id ? 0.5 : 1,
+                border: dragOverMarket === market.id ? '2px dashed #1976d2' : 'none',
+                borderRadius: 1,
+                transition: 'all 0.2s'
+              }}
+            >
+              <Card 
+                elevation={1}
+                sx={{ 
+                  width: '100%',
+                  cursor: 'grab',
+                  transition: 'all 0.3s ease-in-out',
+                  '&:hover': {
+                    boxShadow: 3
+                  }
+                }}
+              >
+                <CardHeader
+                  avatar={
+                    <Box 
+                      sx={{ 
+                        bgcolor: '#f0f4ff', 
+                        p: 1, 
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
                     >
-                      {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
-                        <Box
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          sx={{ 
-                            mb: 2,
-                            width: '100%',
-                            opacity: snapshot.isDragging ? 0.8 : 1,
-                            transform: snapshot.isDragging ? 'rotate(1deg)' : 'none',
-                          }}
-                        >
-                          <Card 
-                            elevation={snapshot.isDragging ? 6 : 1}
-                            sx={{ 
-                              width: '100%',
-                              transition: 'all 0.3s ease-in-out',
-                            }}
-                          >
-                            <CardHeader
-                              avatar={
-                                <Box 
-                                  {...provided.dragHandleProps}
-                                  sx={{ 
-                                    bgcolor: '#f0f4ff', 
-                                    p: 1, 
-                                    borderRadius: 1,
-                                    cursor: 'grab',
-                                    '&:hover': {
-                                      bgcolor: '#e0e7ff',
-                                    }
-                                  }}
-                                >
-                                  <DragIndicatorIcon color="primary" fontSize="medium" />
-                                </Box>
-                              }
-                              title={
-                                <Typography variant="h6">
-                                  {market.name}
-                                </Typography>
-                              }
-                              action={
-                                <Chip 
-                                  label={`Match Score: ${market.match_score}%`}
-                                  color={
-                                    market.match_score >= 80 ? "success" :
-                                    market.match_score >= 60 ? "primary" : "warning"
-                                  }
-                                  sx={{ mr: 1, mt: 1 }}
-                                />
-                              }
-                            />
-                            
-                            <CardContent>
-                              <Grid container spacing={2}>
-                                <Grid item xs={12} md={8}>
-                                  <Stack spacing={1}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
-                                        Market Size:
-                                      </Typography>
-                                      <Typography variant="body1" sx={{ ml: 2 }}>
-                                        {market.market_size}
-                                      </Typography>
-                                    </Box>
-                                    <Divider />
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
-                                        Growth Rate:
-                                      </Typography>
-                                      <Typography variant="body1" sx={{ ml: 2 }}>
-                                        {market.growth_rate}% per year
-                                      </Typography>
-                                    </Box>
-                                    <Divider />
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
-                                        Entry Barriers:
-                                      </Typography>
-                                      <Chip 
-                                        label={market.entry_barriers}
-                                        color={
-                                          market.entry_barriers === 'Low' ? "success" :
-                                          market.entry_barriers === 'Medium' ? "primary" : "error"
-                                        }
-                                        size="small"
-                                        sx={{ ml: 2 }}
-                                      />
-                                    </Box>
-                                    <Divider />
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
-                                        Regulatory Complexity:
-                                      </Typography>
-                                      <Chip 
-                                        label={market.regulatory_complexity}
-                                        color={
-                                          market.regulatory_complexity === 'Low' ? "success" :
-                                          market.regulatory_complexity === 'Medium' ? "primary" : "error"
-                                        }
-                                        size="small"
-                                        sx={{ ml: 2 }}
-                                      />
-                                    </Box>
-                                  </Stack>
-                                </Grid>
-                                <Grid item xs={12} md={4}>
-                                  <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                    <Box sx={{ mb: 1 }}>
-                                      <Typography variant="body2" align="center">
-                                        Overall Compatibility
-                                      </Typography>
-                                      <Typography variant="h4" align="center" color="primary" sx={{ mt: 1 }}>
-                                        {market.match_score}%
-                                      </Typography>
-                                    </Box>
-                                    <LinearProgress 
-                                      variant="determinate" 
-                                      value={market.match_score} 
-                                      color={
-                                        market.match_score >= 80 ? "success" :
-                                        market.match_score >= 60 ? "primary" : "warning"
-                                      }
-                                      sx={{ height: 8, borderRadius: 4 }}
-                                    />
-                                  </Box>
-                                </Grid>
-                              </Grid>
-                            </CardContent>
-                          </Card>
+                      <DragIndicatorIcon color="primary" fontSize="medium" />
+                    </Box>
+                  }
+                  title={
+                    <Typography variant="h6">
+                      {market.name}
+                    </Typography>
+                  }
+                  action={
+                    <Chip 
+                      label={`Match Score: ${market.match_score}%`}
+                      color={
+                        market.match_score >= 80 ? "success" :
+                        market.match_score >= 60 ? "primary" : "warning"
+                      }
+                      sx={{ mr: 1, mt: 1 }}
+                    />
+                  }
+                />
+                
+                <CardContent>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={8}>
+                      <Stack spacing={1}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
+                            Market Size:
+                          </Typography>
+                          <Typography variant="body1" sx={{ ml: 2 }}>
+                            {market.market_size}
+                          </Typography>
                         </Box>
-                      )}
-                    </CustomDraggable>
-                  ))}
-                  {provided.placeholder}
-                </Box>
-              )}
-            </CustomDroppable>
-          </CustomDragDropContext>
+                        <Divider />
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
+                            Growth Rate:
+                          </Typography>
+                          <Typography variant="body1" sx={{ ml: 2 }}>
+                            {market.growth_rate}% per year
+                          </Typography>
+                        </Box>
+                        <Divider />
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
+                            Entry Barriers:
+                          </Typography>
+                          <Chip 
+                            label={market.entry_barriers}
+                            color={
+                              market.entry_barriers === 'Low' ? "success" :
+                              market.entry_barriers === 'Medium' ? "primary" : "error"
+                            }
+                            size="small"
+                            sx={{ ml: 2 }}
+                          />
+                        </Box>
+                        <Divider />
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
+                            Regulatory Complexity:
+                          </Typography>
+                          <Chip 
+                            label={market.regulatory_complexity}
+                            color={
+                              market.regulatory_complexity === 'Low' ? "success" :
+                              market.regulatory_complexity === 'Medium' ? "primary" : "error"
+                            }
+                            size="small"
+                            sx={{ ml: 2 }}
+                          />
+                        </Box>
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Box sx={{ mb: 1 }}>
+                          <Typography variant="body2" align="center">
+                            Overall Compatibility
+                          </Typography>
+                          <Typography variant="h4" align="center" color="primary" sx={{ mt: 1 }}>
+                            {market.match_score}%
+                          </Typography>
+                        </Box>
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={market.match_score} 
+                          color={
+                            market.match_score >= 80 ? "success" :
+                            market.match_score >= 60 ? "primary" : "warning"
+                          }
+                          sx={{ height: 8, borderRadius: 4 }}
+                        />
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Box>
+          ))}
         </Grid>
       </Grid>
       
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4 }}>
-        <Typography variant="body2" color="text.secondary">
-          Your market prioritization will be saved when you continue.
-        </Typography>
+      {/* Debug Section - can be removed in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <Box sx={{ mt: 4, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+          <Typography variant="subtitle2" gutterBottom>Debug Information</Typography>
+          <Typography variant="body2">
+            Market Order: {prioritizedMarkets.map(m => m.name).join(', ')}
+          </Typography>
+          {draggedMarket && (
+            <Typography variant="body2">
+              Currently Dragging: {draggedMarket.name}
+            </Typography>
+          )}
+        </Box>
+      )}
+      
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
         <Button 
           variant="contained" 
           color="primary" 
-          size="large"
           endIcon={<KeyboardArrowRightIcon />}
-          onClick={() => onContinue()}
-          sx={{ 
-            px: 4, 
-            py: 1.5,
-            boxShadow: 3,
-            '&:hover': {
-              boxShadow: 5,
-            }
-          }}
+          onClick={onContinue}
         >
-          Continue to Export Timeline
+          Continue
         </Button>
       </Box>
     </Box>

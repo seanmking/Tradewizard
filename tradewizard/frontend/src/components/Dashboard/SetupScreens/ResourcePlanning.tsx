@@ -27,6 +27,7 @@ import {
 
 interface ResourcePlanningProps {
   onContinue: () => void;
+  onBack?: () => void;
 }
 
 // Mock data for resource planning
@@ -53,7 +54,7 @@ const mockResourceData = {
   ]
 };
 
-const ResourcePlanning: React.FC<ResourcePlanningProps> = ({ onContinue }) => {
+const ResourcePlanning: React.FC<ResourcePlanningProps> = ({ onContinue, onBack }) => {
   const [monthlyBudget, setMonthlyBudget] = useState<number>(mockResourceData.recommendedMonthlyBudget);
   const [inputValue, setInputValue] = useState<string>(mockResourceData.recommendedMonthlyBudget.toString());
   const [estimatedMonths, setEstimatedMonths] = useState<number>(mockResourceData.estimatedTimelineMonths.recommended);
@@ -322,11 +323,20 @@ const ResourcePlanning: React.FC<ResourcePlanningProps> = ({ onContinue }) => {
           {getBudgetRecommendation()}
         </Alert>
         
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+          {onBack && (
+            <Button 
+              variant="outlined"
+              onClick={onBack}
+            >
+              Back
+            </Button>
+          )}
           <Button 
             variant="contained" 
             endIcon={<ArrowForwardIcon />}
             onClick={onContinue}
+            sx={{ ml: onBack ? 0 : 'auto' }}
           >
             Finalize Plan
           </Button>
