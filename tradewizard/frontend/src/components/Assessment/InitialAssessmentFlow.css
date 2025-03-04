@@ -410,10 +410,10 @@
 }
 
 .readiness-report-link-container {
-  margin-top: 12px;
-  display: inline-block;
-  position: relative;
-  z-index: 1;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .create-account-button {
@@ -527,4 +527,64 @@
   animation: fadeIn 0.3s ease-in-out;
   box-shadow: none;
   border: none;
+}
+
+/* Standalone report container */
+.standalone-report-container {
+  width: 100%;
+  background-color: rgba(249, 250, 251, 0.95);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 5;
+}
+
+/* Adjust chat container when standalone report is shown */
+.chat-container.with-standalone-report {
+  opacity: 0.9;
+  max-height: calc(100vh - 70vh - 100px);
+}
+
+/* Standalone report button - now the primary action button */
+.standalone-report-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.standalone-report-button:hover {
+  background-color: #4338ca;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.25);
+}
+
+/* Mobile responsiveness for standalone report */
+@media (max-width: 768px) {
+  .standalone-report-container {
+    max-height: 60vh;
+  }
+  
+  .chat-container.with-standalone-report {
+    max-height: calc(100vh - 60vh - 80px);
+  }
+  
+  .readiness-report-link-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .standalone-report-button {
+    margin-left: 0;
+    width: 100%;
+  }
 } 

@@ -6,9 +6,15 @@ interface ExportReadinessReportProps {
   userData: Record<string, any>;
   onClose: () => void;
   onGoToDashboard?: () => void;
+  standalone?: boolean;
 }
 
-const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData, onClose, onGoToDashboard }) => {
+const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ 
+  userData, 
+  onClose, 
+  onGoToDashboard,
+  standalone = false
+}) => {
   const [marketInsights, setMarketInsights] = useState<{ [key: string]: MarketData }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedMarketsList, setSelectedMarketsList] = useState<string[]>([]);
@@ -113,9 +119,104 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData,
   // Determine which markets to display (use the keys from the fetched insights)
   const selectedMarkets = Object.keys(marketInsights);
 
+  // Function to handle printing the report
+  const handlePrintReport = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const reportContent = document.querySelector('.export-readiness-report')?.innerHTML;
+    
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Export Readiness Report - ${reportData.companyName}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              color: #333;
+            }
+            .report-header {
+              padding: 20px;
+              background-color: #4f46e5;
+              color: white;
+              margin-bottom: 20px;
+            }
+            .report-section {
+              margin-bottom: 30px;
+            }
+            .report-section h3 {
+              color: #4f46e5;
+              border-bottom: 1px solid #e0e0e0;
+              padding-bottom: 10px;
+            }
+            .assessment-grid {
+              display: flex;
+              gap: 20px;
+            }
+            .assessment-column {
+              flex: 1;
+            }
+            .market-insights {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+              gap: 20px;
+            }
+            .market-insight-card {
+              border: 1px solid #e0e0e0;
+              padding: 15px;
+              border-radius: 8px;
+            }
+            .next-steps {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+              gap: 20px;
+            }
+            .next-step-card {
+              border: 1px solid #e0e0e0;
+              padding: 15px;
+              border-radius: 8px;
+            }
+            .timeframe {
+              display: inline-block;
+              background-color: #ebf4ff;
+              color: #4f46e5;
+              padding: 4px 10px;
+              border-radius: 20px;
+              font-size: 14px;
+            }
+            @media print {
+              body {
+                font-size: 12pt;
+              }
+              .report-header {
+                background-color: #4f46e5 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${reportContent}
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // Add a slight delay to ensure content is loaded before printing
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
+
   if (loading) {
     return (
-      <div className="export-readiness-report">
+      <div className={`export-readiness-report ${standalone ? 'standalone-report' : ''}`}>
         <h1>Loading Market Insights...</h1>
         <p>Please wait while we prepare your Export Readiness Report.</p>
       </div>
@@ -123,7 +224,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData,
   }
 
   return (
-    <div className="export-readiness-report">
+    <div className={`export-readiness-report ${standalone ? 'standalone-report' : ''}`}>
       <div className="report-header">
         <h1>Export Readiness Report</h1>
         <div className="company-info">
@@ -284,17 +385,20 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ userData,
 
       <div className="promotional-message">
         <p>
-          Ready to take your South African exports to the next level? 
-          Our team of trade specialists can help you navigate international markets with confidence.
-          <strong> Upgrade to Trade King Premium for personalized market analysis and export support services.</strong>
+          Would you like to continue to your dashboard to explore more market insights?
         </p>
       </div>
 
       <div className="report-footer">
         <div className="button-container">
-          <button className="close-button" onClick={onClose}>Back to Assessment</button>
+          {!standalone && (
+            <button className="close-button" onClick={onClose}>Back to Assessment</button>
+          )}
+          <button className="print-button" onClick={handlePrintReport}>
+            Print Report
+          </button>
           {onGoToDashboard && (
-            <button className="dashboard-button" onClick={onGoToDashboard}>Go to Dashboard</button>
+            <button className="dashboard-button" onClick={onGoToDashboard}>Continue to Dashboard</button>
           )}
         </div>
       </div>

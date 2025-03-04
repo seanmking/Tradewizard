@@ -45,6 +45,7 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
   const [accountCreated, setAccountCreated] = useState(false);
   const [username, setUsername] = useState('');
   const [showReadinessReport, setShowReadinessReport] = useState(false);
+  const [showStandaloneReport, setShowStandaloneReport] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -299,11 +300,6 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
     setShowAccountCreation(false);
   };
   
-  // Handle accessing the export readiness report
-  const handleAccessReport = () => {
-    setShowReadinessReport(true);
-  };
-  
   // Handle closing the export readiness report
   const handleCloseReport = () => {
     setShowReadinessReport(false);
@@ -320,6 +316,7 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
     }
     
     setShowReadinessReport(false);
+    setShowStandaloneReport(false);
     
     // If dashboardData is not set, create mock data
     if (!dashboardData) {
@@ -395,6 +392,17 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
     setShowDashboard(true);
   };
   
+  // Toggle standalone report visibility
+  const toggleStandaloneReport = () => {
+    // If the modal report is open, close it
+    if (showReadinessReport) {
+      setShowReadinessReport(false);
+    }
+    
+    // Toggle the standalone report
+    setShowStandaloneReport(prev => !prev);
+  };
+  
   const getInputPlaceholder = () => {
     if (isTyping) return "Sarah is typing...";
     if (currentStep?.type === 'market_selection') return "Please select markets above...";
@@ -449,12 +457,12 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
            message.metadata?.step === 'account_created' && 
            isLastMessage && (
             <div className="readiness-report-link-container">
-              <a 
-                className="readiness-report-link"
-                onClick={handleAccessReport}
+              <button 
+                className="standalone-report-button"
+                onClick={toggleStandaloneReport}
               >
-                Access your Export-readiness report
-              </a>
+                {showStandaloneReport ? 'Hide Report' : 'Access your Export-readiness report'}
+              </button>
             </div>
           )}
         </div>
@@ -464,17 +472,32 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
   
   // Add debugging for report rendering
   useEffect(() => {
-    if (showReadinessReport) {
+    if (showReadinessReport || showStandaloneReport) {
       console.log('Rendering report with complete userData:', userData);
       console.log('selectedMarkets value:', userData.selectedMarkets);
       console.log('selected_markets value:', userData.selected_markets);
     }
-  }, [showReadinessReport, userData]);
+  }, [showReadinessReport, showStandaloneReport, userData]);
 
   return (
     <div className="assessment-flow-container">
       <div className="initial-assessment-container">
-        <div className={`chat-container ${showDashboard ? 'with-dashboard' : ''}`}>
+        {/* Standalone report container */}
+        {showStandaloneReport && accountCreated && (
+          <div className="standalone-report-container">
+            <ExportReadinessReport
+              userData={{
+                companyName: 'Global Fresh SA',
+                selectedMarkets: userData.selectedMarkets
+              }}
+              onClose={() => setShowStandaloneReport(false)}
+              onGoToDashboard={handleGoToDashboard}
+              standalone={true}
+            />
+          </div>
+        )}
+        
+        <div className={`chat-container ${showDashboard ? 'with-dashboard' : ''} ${showStandaloneReport ? 'with-standalone-report' : ''}`}>
           <div className="messages-container" ref={messagesContainerRef}>
             {renderMessages()}
             <div ref={messagesEndRef} />
