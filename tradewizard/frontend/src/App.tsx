@@ -8,6 +8,10 @@ import AccountCreation from './components/Auth/AccountCreation';
 import Login from './components/Auth/Login';
 import Profile from './components/Auth/Profile';
 import AuthService from './services/AuthService';
+import { resetAssessmentState } from './services/assessment-api';
+
+// Custom event for resetting assessment
+const RESET_ASSESSMENT_EVENT = 'resetAssessment';
 
 // Simple icon components
 const AssessmentIcon = () => (
@@ -77,16 +81,19 @@ const App = () => {
       setUsername(user.username);
       setHasCompletedAssessment(user.hasCompletedAssessment);
       
-      // If user has completed assessment, set dashboard as active tab
-      if (user.hasCompletedAssessment) {
-        setActiveTab('dashboard');
-      }
-      
       // Store the current active tab in localStorage
       const savedTab = localStorage.getItem('activeTab');
       if (savedTab && ['assessment', 'dashboard', 'sidekick', 'documents', 'markets', 'profile'].includes(savedTab)) {
         setActiveTab(savedTab as TabType);
+      } else {
+        // Default to assessment if no valid tab is saved
+        setActiveTab('assessment');
+        localStorage.setItem('activeTab', 'assessment');
       }
+    } else {
+      // For users that aren't logged in, always show assessment
+      setActiveTab('assessment');
+      localStorage.setItem('activeTab', 'assessment');
     }
     
     // Add event listener for navigating to assessment
@@ -99,6 +106,18 @@ const App = () => {
     const handleNavigateToDashboard = () => {
       setActiveTab('dashboard');
       localStorage.setItem('activeTab', 'dashboard');
+      
+      // Ensure the tab is visually updated immediately
+      const assessmentTab = document.querySelector('.assessment-tab');
+      const dashboardTab = document.querySelector('.dashboard-tab');
+      
+      if (assessmentTab) {
+        assessmentTab.classList.remove('active');
+      }
+      
+      if (dashboardTab) {
+        dashboardTab.classList.add('active');
+      }
     };
     
     window.addEventListener('navigateToAssessment', handleNavigateToAssessment);
@@ -148,6 +167,9 @@ const App = () => {
     // Show account creation modal if not authenticated
     if (!isAuthenticated) {
       setShowAuthModal('register');
+    } else {
+      // Just set active tab to dashboard but allow returning to assessment later
+      setActiveTab('dashboard');
     }
   };
   
@@ -168,11 +190,25 @@ const App = () => {
         <nav className="sidebar-nav">
           <a 
             href="#" 
-            className={activeTab === 'assessment' ? 'active' : ''}
+            className={`${activeTab === 'assessment' ? 'active' : ''} assessment-tab`}
             onClick={(e) => {
               e.preventDefault();
+              
+              // First set the active tab
               setActiveTab('assessment');
               localStorage.setItem('activeTab', 'assessment');
+              
+              // For demo purposes, allow restarting the assessment even if completed
+              if (hasCompletedAssessment) {
+                // Reset all assessment state first
+                resetAssessmentState();
+                
+                // Then dispatch the reset event for the component to handle
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent(RESET_ASSESSMENT_EVENT));
+                  console.log('Restarting assessment for demo purposes');
+                }, 100);
+              }
             }}
           >
             <AssessmentIcon />
@@ -180,7 +216,7 @@ const App = () => {
           </a>
           <a 
             href="#" 
-            className={activeTab === 'dashboard' ? 'active' : ''}
+            className={`${activeTab === 'dashboard' ? 'active' : ''} dashboard-tab`}
             onClick={(e) => {
               e.preventDefault();
               
@@ -275,6 +311,17 @@ const App = () => {
             <div className="content-header">
               <h1>Export Market Dashboard</h1>
               <p>View your export readiness analysis and market intelligence.</p>
+              <button 
+                onClick={() => {
+                  setActiveTab('assessment');
+                  localStorage.setItem('activeTab', 'assessment');
+                  // Reset assessment for demo
+                  window.dispatchEvent(new CustomEvent(RESET_ASSESSMENT_EVENT));
+                }}
+                className="return-to-assessment-button"
+              >
+                Return to Assessment
+              </button>
             </div>
             
             <div className="dashboard-wrapper">

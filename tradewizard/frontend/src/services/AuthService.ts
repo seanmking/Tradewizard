@@ -13,11 +13,19 @@ export const AuthService = {
   login: (username: string): User => {
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('username', username);
-    localStorage.setItem('hasCompletedAssessment', 'true');
+    
+    // Don't automatically set hasCompletedAssessment to true
+    // Check if the user has previously completed the assessment
+    const assessmentCompleted = localStorage.getItem('hasCompletedAssessment');
+    if (assessmentCompleted === null) {
+      localStorage.setItem('hasCompletedAssessment', 'false');
+    }
+    
+    const hasCompletedAssessment = localStorage.getItem('hasCompletedAssessment') === 'true';
     
     return {
       username,
-      hasCompletedAssessment: true
+      hasCompletedAssessment
     };
   },
   
@@ -25,11 +33,14 @@ export const AuthService = {
   register: (username: string): User => {
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('username', username);
-    localStorage.setItem('hasCompletedAssessment', 'true');
+    
+    // Don't automatically set hasCompletedAssessment to true
+    // New users should start with hasCompletedAssessment set to false
+    localStorage.setItem('hasCompletedAssessment', 'false');
     
     return {
       username,
-      hasCompletedAssessment: true
+      hasCompletedAssessment: false
     };
   },
   
@@ -37,7 +48,8 @@ export const AuthService = {
   logout: (): void => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
-    localStorage.removeItem('hasCompletedAssessment');
+    // Don't clear hasCompletedAssessment on logout
+    // This allows users to return to the dashboard upon login
   },
   
   // Check if a user is logged in
@@ -48,9 +60,10 @@ export const AuthService = {
   // Get the current user's information
   getCurrentUser: (): User | null => {
     const username = localStorage.getItem('username');
-    const hasCompletedAssessment = localStorage.getItem('hasCompletedAssessment') === 'true';
-    
     if (!username) return null;
+    
+    // Get hasCompletedAssessment or default to false
+    const hasCompletedAssessment = localStorage.getItem('hasCompletedAssessment') === 'true';
     
     return {
       username,

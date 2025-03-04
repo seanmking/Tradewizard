@@ -5,7 +5,8 @@ import {
 } from '@mui/material';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DropResult, DroppableProvided, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import { CustomDragDropContext, CustomDroppable, CustomDraggable } from '../../../components/DragDrop/DraggableWrapper';
 
 interface MarketData {
   id: string;
@@ -111,21 +112,21 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
       
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="markets">
-              {(provided) => (
+          <CustomDragDropContext onDragEnd={handleDragEnd}>
+            <CustomDroppable droppableId="markets">
+              {(provided: DroppableProvided) => (
                 <Box
                   {...provided.droppableProps}
                   ref={provided.innerRef}
                   sx={{ width: '100%' }}
                 >
                   {prioritizedMarkets.map((market, index) => (
-                    <Draggable 
+                    <CustomDraggable 
                       key={market.id} 
                       draggableId={market.id}
                       index={index}
                     >
-                      {(provided, snapshot) => (
+                      {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                         <Box
                           ref={provided.innerRef}
                           {...provided.draggableProps}
@@ -245,13 +246,13 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
                           </Card>
                         </Box>
                       )}
-                    </Draggable>
+                    </CustomDraggable>
                   ))}
                   {provided.placeholder}
                 </Box>
               )}
-            </Droppable>
-          </DragDropContext>
+            </CustomDroppable>
+          </CustomDragDropContext>
         </Grid>
       </Grid>
       

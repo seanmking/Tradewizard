@@ -182,4 +182,21 @@ export async function getMarketIntelligence(
   
   const data = await response.json();
   return data.intelligence;
-} 
+}
+
+// Add a utility function to reset all assessment-related state
+export const resetAssessmentState = () => {
+  console.log('Resetting all assessment state');
+  // Clear localStorage items that might interfere with assessment restart
+  localStorage.removeItem('assessmentResponses');
+  localStorage.removeItem('currentStep');
+  localStorage.removeItem('assessmentData');
+  
+  // Return the user to assessment tab
+  localStorage.setItem('activeTab', 'assessment');
+  
+  // Reset hasCompletedAssessment flag for demo purposes
+  localStorage.setItem('hasCompletedAssessment', 'false');
+  
+  return true;
+}; 

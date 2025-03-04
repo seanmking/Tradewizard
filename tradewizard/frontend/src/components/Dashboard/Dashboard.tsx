@@ -17,6 +17,7 @@ import {
   ArrowForward as ArrowForwardIcon
 } from '@mui/icons-material';
 import AuthService from '../../services/AuthService';
+import { resetAssessmentState } from '../../services/assessment-api';
 import './Dashboard.css';
 
 // Dynamically import the setup screens with error handling
@@ -352,6 +353,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     setWelcomeBannerDismissed(true);
   };
 
+  const handleNavigateToAssessment = () => {
+    // Reset all assessment state first
+    resetAssessmentState();
+    
+    // Wait a moment before dispatching events
+    setTimeout(() => {
+      // Ensure the assessment tab is active
+      const assessmentTab = document.querySelector('.assessment-tab');
+      const dashboardTab = document.querySelector('.dashboard-tab');
+      
+      if (assessmentTab) {
+        assessmentTab.classList.add('active');
+      }
+      
+      if (dashboardTab) {
+        dashboardTab.classList.remove('active');
+      }
+      
+      // Dispatch event to navigate to assessment
+      window.dispatchEvent(new CustomEvent('navigateToAssessment'));
+      
+      // Also reset assessment for demo purposes
+      window.dispatchEvent(new CustomEvent('resetAssessment'));
+    }, 100);
+  };
+
   const renderSetupScreen = () => {
     // Get the components from the loaders
     const MarketPrioritization = MarketPrioritizationLoader();
@@ -414,6 +441,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               </Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>
                 Track your export journey for {dashboardData.selected_markets.join(', ')}
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Let's assess {dashboardData.business_profile.name}'s basics in order to create a detailed export-readiness workflow. We will focus on three areas: Market Prioritization, your Export Timeline, and a quick Regulatory Assessment. This will give you a clear understanding of resource requirements.
               </Typography>
               <LinearProgress 
                 variant="determinate" 
@@ -617,6 +647,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           <Toolbar />
           <Box sx={{ overflow: 'auto', mt: 2 }}>
             <List>
+              <ListItem 
+                button 
+                onClick={handleNavigateToAssessment}
+                sx={{
+                  backgroundColor: '#4f46e5',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: '#3c37b5',
+                  },
+                  mb: 1,
+                }}
+              >
+                <ListItemIcon sx={{ color: 'white' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    <path d="M9 14l2 2 4-4"></path>
+                  </svg>
+                </ListItemIcon>
+                <ListItemText primary="Return to Assessment" primaryTypographyProps={{ fontWeight: 'bold' }} />
+              </ListItem>
+              
               <ListItem 
                 button 
                 selected={activePillar === 'dashboard'} 

@@ -440,17 +440,10 @@ const RegulatoryAssessment: React.FC<RegulatoryAssessmentProps> = ({ markets, on
         
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
           <Button 
-            variant="outlined" 
-            startIcon={<InfoIcon />}
-            onClick={() => window.open('https://www.trade.gov/knowledge-product/export-guides', '_blank')}
-          >
-            Export Guides
-          </Button>
-          
-          <Button 
             variant="contained" 
             endIcon={<ArrowForwardIcon />}
             onClick={onContinue}
+            sx={{ ml: 'auto' }}
           >
             Continue
           </Button>

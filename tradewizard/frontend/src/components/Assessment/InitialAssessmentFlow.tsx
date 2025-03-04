@@ -8,7 +8,8 @@ import {
   processAssessmentResponse, 
   getInitialQuestion, 
   AssessmentStep,
-  MarketOption
+  MarketOption,
+  resetAssessmentState
 } from '../../services/assessment-api';
 import './InitialAssessmentFlow.css';
 
@@ -50,6 +51,7 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const initialQuestionFetchedRef = useRef(false);
   
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -69,48 +71,81 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
     }
   }, []);
   
-  // Get initial question on component mount
-  useEffect(() => {
-    const fetchInitialQuestion = async () => {
-      try {
-        // Check if we're on the assessment tab
-        const activeTab = localStorage.getItem('activeTab');
-        if (activeTab && activeTab !== 'assessment') {
-          console.log('Not on assessment tab, skipping API call');
-          return;
+  // Function to fetch the initial question
+  const fetchInitialQuestion = async () => {
+    try {
+      console.log('Fetching initial question from: /api/assessment/initial-question');
+      setIsTyping(true);
+      const response = await getInitialQuestion();
+      setCurrentStep({
+        id: response.step_id,
+        prompt: response.question,
+        type: 'text'
+      });
+      
+      // Add initial message
+      setMessages([
+        {
+          role: 'assistant' as const,
+          content: response.question,
+          timestamp: Date.now()
         }
-        
-        setIsTyping(true);
-        const response = await getInitialQuestion();
-        setCurrentStep({
-          id: response.step_id,
-          prompt: response.question,
-          type: 'text'
-        });
-        
-        // Add initial message
-        setMessages([
-          {
-            role: 'assistant' as const,
-            content: response.question,
-            timestamp: Date.now()
-          }
-        ]);
-        setIsTyping(false);
-        
-        // Focus the input after initial question loads
-        setTimeout(() => {
-          if (inputRef.current) {
-            inputRef.current.focus();
-          }
-        }, 100);
-      } catch (error) {
-        console.error('Error fetching initial question:', error);
-        setIsTyping(false);
-      }
-    };
+      ]);
+      setIsTyping(false);
+      
+      // Focus the input after initial question loads
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Error fetching initial question:', error);
+      setIsTyping(false);
+    }
+  };
+  
+  // Function to handle assessment reset
+  const handleResetAssessment = async () => {
+    console.log('Resetting assessment state');
     
-    fetchInitialQuestion();
+    // Clear all state
+    setMessages([]);
+    setCurrentStep(null);
+    setUserData({});
+    setDashboardData(null);
+    setShowDashboard(false);
+    setShowAccountCreation(false);
+    setShowReadinessReport(false);
+    setShowStandaloneReport(false);
+    
+    // Reset the flag and fetch initial question
+    initialQuestionFetchedRef.current = false;
+    await fetchInitialQuestion();
+  };
+  
+  // Effect for initial question fetch
+  useEffect(() => {
+    // Only fetch if not already fetched
+    if (!initialQuestionFetchedRef.current) {
+      initialQuestionFetchedRef.current = true;
+      fetchInitialQuestion();
+    }
+    
+    return () => {
+      // Cleanup
+    };
+  }, []);
+  
+  // Effect for reset event listener
+  useEffect(() => {
+    // Add event listener for reset
+    window.addEventListener('resetAssessment', handleResetAssessment);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('resetAssessment', handleResetAssessment);
+    };
   }, []);
   
   // Handle user message submission
@@ -175,35 +210,47 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
         marketOptions: response.next_step.market_options
       });
       
-      // Log market options for debugging
-      if (response.next_step.type === 'market_selection') {
-        console.log('Market options received:', response.next_step.market_options);
+      // Add assistant message to chat
+      setMessages([
+        ...newMessages,
+        {
+          role: 'assistant' as const,
+          content: response.next_step.prompt,
+          timestamp: Date.now(),
+          metadata: {
+            step: response.next_step.id,
+            marketOptions: response.next_step.market_options
+          }
+        }
+      ]);
+      
+      // If we've reached the final step, call onComplete
+      if (response.next_step.id === 'final' && onComplete) {
+        onComplete();
       }
       
-      // Add assistant response to chat with shorter typing delay (500ms instead of longer)
+      // Hide typing indicator
+      setIsTyping(false);
+      
+      // Focus the input after response
       setTimeout(() => {
-        setMessages([
-          ...newMessages,
-          {
-            role: 'assistant' as const,
-            content: response.next_step.prompt,
-            timestamp: Date.now(),
-            metadata: {
-              step: response.next_step.id,
-              marketOptions: response.next_step.market_options
-            }
-          }
-        ]);
-        setIsTyping(false);
-        
-        // Auto-focus the input after new message
-        if (inputRef.current && response.next_step.type !== 'market_selection') {
+        if (inputRef.current) {
           inputRef.current.focus();
         }
-      }, 500); // Reduced typing delay to 500ms
+      }, 100);
     } catch (error) {
       console.error('Error processing response:', error);
       setIsTyping(false);
+      
+      // Add error message
+      setMessages([
+        ...newMessages,
+        {
+          role: 'assistant' as const,
+          content: 'Sorry, there was an error processing your response. Please try again.',
+          timestamp: Date.now()
+        }
+      ]);
     }
   };
   
