@@ -1,0 +1,33 @@
+<svg width="800" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+  <text x="50%" y="30%" font-family="Arial" font-size="24" text-anchor="middle" fill="#333">Comprehensive Timeline</text>
+  <line x1="100" y1="150" x2="700" y2="150" stroke="#4caf50" stroke-width="4"/>
+  
+  <!-- Milestones -->
+  <circle cx="150" cy="150" r="10" fill="#4caf50"/>
+  <text x="150" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 4</text>
+  <text x="150" y="130" font-family="Arial" font-size="12" text-anchor="middle">Market Research</text>
+  
+  <circle cx="250" cy="150" r="10" fill="#4caf50"/>
+  <text x="250" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 9</text>
+  <text x="250" y="130" font-family="Arial" font-size="12" text-anchor="middle">Regulatory Compliance</text>
+  
+  <circle cx="350" cy="150" r="10" fill="#4caf50"/>
+  <text x="350" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 13</text>
+  <text x="350" y="130" font-family="Arial" font-size="12" text-anchor="middle">Partner Negotiations</text>
+  
+  <circle cx="450" cy="150" r="10" fill="#4caf50"/>
+  <text x="450" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 17</text>
+  <text x="450" y="130" font-family="Arial" font-size="12" text-anchor="middle">Product Adaptation</text>
+  
+  <circle cx="550" cy="150" r="10" fill="#4caf50"/>
+  <text x="550" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 20</text>
+  <text x="550" y="130" font-family="Arial" font-size="12" text-anchor="middle">Logistics Setup</text>
+  
+  <circle cx="650" cy="150" r="10" fill="#4caf50"/>
+  <text x="650" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 24</text>
+  <text x="650" y="130" font-family="Arial" font-size="12" text-anchor="middle">Market Launch</text>
+  
+  <text x="400" y="220" font-family="Arial" font-size="16" text-anchor="middle" fill="#333">18-24 Month Timeline</text>
+  <text x="400" y="250" font-family="Arial" font-size="14" text-anchor="middle" fill="#555">Thorough preparation for complex markets</text>
+</svg> 

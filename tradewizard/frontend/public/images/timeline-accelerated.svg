@@ -1,0 +1,29 @@
+<svg width="800" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#f0f0ff"/>
+  <text x="50%" y="30%" font-family="Arial" font-size="24" text-anchor="middle" fill="#333">Accelerated Timeline</text>
+  <line x1="100" y1="150" x2="700" y2="150" stroke="#f44336" stroke-width="4"/>
+  
+  <!-- Milestones -->
+  <circle cx="170" cy="150" r="10" fill="#f44336"/>
+  <text x="170" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 1.5</text>
+  <text x="170" y="130" font-family="Arial" font-size="12" text-anchor="middle">Market Research</text>
+  
+  <circle cx="280" cy="150" r="10" fill="#f44336"/>
+  <text x="280" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 3.5</text>
+  <text x="280" y="130" font-family="Arial" font-size="12" text-anchor="middle">Regulatory Compliance</text>
+  
+  <circle cx="390" cy="150" r="10" fill="#f44336"/>
+  <text x="390" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 5</text>
+  <text x="390" y="130" font-family="Arial" font-size="12" text-anchor="middle">Partner Negotiations</text>
+  
+  <circle cx="500" cy="150" r="10" fill="#f44336"/>
+  <text x="500" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 6.5</text>
+  <text x="500" y="130" font-family="Arial" font-size="12" text-anchor="middle">Product Adaptation</text>
+  
+  <circle cx="630" cy="150" r="10" fill="#f44336"/>
+  <text x="630" y="180" font-family="Arial" font-size="12" text-anchor="middle">Month 9</text>
+  <text x="630" y="130" font-family="Arial" font-size="12" text-anchor="middle">Market Launch</text>
+  
+  <text x="400" y="220" font-family="Arial" font-size="16" text-anchor="middle" fill="#333">6-9 Month Timeline</text>
+  <text x="400" y="250" font-family="Arial" font-size="14" text-anchor="middle" fill="#555">Expedited market entry strategy</text>
+</svg> 
