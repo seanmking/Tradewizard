@@ -252,4 +252,9 @@
   .timeline-milestone.current {
     display: flex;
   }
+}
+
+/* Remove any MuiDrawer related styles */
+.MuiDrawer-root, .MuiDrawer-paper {
+  display: none !important;
 } 

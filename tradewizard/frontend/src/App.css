@@ -8,7 +8,7 @@
 }
 
 .sidebar {
-  width: 280px;
+  width: 200px;
   height: 100%;
   background-color: #f5f7fb;
   border-right: 1px solid #e0e4e8;
@@ -18,16 +18,29 @@
   z-index: 1200;
 }
 
-.sidebar-header {
-  padding: 16px;
-  border-bottom: 1px solid #e0e4e8;
+/* New logo container styles */
+.logo-container {
+  padding: 16px 8px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-.sidebar-header h1 {
-  margin: 0;
-  font-size: 1.4rem;
+.logo {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #4f46e5;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-icon {
+  margin-right: 6px;
+  width: 22px;
+  height: 22px;
   color: #4f46e5;
 }
 
@@ -38,13 +51,14 @@
 }
 
 .sidebar-nav a {
-  padding: 12px 16px;
+  padding: 10px 12px;
   color: #4b5563;
   text-decoration: none;
   font-weight: 500;
   display: flex;
   align-items: center;
   transition: background-color 0.2s;
+  font-size: 0.9rem;
 }
 
 .sidebar-nav a:hover {
@@ -58,7 +72,7 @@
 }
 
 .sidebar-nav a svg {
-  margin-right: 12px;
+  margin-right: 10px;
   width: 20px;
   height: 20px;
 }
@@ -78,33 +92,68 @@
 
 .main-content {
   flex: 1;
+  overflow: hidden;
+  background-color: #f1ede6;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  padding-left: 0;
 }
 
 .content-header {
   padding: 10px 20px;
-  border-bottom: 1px solid #e0e4e8;
-  background-color: #fff;
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 10;
+  background-color: #f1ede6;
 }
 
+/* Hide the title and description in content header */
+.header-content {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+}
+
+.header-content > div:first-child {
+  display: none;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icons svg {
+  width: 24px;
+  height: 24px;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.header-icons svg:hover {
+  color: #4f46e5;
+}
+
+/* Hide these as we're not showing the header content anymore */
 .content-header h1 {
-  margin: 0;
-  font-size: 1.2rem;
-  color: #111827;
+  display: none;
 }
 
 .content-header p {
-  margin: 5px 0 0;
-  font-size: 0.85rem;
-  color: #6b7280;
+  display: none;
 }
 
-.chat-wrapper {
+/* Ensure proper styling for the chat component within the main content */
+.main-content .chat-wrapper {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  background-color: #f1ede6;
+  padding-left: 0;
 }
 
 /* Hide the app-footer in the new layout */
@@ -115,11 +164,16 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .sidebar {
-    width: 70px;
+    width: 60px;
   }
   
-  .sidebar-header h1 {
+  .logo span {
     display: none;
+  }
+  
+  .logo-container {
+    justify-content: center;
+    padding: 10px 5px;
   }
   
   .sidebar-nav a span {
@@ -127,6 +181,25 @@
   }
   
   .sidebar-nav a svg {
+    margin-right: 0;
+  }
+  
+  .sidebar-profile {
+    padding: 10px 5px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .sidebar-profile a {
+    justify-content: center;
+    padding: 8px;
+  }
+  
+  .sidebar-profile span {
+    display: none;
+  }
+  
+  .sidebar-profile svg {
     margin-right: 0;
   }
 }
@@ -187,8 +260,7 @@
 /* Sidebar Profile Section */
 .sidebar-profile {
   margin-top: auto;
-  padding: 15px;
-  border-top: 1px solid #e0e4e8;
+  padding: 10px;
   background-color: #f5f7fb;
 }
 
@@ -197,10 +269,11 @@
   align-items: center;
   text-decoration: none;
   color: #4b5563;
-  padding: 10px;
+  padding: 8px 10px;
   border-radius: 5px;
   transition: all 0.3s ease;
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .sidebar-profile a:hover {
@@ -215,7 +288,9 @@
 }
 
 .sidebar-profile svg {
-  margin-right: 10px;
+  margin-right: 8px;
+  width: 20px;
+  height: 20px;
 }
 
 /* Dashboard Wrapper */
@@ -359,6 +434,10 @@
 /* Make sure Mui Dashboard elements don't conflict with our sidebar */
 .MuiDrawer-root .MuiDrawer-paper {
   z-index: 1100;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  /* Force hide the legacy dashboard sidebar */
+  display: none !important;
 }
 
 /* Button to return to Assessment */
@@ -375,4 +454,10 @@
 
 .return-to-assessment-button:hover {
   background-color: #3c37b5;
+}
+
+/* Apply transparency to other dashboard sidebar elements if they exist */
+.MuiDrawer-paper {
+  background-color: transparent !important;
+  box-shadow: none !important;
 } 

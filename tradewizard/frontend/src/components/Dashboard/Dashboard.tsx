@@ -2,19 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { 
   Box, Container, Grid, Paper, Typography, Button, 
   Avatar, LinearProgress, Card, CardContent, CardActions, 
-  Divider, IconButton, Drawer, List, ListItem, 
-  ListItemIcon, ListItemText, AppBar, Toolbar, Badge, Menu, MenuItem 
+  Divider, IconButton, Menu, MenuItem 
 } from '@mui/material';
 import { 
-  Dashboard as DashboardIcon, 
-  BarChart as MarketIcon, 
-  Gavel as RegulatoryIcon, 
-  LocalShipping as OperationsIcon, 
-  MenuBook as KnowledgeIcon, 
-  Settings as SettingsIcon, 
   Notifications as NotificationsIcon, 
   Help as HelpIcon, 
-  ArrowForward as ArrowForwardIcon
+  ArrowForward as ArrowForwardIcon,
+  BarChart as MarketIcon, 
+  Gavel as RegulatoryIcon, 
+  LocalShipping as OperationsIcon
 } from '@mui/icons-material';
 import AuthService from '../../services/AuthService';
 import { resetAssessmentState } from '../../services/assessment-api';
@@ -470,25 +466,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       case 'dashboard':
         return (
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            {/* Welcome Banner */}
+            {/* Export readiness summary */}
             <Paper
               sx={{
                 p: 3,
                 mb: 4,
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundImage: 'linear-gradient(to right, #4880EC, #019CAD)',
-                color: 'white'
               }}
             >
-              <Typography variant="h4" gutterBottom>
-                Welcome back, {username}
+              <Typography variant="h5" gutterBottom>
+                Export Readiness: {username}
               </Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                Track your export journey for {dashboardData.selected_markets.join(', ')}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                Let's assess {dashboardData.business_profile.name}'s basics in order to create a detailed export-readiness workflow. We will focus on three areas: Market Prioritization, your Export Timeline, and a quick Regulatory Assessment. This will give you a clear understanding of resource requirements.
+                Target markets: {dashboardData.selected_markets.join(', ')}
               </Typography>
               <LinearProgress 
                 variant="determinate" 
@@ -496,9 +485,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 sx={{ 
                   height: 10, 
                   borderRadius: 5,
-                  backgroundColor: 'rgba(255,255,255,0.3)',
+                  backgroundColor: 'rgba(0,0,0,0.1)',
                   '& .MuiLinearProgress-bar': {
-                    backgroundColor: 'white'
+                    backgroundColor: '#4f46e5'
                   }
                 }} 
               />
@@ -634,133 +623,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   return (
     <DashboardErrorBoundary>
-      <Box sx={{ display: 'flex' }}>
-        {/* Top Header Bar */}
-        <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              TradeWizard
-            </Typography>
-            
-            <IconButton color="inherit" onClick={handleNotificationsClick}>
-              <Badge badgeContent={3} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            
-            <Menu
-              anchorEl={notificationsAnchorEl}
-              open={Boolean(notificationsAnchorEl)}
-              onClose={handleNotificationsClose}
-            >
-              <MenuItem onClick={handleNotificationsClose}>New market report available</MenuItem>
-              <MenuItem onClick={handleNotificationsClose}>Certification deadline approaching</MenuItem>
-              <MenuItem onClick={handleNotificationsClose}>Export timeline updated</MenuItem>
-            </Menu>
-            
-            <IconButton color="inherit">
-              <HelpIcon />
-            </IconButton>
-            
-            <IconButton color="inherit" onClick={handleProfileClick}>
-              <Avatar sx={{ width: 32, height: 32 }}>
-                {username.charAt(0)}
-              </Avatar>
-            </IconButton>
-            
-            <Menu
-              anchorEl={profileAnchorEl}
-              open={Boolean(profileAnchorEl)}
-              onClose={handleProfileClose}
-            >
-              <MenuItem onClick={handleProfileClose}>Profile</MenuItem>
-              <MenuItem onClick={handleProfileClose}>Settings</MenuItem>
-              <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
-            </Menu>
-          </Toolbar>
-        </AppBar>
-        
-        {/* Side Navigation */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            width: 240,
-            flexShrink: 0,
-            [`& .MuiDrawer-paper`]: { width: 240, boxSizing: 'border-box' },
-          }}
-        >
-          <Toolbar />
-          <Box sx={{ overflow: 'auto', mt: 2 }}>
-            <List>
-              <ListItem 
-                button 
-                selected={activePillar === 'dashboard'} 
-                onClick={() => handlePillarChange('dashboard')}
-              >
-                <ListItemIcon>
-                  <DashboardIcon />
-                </ListItemIcon>
-                <ListItemText primary="Dashboard" />
-              </ListItem>
-              
-              <ListItem 
-                button 
-                selected={activePillar === 'market_intelligence'} 
-                onClick={() => handlePillarChange('market_intelligence')}
-              >
-                <ListItemIcon>
-                  <MarketIcon />
-                </ListItemIcon>
-                <ListItemText primary="Market Intelligence" />
-              </ListItem>
-              
-              <ListItem 
-                button 
-                selected={activePillar === 'regulatory_compliance'} 
-                onClick={() => handlePillarChange('regulatory_compliance')}
-              >
-                <ListItemIcon>
-                  <RegulatoryIcon />
-                </ListItemIcon>
-                <ListItemText primary="Regulatory Compliance" />
-              </ListItem>
-              
-              <ListItem 
-                button 
-                selected={activePillar === 'export_operations'} 
-                onClick={() => handlePillarChange('export_operations')}
-              >
-                <ListItemIcon>
-                  <OperationsIcon />
-                </ListItemIcon>
-                <ListItemText primary="Export Operations" />
-              </ListItem>
-            </List>
-            
-            <Divider />
-            
-            <List>
-              <ListItem button>
-                <ListItemIcon>
-                  <KnowledgeIcon />
-                </ListItemIcon>
-                <ListItemText primary="Knowledge Base" />
-              </ListItem>
-              
-              <ListItem button>
-                <ListItemIcon>
-                  <SettingsIcon />
-                </ListItemIcon>
-                <ListItemText primary="Settings" />
-              </ListItem>
-            </List>
-          </Box>
-        </Drawer>
-        
-        {/* Main Content */}
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Toolbar />
-          
+      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        {/* Main Content - Removed legacy sidebar */}
+        <Box component="main" sx={{ flexGrow: 1, p: 3, width: '100%' }}>
           {!setupComplete ? (
             <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
               {renderSetupScreen()}

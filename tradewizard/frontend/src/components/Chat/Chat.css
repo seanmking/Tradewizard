@@ -1,19 +1,18 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 280px); /* Adjusted to account for page header, title, and description */
+  height: 100%;
   min-height: 400px;
-  max-height: 800px;
-  background-color: #e5ddd5; /* WhatsApp background pattern background */
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%23bdbdbd' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
-  border-radius: 12px;
+  background-color: #f1ede6; /* Match the header beige color */
+  background-image: none; /* Remove the patterned background */
+  border-radius: 0; /* Remove border radius */
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  margin: 20px 0; /* Changed from margin: 20px auto to allow full width */
+  margin: 0; /* Remove margin */
   width: 100%;
-  max-width: 100%; /* Changed from max-width: 1200px to use full width */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative; /* Added to ensure proper positioning of child elements */
+  max-width: 100%;
+  box-shadow: none; /* Remove shadow */
+  position: relative;
 }
 
 .chat-header {
@@ -63,27 +62,22 @@
 .messages-container {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 200px;
+  overflow-x: hidden;
+  padding: 0 20px 20px 0; /* Remove left padding */
   scroll-behavior: smooth;
-  max-height: calc(100% - 60px);
-  width: 100%;
+  background-color: #f1ede6; /* Match the header beige color */
 }
 
 /* Create a centered container for messages with max width */
 .messages-content {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  min-height: 200px;
   width: 100%;
-  max-width: 1100px; /* Increased from 900px */
-  margin: 0 auto;
-  padding: 0 16px; /* Added padding for better spacing */
-  text-align: left !important; /* Ensure text alignment is left */
-  align-items: flex-start !important; /* Ensure children are left-aligned */
-  justify-content: flex-start !important; /* Ensure children are top-aligned */
+  max-width: 100%;
+  margin: 0 0 0 16px; /* Add left margin to align with sidebar */
+  padding-top: 20px;
 }
 
 .message {
@@ -188,17 +182,23 @@
 }
 
 .chat-input {
-  padding: 16px;
-  background-color: #fff;
-  border-top: 1px solid #e0e0e0;
+  padding: 16px 16px 16px 0; /* Remove left padding */
+  background-color: #f1ede6; /* Match the header beige color */
   position: sticky;
   bottom: 0;
+  border-top: none; /* Remove the border */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .chat-input form {
   display: flex;
   gap: 12px;
-  align-items: flex-end; /* Align items to bottom */
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 0 16px; /* Add left margin to align with sidebar */
+  padding-right: 16px; /* Add right padding for balance */
 }
 
 .chat-input textarea {
@@ -210,11 +210,12 @@
   font-family: inherit;
   font-size: 15px;
   line-height: 1.4;
-  background-color: #f0f2f5;
+  background-color: #fff; /* Change background to white */
   transition: border-color 0.2s ease;
   min-height: 44px;
-  max-height: 200px; /* Height for approximately 8 lines */
+  max-height: 200px;
   overflow-y: auto;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .chat-input textarea:focus {
@@ -358,15 +359,15 @@
   
   .chat-input {
     padding: 12px;
+    background-color: #f1ede6;
   }
   
   .chat-input form {
-    gap: 8px;
+    max-width: 100%;
   }
   
   .chat-input textarea {
     padding: 10px 14px;
-    min-height: 40px;
   }
   
   .chat-input button {

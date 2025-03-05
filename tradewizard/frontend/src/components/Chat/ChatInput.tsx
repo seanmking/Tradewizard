@@ -97,59 +97,28 @@ const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div className="chat-input">
       <form onSubmit={handleSubmit}>
-        {dropdownOptions.length > 0 ? (
-          <div className="dropdown-container">
-            <select 
-              value={selectedOption}
-              onChange={handleDropdownChange}
-              disabled={isLoading}
-              className="chat-dropdown"
-              autoFocus={true}
-            >
-              <option value="">{dropdownPlaceholder}</option>
-              {dropdownOptions.map(option => (
-                <option key={option.id} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <button 
-              type="submit" 
-              disabled={isLoading || !selectedOption}
-              className="dropdown-submit-button"
-              aria-label="Send"
-            >
-              {/* Icon is added via CSS */}
-            </button>
-          </div>
-        ) : (
-          <>
-            <textarea
-              ref={actualInputRef}
-              value={input}
-              onChange={handleResize}
-              onKeyPress={handleKeyPress}
-              placeholder={disableInput ? "Please use the selection options above..." : "Type your message..."}
-              disabled={isLoading || disableInput}
-              rows={1}
-              style={{
-                minHeight: '40px',
-                maxHeight: '200px', // Height for approximately 8 lines
-                overflowY: 'auto', // Add scrollbar when content exceeds height
-                resize: 'none' // Prevent manual resizing
-              }}
-              autoFocus={true}
-            />
-            <button 
-              type="submit" 
-              disabled={isLoading || disableInput || !input.trim()}
-              onClick={handleSubmit}
-              aria-label="Send"
-            >
-              {/* Icon is added via CSS */}
-            </button>
-          </>
-        )}
+        <textarea
+          ref={actualInputRef}
+          value={input}
+          onChange={handleResize}
+          onKeyPress={handleKeyPress}
+          placeholder={disableInput ? "Please use the selection options above..." : "Type your message..."}
+          disabled={isLoading || disableInput}
+          rows={1}
+          style={{
+            minHeight: '40px',
+            maxHeight: '200px', // Height for approximately 8 lines
+            overflowY: 'auto', // Add scrollbar when content exceeds height
+            resize: 'none' // Prevent manual resizing
+          }}
+        />
+        <button 
+          type="submit" 
+          disabled={isLoading || disableInput || !input.trim()} 
+          aria-label="Send"
+        >
+          Send
+        </button>
       </form>
     </div>
   );
