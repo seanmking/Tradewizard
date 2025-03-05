@@ -256,46 +256,8 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
   
   // Get dropdown options for market selection
   const getDropdownOptions = () => {
-    if (!currentStep || currentStep.type !== 'market_selection') {
-      return [];
-    }
-    
-    // Ensure marketOptions exists and is an array
-    if (!currentStep.marketOptions || !Array.isArray(currentStep.marketOptions) || currentStep.marketOptions.length === 0) {
-      // If we're at the target_markets step but don't have options, create some default ones
-      if (currentStep.id === 'target_markets') {
-        return [
-          { id: 'uk', label: 'United Kingdom', value: 'United Kingdom' },
-          { id: 'us', label: 'United States', value: 'United States' },
-          { id: 'eu', label: 'European Union', value: 'European Union' },
-          { id: 'ca', label: 'Canada', value: 'Canada' },
-          { id: 'au', label: 'Australia', value: 'Australia' },
-          { id: 'jp', label: 'Japan', value: 'Japan' },
-          { id: 'sg', label: 'Singapore', value: 'Singapore' },
-          { id: 'uae', label: 'United Arab Emirates', value: 'United Arab Emirates' }
-        ];
-      }
-      return [];
-    }
-    
-    // Make sure UK is in the list of market options
-    const marketOptions = [...currentStep.marketOptions];
-    const hasUK = marketOptions.some(option => option.name === 'United Kingdom' || option.id === 'uk');
-    
-    if (!hasUK) {
-      marketOptions.unshift({
-        id: 'uk',
-        name: 'United Kingdom',
-        description: 'Major market with extensive data on South African exports. Strong trade relationships and consumer interest in premium South African products.',
-        confidence: 0.94
-      });
-    }
-    
-    return marketOptions.map(option => ({
-      id: option.id,
-      label: option.name,
-      value: option.name
-    }));
+    // Return empty array to prevent dropdown from showing
+    return [];
   };
   
   // Handle market selection submission
@@ -396,7 +358,7 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
   
   const getInputPlaceholder = () => {
     if (isTyping) return "Sarah is typing...";
-    if (currentStep?.type === 'market_selection') return "Please select markets above...";
+    if (currentStep?.type === 'market_selection') return "You can select markets above or type your preferences here...";
     return "Type your message...";
   };
   
@@ -498,8 +460,8 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
             <ChatInput 
               onSubmit={handleSubmit} 
               isLoading={isTyping}
-              disableInput={!currentStep || currentStep.type === 'final' || currentStep.type === 'market_selection' || showDashboard}
-              dropdownOptions={getDropdownOptions()}
+              disableInput={!currentStep || currentStep.type === 'final' || showDashboard}
+              dropdownOptions={[]}
               inputRef={inputRef}
             />
           </div>
