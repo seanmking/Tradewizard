@@ -169,4 +169,13 @@
 .primary-button:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
-} 
+}
+
+/* Removing the transparent sidebar panel styles we added */
+/*
+.sidebar-panel, .side-panel, .drawer-panel {
+  background-color: transparent !important;
+  border-right: 1px dashed rgba(224, 228, 232, 0.5) !important;
+  box-shadow: none !important;
+}
+*/ 

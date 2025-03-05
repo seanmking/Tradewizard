@@ -2,19 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { 
   Box, Container, Grid, Paper, Typography, Button, 
   Avatar, LinearProgress, Card, CardContent, CardActions, 
-  Divider, IconButton, Drawer, List, ListItem, 
-  ListItemIcon, ListItemText, Badge, Menu, MenuItem 
+  Divider, IconButton, Menu, MenuItem 
 } from '@mui/material';
 import { 
-  Dashboard as DashboardIcon, 
-  BarChart as MarketIcon, 
-  Gavel as RegulatoryIcon, 
-  LocalShipping as OperationsIcon, 
-  MenuBook as KnowledgeIcon, 
-  Settings as SettingsIcon, 
   Notifications as NotificationsIcon, 
   Help as HelpIcon, 
-  ArrowForward as ArrowForwardIcon
+  ArrowForward as ArrowForwardIcon,
+  BarChart as MarketIcon, 
+  Gavel as RegulatoryIcon, 
+  LocalShipping as OperationsIcon
 } from '@mui/icons-material';
 import AuthService from '../../services/AuthService';
 import { resetAssessmentState } from '../../services/assessment-api';
@@ -600,85 +596,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   return (
     <DashboardErrorBoundary>
-      <Box sx={{ display: 'flex' }}>
-        {/* Side Navigation */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            width: 240,
-            flexShrink: 0,
-            [`& .MuiDrawer-paper`]: { width: 240, boxSizing: 'border-box' },
-          }}
-        >
-          <Box sx={{ overflow: 'auto', mt: 2 }}>
-            <List>
-              <ListItem 
-                button 
-                selected={activePillar === 'dashboard'} 
-                onClick={() => handlePillarChange('dashboard')}
-              >
-                <ListItemIcon>
-                  <DashboardIcon />
-                </ListItemIcon>
-                <ListItemText primary="Dashboard" />
-              </ListItem>
-              
-              <ListItem 
-                button 
-                selected={activePillar === 'market_intelligence'} 
-                onClick={() => handlePillarChange('market_intelligence')}
-              >
-                <ListItemIcon>
-                  <MarketIcon />
-                </ListItemIcon>
-                <ListItemText primary="Market Intelligence" />
-              </ListItem>
-              
-              <ListItem 
-                button 
-                selected={activePillar === 'regulatory_compliance'} 
-                onClick={() => handlePillarChange('regulatory_compliance')}
-              >
-                <ListItemIcon>
-                  <RegulatoryIcon />
-                </ListItemIcon>
-                <ListItemText primary="Regulatory Compliance" />
-              </ListItem>
-              
-              <ListItem 
-                button 
-                selected={activePillar === 'export_operations'} 
-                onClick={() => handlePillarChange('export_operations')}
-              >
-                <ListItemIcon>
-                  <OperationsIcon />
-                </ListItemIcon>
-                <ListItemText primary="Export Operations" />
-              </ListItem>
-            </List>
-            
-            <Divider />
-            
-            <List>
-              <ListItem button>
-                <ListItemIcon>
-                  <KnowledgeIcon />
-                </ListItemIcon>
-                <ListItemText primary="Knowledge Base" />
-              </ListItem>
-              
-              <ListItem button>
-                <ListItemIcon>
-                  <SettingsIcon />
-                </ListItemIcon>
-                <ListItemText primary="Settings" />
-              </ListItem>
-            </List>
-          </Box>
-        </Drawer>
-        
-        {/* Main Content */}
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        {/* Main Content - Removed legacy sidebar */}
+        <Box component="main" sx={{ flexGrow: 1, p: 3, width: '100%' }}>
           {!setupComplete ? (
             <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
               {renderSetupScreen()}

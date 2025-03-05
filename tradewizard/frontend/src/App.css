@@ -434,6 +434,10 @@
 /* Make sure Mui Dashboard elements don't conflict with our sidebar */
 .MuiDrawer-root .MuiDrawer-paper {
   z-index: 1100;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  /* Force hide the legacy dashboard sidebar */
+  display: none !important;
 }
 
 /* Button to return to Assessment */
@@ -450,4 +454,10 @@
 
 .return-to-assessment-button:hover {
   background-color: #3c37b5;
+}
+
+/* Apply transparency to other dashboard sidebar elements if they exist */
+.MuiDrawer-paper {
+  background-color: transparent !important;
+  box-shadow: none !important;
 } 
