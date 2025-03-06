@@ -8,14 +8,33 @@ import json
 import time
 import os
 import re
+import bs4
 from urllib.parse import urlparse
 from typing import Dict, Any, List, Optional
+import traceback
 
 class BsScraper:
-    """BeautifulSoup-based scraper for company websites"""
+    """BeautifulSoup-based web scraper for company websites"""
     
     def __init__(self):
-        """Initialize the scraper with default settings"""
+        """Initialize the scraper"""
+        # Common product categories to look for
+        self.product_categories = [
+            "food", "beverage", "fruit", "vegetable", "meat", "dairy", 
+            "organic", "natural", "fresh", "dried", "frozen", "canned",
+            "snack", "meal", "drink", "juice", "wine", "beer", "spirits"
+        ]
+        
+        # Common certification terms
+        self.certification_terms = [
+            "certified", "certification", "haccp", "iso", "halal", "kosher", 
+            "organic", "fair trade", "fairtrade", "global g.a.p", "fsc", 
+            "brc", "ifs", "fssc", "usda", "quality", "safety"
+        ]
+        
+        # Add logging
+        print("BsScraper initialized")
+        
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -53,80 +72,64 @@ class BsScraper:
             return None
     
     def scrape_company_website(self, url: str) -> Dict[str, Any]:
-        """Scrape a company website for business intelligence data"""
-        domain = self.extract_domain(url)
-        print(f"[BS_SCRAPER] Analyzing website: {url} (domain: {domain})")
-        
-        # Check if this is a special case website
-        if domain in self.special_cases:
-            print(f"[BS_SCRAPER] Using special case data for {domain}")
-            return self.special_cases[domain]
-        
-        # Fetch the homepage
-        soup = self.fetch_page(url)
-        if not soup:
-            print(f"[BS_SCRAPER] Failed to fetch {url}, returning empty data")
-            return self._get_empty_data()
-        
-        # Initialize data structure
-        company_data = {
-            "products": {
-                "categories": [],
-                "items": [],
-                "confidence": 0.5
-            },
-            "markets": {
-                "current": [],
-                "confidence": 0.5
-            },
-            "certifications": {
-                "items": [],
-                "confidence": 0.5
-            },
-            "business_details": {
-                "estimated_size": "Unknown",
-                "years_operating": "Unknown",
-                "confidence": 0.5
+        """Scrape a company website and extract relevant information"""
+        try:
+            domain = self.extract_domain(url)
+            soup = self.fetch_page(url)
+            
+            if not soup:
+                print(f"Failed to fetch page for {url}")
+                return self._get_empty_data()
+            
+            # Basic information
+            company_name = self._extract_company_name(soup, domain)
+            description = self._extract_description(soup)
+            business_details = self._extract_business_details(soup)
+            
+            # Product information
+            product_items = self._extract_products(soup)
+            product_categories = self._extract_categories(soup)
+            
+            # Market and certification information
+            markets = self._extract_markets(soup)
+            certifications = self._extract_certifications(soup)
+            
+            # New enriched information
+            contact_info = self._extract_contact_info(soup, domain)
+            team_info = self._extract_team_info(soup)
+            facilities_info = self._extract_facilities_info(soup)
+            distribution_info = self._extract_distribution_info(soup)
+            sustainability_info = self._extract_sustainability_info(soup)
+            
+            # Combine all data
+            return {
+                "business_details": business_details,
+                "company_name": company_name,
+                "description": description,
+                "products": {
+                    "items": product_items,
+                    "categories": product_categories,
+                    "confidence": 0.7 if product_items or product_categories else 0.5
+                },
+                "markets": {
+                    "current": markets,
+                    "confidence": 0.6 if markets else 0.5
+                },
+                "certifications": {
+                    "items": certifications,
+                    "confidence": 0.5 if certifications else 0.4
+                },
+                "contact_info": contact_info,
+                "team_info": team_info,
+                "facilities_info": facilities_info,
+                "distribution_info": distribution_info,
+                "sustainability_info": sustainability_info
             }
-        }
-        
-        # Extract company name and basic info
-        company_name = self._extract_company_name(soup, domain)
-        description = self._extract_description(soup)
-        
-        # Extract products
-        product_items = self._extract_products(soup)
-        if product_items:
-            company_data["products"]["items"] = product_items
-            company_data["products"]["confidence"] = 0.7
-        
-        # Extract product categories
-        categories = self._extract_categories(soup)
-        if categories:
-            company_data["products"]["categories"] = categories
-            company_data["products"]["confidence"] = 0.7
-        
-        # Extract markets
-        markets = self._extract_markets(soup)
-        if markets:
-            company_data["markets"]["current"] = markets
-            company_data["markets"]["confidence"] = 0.6
-        else:
-            # Default to South Africa if no markets found
-            company_data["markets"]["current"] = ["South Africa"]
-            company_data["markets"]["confidence"] = 0.8
-        
-        # Extract certifications
-        certifications = self._extract_certifications(soup)
-        if certifications:
-            company_data["certifications"]["items"] = certifications
-            company_data["certifications"]["confidence"] = 0.7
-        
-        # Extract business details
-        company_data["business_details"] = self._extract_business_details(soup)
-        
-        print(f"[BS_SCRAPER] Analysis complete for {domain}")
-        return company_data
+            
+        except Exception as e:
+            print(f"Error scraping website {url}: {e}")
+            traceback.print_exc()
+            return self._get_empty_data()
     
     def _extract_company_name(self, soup: BeautifulSoup, domain: str) -> str:
         """Extract company name from the webpage"""
@@ -388,26 +391,413 @@ class BsScraper:
         
         return details
     
+    def _extract_contact_info(self, soup: BeautifulSoup, domain: str) -> Dict[str, Any]:
+        """Extract contact information from the website"""
+        contact_info = {
+            "phone": None,
+            "email": None,
+            "address": None,
+            "social_media": [],
+            "confidence": 0.5
+        }
+        
+        # Extract email addresses
+        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        emails = []
+        
+        # Find emails in text
+        for tag in soup.find_all(['p', 'div', 'span', 'a']):
+            if tag.name == 'a' and tag.get('href', '').startswith('mailto:'):
+                email = tag.get('href').replace('mailto:', '').strip()
+                if re.match(email_pattern, email):
+                    emails.append(email)
+            else:
+                matches = re.findall(email_pattern, tag.text)
+                emails.extend(matches)
+        
+        # Filter out non-company emails
+        domain_name = domain.split('.')[0]
+        company_emails = [email for email in emails if domain_name.lower() in email.lower()]
+        
+        if company_emails:
+            contact_info["email"] = company_emails[0]
+            contact_info["confidence"] = 0.8
+        elif emails:
+            contact_info["email"] = emails[0]
+        
+        # Extract phone numbers
+        phone_pattern = r'(?:\+\d{1,3}[ -]?)?(?:\(\d{1,4}\)|\d{1,4})[ -]?\d{1,4}[ -]?\d{1,4}[ -]?\d{1,4}'
+        phones = []
+        
+        for tag in soup.find_all(['p', 'div', 'span', 'a']):
+            if tag.name == 'a' and tag.get('href', '').startswith('tel:'):
+                phone = tag.get('href').replace('tel:', '').strip()
+                phones.append(phone)
+            else:
+                matches = re.findall(phone_pattern, tag.text)
+                phones.extend(matches)
+        
+        if phones:
+            contact_info["phone"] = phones[0]
+            contact_info["confidence"] = 0.8
+        
+        # Extract addresses
+        address_keywords = ['address', 'location', 'find us', 'visit us']
+        address_texts = []
+        
+        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'p', 'div']):
+            tag_text = tag.text.lower()
+            if any(keyword in tag_text for keyword in address_keywords):
+                # Get the next sibling or the parent's next sibling
+                siblings = list(tag.next_siblings)
+                if siblings and isinstance(siblings[0], (bs4.element.Tag)):
+                    address_texts.append(siblings[0].text.strip())
+                elif tag.parent and list(tag.parent.next_siblings):
+                    next_parent_sibling = list(tag.parent.next_siblings)[0]
+                    if isinstance(next_parent_sibling, (bs4.element.Tag)):
+                        address_texts.append(next_parent_sibling.text.strip())
+        
+        # Check for social media links
+        social_platforms = {
+            'facebook': r'facebook\.com',
+            'twitter': r'twitter\.com|x\.com',
+            'instagram': r'instagram\.com',
+            'linkedin': r'linkedin\.com',
+            'youtube': r'youtube\.com'
+        }
+        
+        social_media = []
+        for link in soup.find_all('a', href=True):
+            href = link['href'].lower()
+            for platform, pattern in social_platforms.items():
+                if re.search(pattern, href):
+                    social_media.append(platform)
+                    break
+        
+        if social_media:
+            contact_info["social_media"] = list(set(social_media))
+            contact_info["confidence"] = max(contact_info["confidence"], 0.7)
+        
+        if address_texts:
+            contact_info["address"] = address_texts[0]
+            contact_info["confidence"] = max(contact_info["confidence"], 0.7)
+        
+        return contact_info
+
+    def _extract_team_info(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract information about the company team"""
+        team_info = {
+            "members": [],
+            "confidence": 0.5
+        }
+        
+        # Look for team sections
+        team_section_keywords = ['team', 'leadership', 'management', 'our people', 'about us', 'who we are']
+        team_sections = []
+        
+        for heading in soup.find_all(['h1', 'h2', 'h3']):
+            if any(keyword in heading.text.lower() for keyword in team_section_keywords):
+                # Get the section after this heading
+                section = []
+                for sibling in heading.next_siblings:
+                    if sibling.name in ['h1', 'h2', 'h3']:
+                        break
+                    if sibling.name:
+                        section.append(sibling)
+                
+                if section:
+                    team_sections.append(section)
+        
+        # Look for team members within these sections
+        if team_sections:
+            # Find person cards or listings
+            for section in team_sections:
+                for element in section:
+                    # Check for nested structure that might represent a person
+                    person_elements = element.find_all(['div', 'article', 'section'])
+                    
+                    # Process each potential person card
+                    for person in person_elements:
+                        name = None
+                        role = None
+                        
+                        # Look for name (usually in heading)
+                        name_elem = person.find(['h4', 'h5', 'h6', 'strong'])
+                        if name_elem:
+                            name = name_elem.text.strip()
+                        
+                        # Look for role (usually in paragraph or div)
+                        role_elem = person.find(['p', 'div', 'span'])
+                        if role_elem and role_elem != name_elem:
+                            role = role_elem.text.strip()
+                            # Clean up role (often contains title or position)
+                            role_keywords = ['ceo', 'cfo', 'coo', 'director', 'manager', 'head', 'leader']
+                            if any(keyword in role.lower() for keyword in role_keywords):
+                                role = role.strip()
+                            else:
+                                # Try to extract just the role part
+                                role_match = re.search(r'(CEO|CFO|COO|Director|Manager|Head of|Lead)\b.*', role, re.IGNORECASE)
+                                if role_match:
+                                    role = role_match.group(0).strip()
+                        
+                        if name and role:
+                            team_info["members"].append({
+                                "name": name,
+                                "role": role
+                            })
+        
+        if team_info["members"]:
+            team_info["confidence"] = 0.7
+        
+        return team_info
+
+    def _extract_facilities_info(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract information about company facilities"""
+        facilities_info = {
+            "locations": [],
+            "features": [],
+            "confidence": 0.5
+        }
+        
+        # Look for facility-related keywords
+        facility_keywords = ['facility', 'facilities', 'factory', 'plant', 'production', 'manufacturing']
+        facility_sections = []
+        
+        for heading in soup.find_all(['h1', 'h2', 'h3', 'h4']):
+            if any(keyword in heading.text.lower() for keyword in facility_keywords):
+                # Get the parent section
+                parent = heading.parent
+                if parent:
+                    facility_sections.append(parent)
+        
+        # Extract locations from address information or facility mentions
+        location_patterns = [
+            r'located in (\w+(?:[ -]\w+)*)',
+            r'facility in (\w+(?:[ -]\w+)*)',
+            r'factory in (\w+(?:[ -]\w+)*)',
+            r'based in (\w+(?:[ -]\w+)*)'
+        ]
+        
+        for section in facility_sections:
+            section_text = section.text
+            
+            # Look for locations
+            for pattern in location_patterns:
+                matches = re.findall(pattern, section_text, re.IGNORECASE)
+                if matches:
+                    facilities_info["locations"].extend(matches)
+            
+            # Look for facility features
+            feature_keywords = ['equipment', 'technology', 'machine', 'capacity', 'production line', 'processing']
+            for p in section.find_all('p'):
+                p_text = p.text.lower()
+                if any(keyword in p_text for keyword in feature_keywords):
+                    facilities_info["features"].append(p.text.strip())
+        
+        # If we found locations or features
+        if facilities_info["locations"] or facilities_info["features"]:
+            facilities_info["confidence"] = 0.7
+            
+            # Remove duplicates
+            facilities_info["locations"] = list(set(facilities_info["locations"]))
+            facilities_info["features"] = list(set(facilities_info["features"]))
+        
+        return facilities_info
+
+    def _extract_distribution_info(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract information about distribution channels"""
+        distribution_info = {
+            "retail_locations": [],
+            "online_platforms": [],
+            "export_markets": [],
+            "confidence": 0.5
+        }
+        
+        # Look for distribution-related sections
+        dist_keywords = ['distribution', 'where to buy', 'find our products', 'retailers', 'stores']
+        dist_sections = []
+        
+        for heading in soup.find_all(['h1', 'h2', 'h3', 'h4']):
+            if any(keyword in heading.text.lower() for keyword in dist_keywords):
+                # Get the parent section
+                parent = heading.parent
+                if parent:
+                    dist_sections.append(parent)
+        
+        # Look for retailer mentions
+        retailer_names = ['woolworths', 'spar', 'pick n pay', 'checkers', 'shoprite', 'makro', 
+                         'walmart', 'tesco', 'sainsbury', 'aldi', 'lidl', 'carrefour', 'waitrose']
+        
+        # Look for online platform mentions
+        online_platforms = ['website', 'online store', 'e-commerce', 'takealot', 'amazon', 'ebay', 'etsy', 'shopify']
+        
+        for section in dist_sections:
+            section_text = section.text.lower()
+            
+            # Check for retailers
+            for retailer in retailer_names:
+                if retailer in section_text:
+                    distribution_info["retail_locations"].append(retailer.title())
+            
+            # Check for online platforms
+            for platform in online_platforms:
+                if platform in section_text:
+                    distribution_info["online_platforms"].append(platform.title())
+            
+            # Look for lists that might contain locations or stores
+            for ul in section.find_all('ul'):
+                for li in ul.find_all('li'):
+                    li_text = li.text.strip()
+                    if any(retailer in li_text.lower() for retailer in retailer_names):
+                        distribution_info["retail_locations"].append(li_text)
+                    elif any(platform in li_text.lower() for platform in online_platforms):
+                        distribution_info["online_platforms"].append(li_text)
+        
+        # Check for export markets
+        export_keywords = ['export', 'international', 'global market', 'overseas']
+        export_sections = []
+        
+        for p in soup.find_all('p'):
+            p_text = p.text.lower()
+            if any(keyword in p_text for keyword in export_keywords):
+                export_sections.append(p)
+        
+        # Common country names to look for
+        countries = ['usa', 'united states', 'uk', 'united kingdom', 'europe', 'european union', 
+                     'germany', 'france', 'china', 'japan', 'australia', 'canada', 'uae', 
+                     'namibia', 'botswana', 'zimbabwe', 'mozambique']
+        
+        for section in export_sections:
+            section_text = section.text.lower()
+            for country in countries:
+                if country in section_text:
+                    distribution_info["export_markets"].append(country.title())
+        
+        # Remove duplicates
+        distribution_info["retail_locations"] = list(set(distribution_info["retail_locations"]))
+        distribution_info["online_platforms"] = list(set(distribution_info["online_platforms"]))
+        distribution_info["export_markets"] = list(set(distribution_info["export_markets"]))
+        
+        if (distribution_info["retail_locations"] or 
+            distribution_info["online_platforms"] or 
+            distribution_info["export_markets"]):
+            distribution_info["confidence"] = 0.7
+        
+        return distribution_info
+
+    def _extract_sustainability_info(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract information about sustainability initiatives"""
+        sustainability_info = {
+            "initiatives": [],
+            "certifications": [],
+            "confidence": 0.5
+        }
+        
+        # Look for sustainability-related sections
+        sustain_keywords = ['sustainability', 'sustainable', 'environment', 'green', 'eco', 
+                           'responsible', 'ethical', 'fair trade', 'organic']
+        sustain_sections = []
+        
+        for heading in soup.find_all(['h1', 'h2', 'h3', 'h4']):
+            if any(keyword in heading.text.lower() for keyword in sustain_keywords):
+                # Get the parent section
+                parent = heading.parent
+                if parent:
+                    sustain_sections.append(parent)
+        
+        # Initiative keywords
+        initiative_keywords = ['packaging', 'waste', 'energy', 'water', 'carbon', 'community', 
+                              'recycling', 'renewable', 'footprint']
+        
+        # Look for initiatives within sustainability sections
+        for section in sustain_sections:
+            # Check for lists
+            for ul in section.find_all('ul'):
+                for li in ul.find_all('li'):
+                    sustainability_info["initiatives"].append(li.text.strip())
+            
+            # Check paragraphs
+            for p in section.find_all('p'):
+                p_text = p.text.lower()
+                if any(keyword in p_text for keyword in initiative_keywords):
+                    sustainability_info["initiatives"].append(p.text.strip())
+            
+            # Look for sustainability certifications
+            cert_keywords = ['certified', 'certification', 'organic', 'fair trade', 'rainforest alliance']
+            for p in section.find_all(['p', 'li']):
+                p_text = p.text.lower()
+                if any(keyword in p_text for keyword in cert_keywords):
+                    potential_cert = p.text.strip()
+                    # Avoid adding long paragraphs as certifications
+                    if len(potential_cert.split()) < 10:
+                        sustainability_info["certifications"].append(potential_cert)
+        
+        # Check the entire page for sustainability mentions
+        if not sustain_sections:
+            for p in soup.find_all('p'):
+                p_text = p.text.lower()
+                if any(keyword in p_text for keyword in sustain_keywords):
+                    if any(initiative in p_text for initiative in initiative_keywords):
+                        sustainability_info["initiatives"].append(p.text.strip())
+        
+        # Remove duplicates
+        sustainability_info["initiatives"] = list(set(sustainability_info["initiatives"]))
+        sustainability_info["certifications"] = list(set(sustainability_info["certifications"]))
+        
+        if sustainability_info["initiatives"] or sustainability_info["certifications"]:
+            sustainability_info["confidence"] = 0.7
+        
+        return sustainability_info
+
     def _get_empty_data(self) -> Dict[str, Any]:
-        """Return empty data structure"""
+        """Return empty data structure for when scraping fails"""
         return {
-            "products": {
-                "categories": [],
-                "items": [],
-                "confidence": 0
-            },
-            "markets": {
-                "current": [],
-                "confidence": 0
-            },
-            "certifications": {
-                "items": [],
-                "confidence": 0
-            },
             "business_details": {
                 "estimated_size": "Unknown",
                 "years_operating": "Unknown",
-                "confidence": 0
+                "confidence": 0.5
+            },
+            "company_name": "",
+            "description": "",
+            "products": {
+                "items": [],
+                "categories": [],
+                "confidence": 0.5
+            },
+            "markets": {
+                "current": [],
+                "confidence": 0.5
+            },
+            "certifications": {
+                "items": [],
+                "confidence": 0.5
+            },
+            "contact_info": {
+                "phone": None,
+                "email": None,
+                "address": None,
+                "social_media": [],
+                "confidence": 0.5
+            },
+            "team_info": {
+                "members": [],
+                "confidence": 0.5
+            },
+            "facilities_info": {
+                "locations": [],
+                "features": [],
+                "confidence": 0.5
+            },
+            "distribution_info": {
+                "retail_locations": [],
+                "online_platforms": [],
+                "export_markets": [],
+                "confidence": 0.5
+            },
+            "sustainability_info": {
+                "initiatives": [],
+                "certifications": [],
+                "confidence": 0.5
             }
         }
 

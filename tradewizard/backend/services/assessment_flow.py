@@ -569,9 +569,22 @@ class AssessmentFlowService:
         
         # Format product items for display
         if not selected_products:
-            # Default if no products found
-            product_type = "premium products"
-            print(f"[SUMMARY] No product items found, using default: {product_type}")
+            # Try to use product categories if available
+            if 'products' in user_data and 'categories' in user_data['products'] and user_data['products']['categories']:
+                categories = user_data['products']['categories']
+                if len(categories) > 0:
+                    if len(categories) == 1:
+                        product_type = f"{categories[0]} products"
+                    else:
+                        product_type = f"{categories[0]} and {categories[1]} products"
+                    print(f"[SUMMARY] No product items found, using categories: {product_type}")
+                else:
+                    product_type = "premium products"
+                    print(f"[SUMMARY] No product items or categories found, using default: {product_type}")
+            else:
+                # Default if no products found
+                product_type = "premium products"
+                print(f"[SUMMARY] No product items found, using default: {product_type}")
         else:
             # Create a properly formatted product list
             if len(selected_products) == 1:

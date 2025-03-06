@@ -1,10 +1,17 @@
 {
+  "business_details": {
+    "estimated_size": "Medium",
+    "years_operating": "Unknown",
+    "confidence": 0.6
+  },
+  "company_name": "Home",
+  "description": "",
   "products": {
+    "items": [],
     "categories": [
       "Food Products",
       "Prepared Meals"
     ],
-    "items": [],
     "confidence": 0.7
   },
   "markets": {
@@ -16,11 +23,38 @@
   },
   "certifications": {
     "items": [],
+    "confidence": 0.4
+  },
+  "contact_info": {
+    "phone": "+27 682 992 611",
+    "email": "info@brownsfoods.co.za",
+    "address": null,
+    "social_media": [
+      "instagram",
+      "twitter",
+      "facebook",
+      "youtube"
+    ],
+    "confidence": 0.8
+  },
+  "team_info": {
+    "members": [],
     "confidence": 0.5
   },
-  "business_details": {
-    "estimated_size": "Medium",
-    "years_operating": "Unknown",
-    "confidence": 0.6
+  "facilities_info": {
+    "locations": [],
+    "features": [],
+    "confidence": 0.5
+  },
+  "distribution_info": {
+    "retail_locations": [],
+    "online_platforms": [],
+    "export_markets": [],
+    "confidence": 0.5
+  },
+  "sustainability_info": {
+    "initiatives": [],
+    "certifications": [],
+    "confidence": 0.5
   }
 }
