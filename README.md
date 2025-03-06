@@ -144,4 +144,4 @@ When you have a stable version ready for demonstrations:
 5. Commit: `git commit -am "Update showcase with latest stable features"`
 6. Return to development: `git checkout main`
 
-This workflow ensures you always have a stable version ready for investor presentations while allowing ongoing development. 
+This workflow ensures you always have a stable version ready for investor presentations while allowing ongoing development.
