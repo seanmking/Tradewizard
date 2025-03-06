@@ -103,6 +103,19 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
     loadMarketData();
   }, [userData]);
 
+  // Add this useEffect to ensure visibility when component mounts
+  useEffect(() => {
+    // Ensure report is visible when component mounts
+    const reportElement = document.querySelector('.export-readiness-report');
+    if (reportElement) {
+      // Force visibility
+      (reportElement as HTMLElement).style.display = 'block';
+      (reportElement as HTMLElement).style.visibility = 'visible';
+      (reportElement as HTMLElement).style.opacity = '1';
+      console.log("Report visibility enforced on mount");
+    }
+  }, []); // Empty dependency array ensures this runs once on mount
+
   // Mock data for the report (non-market data still hard-coded for now)
   const reportData = {
     companyName: userData.companyName || 'Global Fresh SA',

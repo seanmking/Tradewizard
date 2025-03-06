@@ -598,16 +598,29 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
 
       {/* Export readiness report modal */}
       {showReadinessReport && (
-        <ExportReadinessReport
-          userData={{
-            companyName: userData.business_name || 'Your Company',
-            selectedMarkets: userData.selectedMarkets || (userData.selected_markets ? userData.selected_markets.split(',').map((m: string) => m.trim()) : []),
-            products: userData.products?.items || [],
-            ...userData  // Pass the full userData object as well
-          }}
-          onClose={handleCloseReport}
-          onGoToDashboard={handleGoToDashboard}
-        />
+        <div className="report-modal-container" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          zIndex: 9998,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <ExportReadinessReport
+            userData={{
+              companyName: userData.business_name || 'Your Company',
+              selectedMarkets: userData.selectedMarkets || (userData.selected_markets ? userData.selected_markets.split(',').map((m: string) => m.trim()) : []),
+              products: userData.products?.items || [],
+              ...userData  // Pass the full userData object as well
+            }}
+            onClose={handleCloseReport}
+            onGoToDashboard={handleGoToDashboard}
+          />
+        </div>
       )}
     </div>
   );
