@@ -16,8 +16,8 @@
   },
   "markets": {
     "current": [
-      "Africa",
-      "South Africa"
+      "South Africa",
+      "Africa"
     ],
     "confidence": 0.6
   },
@@ -30,10 +30,10 @@
     "email": "info@brownsfoods.co.za",
     "address": null,
     "social_media": [
-      "instagram",
       "twitter",
       "facebook",
-      "youtube"
+      "youtube",
+      "instagram"
     ],
     "confidence": 0.8
   },
