@@ -3,14 +3,16 @@ import time
 import random
 import os
 import json
+from .market_data_service import MarketDataService
 
 class MarketIntelligenceService:
     """
-    Service for providing market intelligence, including personalized market
-    recommendations based on business data.
+    Service for providing market intelligence data.
+    This includes market opportunities, trade statistics, and export markets.
     """
     
     def __init__(self):
+        self.market_data_service = MarketDataService()
         self.market_data = {}
         self._initialize_market_data()
         # Add path to mock data
@@ -182,50 +184,223 @@ class MarketIntelligenceService:
             print(f"Error loading mock data for {market_code}: {str(e)}")
             return {}
     
-    def get_market_options(self, product_categories: List[str]) -> List[Dict[str, Any]]:
+    def get_market_opportunities(self, products: Dict[str, Any], use_mock_data: bool = None) -> Dict[str, Any]:
         """
-        Generate personalized market options based on product categories.
+        Get market opportunities for a set of products.
         
         Args:
-            product_categories: List of product categories from business analysis
+            products: Product information from website analysis
+            use_mock_data: Whether to use mock data (overrides default setting)
             
         Returns:
-            List of market options with personalized descriptions
+            Dictionary with market opportunities data
         """
-        # Simulate processing time
-        time.sleep(1)
+        if not products or not products.get('categories'):
+            return {
+                "opportunities": []
+            }
         
-        market_options = []
+        # Extract product categories
+        categories = products.get('categories', [])
         
-        for market_name, market_data in self.market_data.items():
-            # Find the most relevant product category for this market
-            best_category = None
-            best_growth = 0
-            
-            for category in product_categories:
-                if category in market_data["growth_rates"]:
-                    growth_rate = float(market_data["growth_rates"][category].strip('%'))
-                    if growth_rate > best_growth:
-                        best_growth = growth_rate
-                        best_category = category
-            
-            if best_category:
-                # Create personalized description
-                size = market_data["market_size"].get(best_category, "Unknown")
-                growth = market_data["growth_rates"].get(best_category, "Unknown")
-                
-                description = f"Premium {best_category} market sized at {size} and growing at {growth} annually. {market_data['market_description']}"
-                
-                market_options.append({
-                    "id": market_name.lower(),
-                    "name": market_name,
-                    "description": description,
-                    "confidence": min(0.5 + (best_growth / 20), 0.95)  # Higher growth = higher confidence
+        # Get market data for each category
+        market_data = {}
+        for category in categories:
+            market_data[category] = self.market_data_service.get_market_data_for_category(
+                category, use_mock=use_mock_data
+            )
+        
+        # Compile opportunities
+        opportunities = []
+        for category, data in market_data.items():
+            # Add top markets as opportunities
+            for market in data.get('top_markets', []):
+                opportunities.append({
+                    "product_category": category,
+                    "market": market['country'],
+                    "opportunity_score": market['score'],
+                    "description": market['reason']
                 })
         
-        # Sort by confidence
-        market_options.sort(key=lambda x: x["confidence"], reverse=True)
+        # Sort opportunities by score (descending)
+        opportunities.sort(key=lambda x: x['opportunity_score'], reverse=True)
         
+        return {
+            "opportunities": opportunities
+        }
+    
+    def get_market_trends(self, products: Dict[str, Any], use_mock_data: bool = None) -> Dict[str, Any]:
+        """
+        Get market trends for a set of products.
+        
+        Args:
+            products: Product information from website analysis
+            use_mock_data: Whether to use mock data (overrides default setting)
+            
+        Returns:
+            Dictionary with market trends data
+        """
+        if not products or not products.get('categories'):
+            return {
+                "trends": []
+            }
+        
+        # Extract product categories
+        categories = products.get('categories', [])
+        
+        # Get market data for each category
+        market_data = {}
+        for category in categories:
+            market_data[category] = self.market_data_service.get_market_data_for_category(
+                category, use_mock=use_mock_data
+            )
+        
+        # Compile trends
+        all_trends = []
+        for category, data in market_data.items():
+            for trend in data.get('trends', []):
+                all_trends.append({
+                    "product_category": category,
+                    "trend": trend
+                })
+        
+        return {
+            "trends": all_trends
+        }
+    
+    def get_trade_barriers(self, products: Dict[str, Any], use_mock_data: bool = None) -> Dict[str, Any]:
+        """
+        Get trade barriers for a set of products.
+        
+        Args:
+            products: Product information from website analysis
+            use_mock_data: Whether to use mock data (overrides default setting)
+            
+        Returns:
+            Dictionary with trade barriers data
+        """
+        if not products or not products.get('categories'):
+            return {
+                "barriers": []
+            }
+        
+        # Extract product categories
+        categories = products.get('categories', [])
+        
+        # Get market data for each category
+        market_data = {}
+        for category in categories:
+            market_data[category] = self.market_data_service.get_market_data_for_category(
+                category, use_mock=use_mock_data
+            )
+        
+        # Compile barriers
+        all_barriers = []
+        for category, data in market_data.items():
+            for barrier in data.get('barriers', []):
+                all_barriers.append({
+                    "product_category": category,
+                    "market": barrier['country'],
+                    "barrier": barrier['barrier'],
+                    "impact": barrier['impact']
+                })
+        
+        return {
+            "barriers": all_barriers
+        }
+    
+    def get_market_data_summary(self, products: Dict[str, Any], use_mock_data: bool = None) -> Dict[str, Any]:
+        """
+        Get a comprehensive summary of market data.
+        
+        Args:
+            products: Product information from website analysis
+            use_mock_data: Whether to use mock data (overrides default setting)
+            
+        Returns:
+            Dictionary with comprehensive market data
+        """
+        opportunities = self.get_market_opportunities(products, use_mock_data)
+        trends = self.get_market_trends(products, use_mock_data)
+        barriers = self.get_trade_barriers(products, use_mock_data)
+        
+        return {
+            "opportunities": opportunities['opportunities'],
+            "trends": trends['trends'],
+            "barriers": barriers['barriers']
+        }
+    
+    def get_market_options(self, product_categories: List[str], use_mock_data: bool = True, user_data: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        """
+        Get market options based on product categories.
+        
+        Args:
+            product_categories: List of product categories
+            use_mock_data: Whether to use mock data (defaults to True for safety)
+            user_data: User data containing company information
+            
+        Returns:
+            List of market options
+        """
+        # Log the parameters
+        print(f"[MARKET] Getting market options for categories: {product_categories} (using mock data: {use_mock_data})")
+        
+        # If no valid categories, use default
+        if not product_categories or len(product_categories) == 0:
+            product_categories = ["General"]
+        
+        # Convert product categories to string for matching
+        product_category = ", ".join(product_categories[:3])
+        
+        # Get business name from user_data if available
+        business_name = "Your company"  # Default generic name
+        product_type = "premium products"  # Default product type
+        
+        if user_data:
+            # Extract business name from user_data
+            if 'business_name' in user_data:
+                if isinstance(user_data['business_name'], dict) and 'text' in user_data['business_name']:
+                    business_name = user_data['business_name']['text']
+                else:
+                    business_name = user_data['business_name']
+                    
+            # Extract product info if available
+            if 'products' in user_data and 'items' in user_data['products']:
+                items = user_data['products']['items']
+                if items and len(items) > 0:
+                    product_type = items[0] if isinstance(items[0], str) else "premium products"
+        
+        print(f"[MARKET] Using business name: {business_name}, product type: {product_type}")
+        
+        # Standard market options that can be customized
+        market_options = [
+            {
+                "id": "uk", 
+                "name": "United Kingdom", 
+                "description": f"Major market with extensive data on South African exports. Strong demand for {product_category} with established trade relationships and consumer interest in premium South African products. Well-suited for {business_name}'s quality offerings with favorable import regulations.", 
+                "confidence": 0.94
+            },
+            {
+                "id": "us", 
+                "name": "United States", 
+                "description": f"Largest consumer market with high demand for {product_category}. E-commerce friendly with multiple entry strategies available for {product_type}. {business_name}'s premium offerings align well with US consumer preferences for quality and innovation.", 
+                "confidence": 0.92
+            },
+            {
+                "id": "eu", 
+                "name": "European Union", 
+                "description": f"Unified market with 450M consumers. Once certified, your {product_type} can be sold across all member states with minimal additional requirements. Strong demand for South African products with established trade agreements making export easier.", 
+                "confidence": 0.88
+            },
+            {
+                "id": "uae", 
+                "name": "United Arab Emirates", 
+                "description": f"Growing market with high purchasing power and appetite for premium {product_category}. Dubai serves as a regional distribution hub for MENA region. {business_name}'s products would appeal to the UAE's health-conscious consumers and expat community.", 
+                "confidence": 0.85
+            }
+        ]
+        
+        print(f"Generated market options: {len(market_options)} options")
         return market_options
     
     def get_market_intelligence(self, 

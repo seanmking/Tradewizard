@@ -1,0 +1,26 @@
+{
+  "products": {
+    "categories": [
+      "Food Products",
+      "Prepared Meals"
+    ],
+    "items": [],
+    "confidence": 0.7
+  },
+  "markets": {
+    "current": [
+      "South Africa",
+      "Africa"
+    ],
+    "confidence": 0.6
+  },
+  "certifications": {
+    "items": [],
+    "confidence": 0.5
+  },
+  "business_details": {
+    "estimated_size": "Medium",
+    "years_operating": "Unknown",
+    "confidence": 0.6
+  }
+}

@@ -15,14 +15,16 @@ export interface AssessmentStep {
 }
 
 export interface AssessmentResponse {
-  next_step: {
+  next_step: string | {
     id: string;
     prompt: string;
     type: string;
     market_options?: MarketOption[];
+    marketOptions?: MarketOption[];
   };
   user_data: Record<string, any>;
-  dashboard_updates: Record<string, any>;
+  dashboard_updates?: Record<string, any>;
+  response?: string;
 }
 
 export interface SarahFlowResponse {
@@ -67,31 +69,61 @@ export async function processAssessmentResponse(
   response: string,
   user_data: Record<string, any> = {}
 ): Promise<AssessmentResponse> {
-  const apiResponse = await fetch('/api/assessment/process-response', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      step_id,
-      response,
-      user_data
-    })
-  });
+  console.log(`Processing response for step ${step_id} with user data:`, user_data);
   
-  if (!apiResponse.ok) {
-    throw new Error('Failed to process assessment response');
+  try {
+    const apiResponse = await fetch('/api/assessment/process-response', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        step_id,
+        response,
+        user_data
+      })
+    });
+    
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      console.error('API Error:', errorText);
+      throw new Error(`Failed to process assessment response: ${apiResponse.status} ${apiResponse.statusText}`);
+    }
+    
+    const data = await apiResponse.json();
+    console.log('API Response:', data);
+    
+    // Ensure user_data exists
+    if (!data.user_data) {
+      data.user_data = {};
+    }
+    
+    // Handle next_step being an object with market options
+    if (data.next_step && typeof data.next_step === 'object') {
+      // Ensure next_step has all required fields
+      if (!data.next_step.id) data.next_step.id = 'unknown';
+      if (!data.next_step.prompt) data.next_step.prompt = '';
+      if (!data.next_step.type) data.next_step.type = 'text';
+      
+      // Convert market_options to marketOptions for consistency
+      if (data.next_step.market_options) {
+        console.log('Market options received from API:', data.next_step.market_options);
+        data.next_step.marketOptions = data.next_step.market_options;
+      }
+      
+      // Ensure we have marketOptions if this is a market_selection step
+      if (data.next_step.type === 'market_selection' && 
+          (!data.next_step.marketOptions || !Array.isArray(data.next_step.marketOptions))) {
+        console.warn('Market selection step without valid marketOptions, creating empty array');
+        data.next_step.marketOptions = [];
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in processAssessmentResponse:', error);
+    throw error;
   }
-  
-  const data = await apiResponse.json();
-  
-  // Convert market_options to marketOptions for consistency
-  if (data.next_step.market_options) {
-    console.log('Market options received from API:', data.next_step.market_options);
-    data.next_step.marketOptions = data.next_step.market_options;
-  }
-  
-  return data;
 }
 
 /**

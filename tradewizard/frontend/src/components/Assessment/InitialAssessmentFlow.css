@@ -460,6 +460,36 @@
   color: #4338ca;
 }
 
+.view-report-button-container {
+  margin-top: 12px;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  width: 100%;
+}
+
+.view-report-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #10b981; /* Green instead of purple */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  margin: 0 auto;
+}
+
+.view-report-button:hover {
+  background-color: #059669; /* Darker green on hover */
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(16, 185, 129, 0.3);
+}
+
 .assessment-flow-container {
   display: flex;
   flex-direction: column;

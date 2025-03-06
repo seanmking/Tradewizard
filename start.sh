@@ -129,6 +129,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Create user_data directory for scraped data
+echo_info "Creating user_data directory for scraped data..."
+mkdir -p user_data
+
 # Start backend server in the background
 echo_info "Starting backend server..."
 $PYTHON_CMD app.py &

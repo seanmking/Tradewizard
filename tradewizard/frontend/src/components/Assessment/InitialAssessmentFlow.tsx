@@ -152,6 +152,25 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
   const handleSubmit = async (message: string) => {
     if (!currentStep) return;
     
+    // If user responds "yes" to summary step, show account creation dialog
+    if (currentStep.id === 'summary' && 
+        message.toLowerCase().includes('yes')) {
+      console.log('User answered YES to summary step, showing account creation dialog');
+      setShowAccountCreation(true);
+      
+      // Add user message to chat
+      const newMessages = [
+        ...messages,
+        {
+          role: 'user' as const,
+          content: message,
+          timestamp: Date.now()
+        }
+      ];
+      setMessages(newMessages);
+      return;
+    }
+    
     // Add user message to chat
     const newMessages = [
       ...messages,
@@ -168,89 +187,158 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
     
     try {
       // Process the response
+      console.log('Submitting response to step:', currentStep.id);
+      console.log('Current userData:', userData);
+      
+      // Create a deep copy of userData to prevent modification issues
+      const userDataCopy = JSON.parse(JSON.stringify(userData || {}));
+      
+      console.log(`Sending to backend - step_id: ${currentStep.id}, message: ${message.substring(0, 50)}...`);
       const response = await processAssessmentResponse(
         currentStep.id,
         message,
-        userData
+        userDataCopy
       );
+      
+      console.log('Backend response:', JSON.stringify(response, null, 2));
+      
+      // Validate response format to prevent errors
+      if (!response || typeof response !== 'object') {
+        console.error('Invalid response format:', response);
+        throw new Error('Invalid response format from server');
+      }
+      
+      // Check for required fields
+      if (!response.next_step && !response.response) {
+        console.error('Missing required fields in response:', response);
+        throw new Error('Missing required fields in server response');
+      }
       
       // Update user data but preserve our selectedMarkets if they exist
       setUserData(prevUserData => {
         const preservedSelectedMarkets = prevUserData.selectedMarkets;
+        console.log('Preserved selected markets:', preservedSelectedMarkets);
+        
+        // Ensure response.user_data exists to prevent errors
+        const responseUserData = response.user_data || {};
+        console.log('Response user_data:', responseUserData);
+        
+        // Make sure responseUserData is not empty - if it is, keep the previous userData
+        if (Object.keys(responseUserData).length === 0 && Object.keys(prevUserData).length > 0) {
+          console.warn('Response user_data is empty but we have previous data - keeping previous data');
+          
+          // We'll merge the current userData with any new keys from response
+          const newUserData = {
+            ...prevUserData,
+            ...(Object.keys(responseUserData).length > 0 ? responseUserData : {}),
+          };
+          
+          console.log('Using previous userData with any new fields:', newUserData);
+          return newUserData;
+        }
         
         // Create new userData object from the response
         const newUserData = {
-          ...response.user_data,
+          ...responseUserData,
           // Preserve our selectedMarkets array if it exists
           ...(preservedSelectedMarkets && { selectedMarkets: preservedSelectedMarkets })
         };
         
-        console.log('Preserved selected markets:', preservedSelectedMarkets);
         console.log('Updated userData:', newUserData);
-        
         return newUserData;
       });
       
-      // Only show dashboard after target markets have been selected
-      if (response.next_step.id === 'summary' && response.user_data.selected_markets) {
-        // Update dashboard data if available
-        if (response.dashboard_updates && Object.keys(response.dashboard_updates).length > 0) {
-          setDashboardData(response.dashboard_updates);
-          setShowDashboard(true);
+      // For market selection step, we need to keep track of the options
+      let marketOptions: MarketOption[] = [];
+      let nextStepType: 'text' | 'market_selection' | 'final' = 'text';
+      
+      if (response.next_step && typeof response.next_step === 'object') {
+        console.log('Complex next_step object:', response.next_step);
+        
+        if (response.next_step.type === 'market_selection') {
+          nextStepType = 'market_selection';
+          
+          // Get market options from the response
+          marketOptions = response.next_step.marketOptions || response.next_step.market_options || [];
+          console.log('Market options:', marketOptions);
+          
+          // Add assistant message with market options
+          const marketSelectionMessage = {
+            role: 'assistant' as const,
+            content: response.response || response.next_step.prompt || 'Please select your target markets:',
+            timestamp: Date.now(),
+            metadata: {
+              step: 'target_markets',
+              marketOptions
+            }
+          };
+          
+          setMessages(prev => [...prev, marketSelectionMessage]);
+        } else {
+          // Add normal assistant response for non-market selection steps
+          const assistantMessage = {
+            role: 'assistant' as const,
+            content: response.response || '',
+            timestamp: Date.now()
+          };
+          
+          setMessages(prev => [...prev, assistantMessage]);
         }
       } else {
-        setShowDashboard(false);
+        // Simple next_step (string ID)
+        // Add assistant response
+        const assistantMessage = {
+          role: 'assistant' as const,
+          content: response.response || '',
+          timestamp: Date.now()
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
       }
       
-      // Update current step
+      // Set the new current step
+      const nextStepId = typeof response.next_step === 'object' 
+        ? response.next_step.id 
+        : (response.next_step || 'unknown');
+        
+      const nextPrompt = typeof response.next_step === 'object'
+        ? response.next_step.prompt
+        : response.response || '';
+      
+      // Show the readiness report if we've reached the final step
+      if (nextStepId === 'final') {
+        console.log('Final step reached, showing readiness report');
+        setShowReadinessReport(true);
+      }
+      
       setCurrentStep({
-        id: response.next_step.id,
-        prompt: response.next_step.prompt,
-        type: response.next_step.type as 'text' | 'market_selection' | 'final',
-        marketOptions: response.next_step.market_options
+        id: nextStepId,
+        prompt: nextPrompt,
+        type: nextStepType
       });
       
-      // Add assistant message to chat
-      setMessages([
-        ...newMessages,
-        {
-          role: 'assistant' as const,
-          content: response.next_step.prompt,
-          timestamp: Date.now(),
-          metadata: {
-            step: response.next_step.id,
-            marketOptions: response.next_step.market_options
-          }
-        }
-      ]);
-      
-      // If we've reached the final step, call onComplete
-      if (response.next_step.id === 'final' && onComplete) {
-        onComplete();
-      }
-      
-      // Hide typing indicator
+      // Set typing to false after the response is processed
       setIsTyping(false);
       
-      // Focus the input after response
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 100);
+      // Focus the input field after the response
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     } catch (error) {
       console.error('Error processing response:', error);
-      setIsTyping(false);
       
-      // Add error message
+      // Add an error message to the chat
       setMessages([
         ...newMessages,
         {
-          role: 'assistant' as const,
-          content: 'Sorry, there was an error processing your response. Please try again.',
+          role: 'assistant',
+          content: "I'm sorry, I encountered an error processing your request. Please try again.",
           timestamp: Date.now()
         }
       ]);
+      
+      // Set typing to false after error
+      setIsTyping(false);
     }
   };
   
@@ -304,6 +392,10 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
         metadata: { step: 'account_created' }
       }
     ]);
+    
+    // Show the readiness report
+    console.log('Account created successfully, showing readiness report');
+    setShowReadinessReport(true);
     
     // Scroll to the new message
     setTimeout(() => {
@@ -363,64 +455,84 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
   };
   
   const renderMessages = () => {
-    return messages.map((message, index) => {
-      const isLastMessage = index === messages.length - 1;
-      const showMarketSelection = 
-        message.role === 'assistant' && 
-        message.metadata?.step === 'target_markets' && 
-        isLastMessage;
-      
-      return (
-        <div key={message.timestamp} className={`message-wrapper ${message.role}-wrapper`}>
-          <div className={`message ${message.role}-message`}>
-            <div className="message-text">
-              {message.content.split('\n\n').map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
-              ))}
-            </div>
-          </div>
+    try {
+      return messages.map((message, index) => {
+        if (!message || !message.role) {
+          console.error('Invalid message format:', message);
+          return null; // Skip rendering invalid messages
+        }
+        
+        const isLastMessage = index === messages.length - 1;
+        const showMarketSelection = 
+          message.role === 'assistant' && 
+          message.metadata?.step === 'target_markets' && 
+          isLastMessage;
           
-          {showMarketSelection && (
-            <div className="market-selection-container-simplified">
-              <MarketSelectionPanel 
-                markets={message.metadata?.marketOptions || []} 
-                onSubmit={handleMarketsSubmit}
-                isLoading={isTyping}
-              />
+        // Handle the content safely
+        const messageContent = message.content || '';
+        const paragraphs = typeof messageContent === 'string' 
+          ? messageContent.split('\n\n') 
+          : ['[No content]'];
+        
+        return (
+          <div key={message.timestamp || index} className={`message-wrapper ${message.role}-wrapper`}>
+            <div className={`message ${message.role}-message`}>
+              <div className="message-text">
+                {paragraphs.map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
             </div>
-          )}
+            
+            {showMarketSelection && (
+              <div className="market-selection-container-simplified">
+                <MarketSelectionPanel 
+                  markets={message.metadata?.marketOptions || []} 
+                  onSubmit={handleMarketsSubmit}
+                  isLoading={isTyping}
+                />
+              </div>
+            )}
 
-          {/* Render account creation button if this is the summary step */}
-          {message.role === 'assistant' && 
-           message.metadata?.step === 'summary' && 
-           isLastMessage && 
-           !accountCreated && (
-            <div className="create-account-button-container">
-              <button 
-                className="create-account-button"
-                onClick={() => setShowAccountCreation(true)}
-              >
-                Create account and access Export-readiness report
-              </button>
-            </div>
-          )}
-          
-          {/* Render download report button if account has been created */}
-          {message.role === 'assistant' && 
-           message.metadata?.step === 'account_created' && 
-           isLastMessage && (
-            <div className="readiness-report-link-container">
-              <button 
-                className="standalone-report-button"
-                onClick={toggleStandaloneReport}
-              >
-                {showStandaloneReport ? 'Hide Report' : 'Access your Export-readiness report'}
-              </button>
-            </div>
-          )}
+            {/* Render account creation button if this is the summary step */}
+            {message.role === 'assistant' && 
+             ((currentStep?.id === 'summary' && isLastMessage && !accountCreated) || 
+              (message.content?.includes('Would you like to create an account') && !accountCreated)) && (
+              <div className="create-account-button-container">
+                <button 
+                  className="create-account-button"
+                  onClick={() => setShowAccountCreation(true)}
+                >
+                  Create account and access your report
+                </button>
+              </div>
+            )}
+            
+            {/* Render view report button if account has been created */}
+            {message.role === 'assistant' && 
+             message.content?.includes('Account created successfully') && 
+             accountCreated && (
+              <div className="view-report-button-container">
+                <button 
+                  className="view-report-button"
+                  onClick={() => setShowReadinessReport(true)}
+                >
+                  View your export readiness report
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      });
+    } catch (error) {
+      console.error('Error rendering messages:', error);
+      return (
+        <div className="error-message">
+          There was an error displaying messages. 
+          <button onClick={handleResetAssessment}>Reset Assessment</button>
         </div>
       );
-    });
+    }
   };
   
   // Add debugging for report rendering
@@ -488,8 +600,10 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
       {showReadinessReport && (
         <ExportReadinessReport
           userData={{
-            companyName: 'Global Fresh SA',
-            selectedMarkets: userData.selectedMarkets
+            companyName: userData.business_name || 'Your Company',
+            selectedMarkets: userData.selectedMarkets || (userData.selected_markets ? userData.selected_markets.split(',').map((m: string) => m.trim()) : []),
+            products: userData.products?.items || [],
+            ...userData  // Pass the full userData object as well
           }}
           onClose={handleCloseReport}
           onGoToDashboard={handleGoToDashboard}
