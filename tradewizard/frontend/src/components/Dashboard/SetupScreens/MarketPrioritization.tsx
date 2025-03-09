@@ -20,6 +20,7 @@ interface MarketData {
 interface MarketPrioritizationProps {
   markets: string[];
   onContinue: () => void;
+  useMockData?: boolean;
 }
 
 // Mock market data
@@ -33,26 +34,6 @@ const mockMarketData: Record<string, MarketData> = {
     entry_barriers: 'Low',
     regulatory_complexity: 'Medium',
     strengths: ['Strong consumer demand', 'Favorable trade agreements', 'English language market']
-  },
-  "Germany": {
-    id: "germany",
-    name: "Germany",
-    match_score: 70,
-    market_size: "$31.8 billion",
-    growth_rate: 2.8,
-    entry_barriers: 'Medium',
-    regulatory_complexity: 'Medium',
-    strengths: ['Large consumer base', 'Strong economy', 'Central European location']
-  },
-  "France": {
-    id: "france",
-    name: "France",
-    match_score: 68,
-    market_size: "$22.3 billion",
-    growth_rate: 2.5,
-    entry_barriers: 'Medium',
-    regulatory_complexity: 'Medium',
-    strengths: ['Growing demand', 'Sophisticated consumer base', 'Strategic location']
   },
   "United Arab Emirates": {
     id: "united-arab-emirates",
@@ -76,25 +57,88 @@ const mockMarketData: Record<string, MarketData> = {
   }
 };
 
-const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, onContinue }) => {
-  // Initialize with defaults if markets aren't in our mock data
-  const [prioritizedMarkets, setPrioritizedMarkets] = useState<MarketData[]>(() => {
-    const validMarkets = markets.filter(market => mockMarketData[market] !== undefined);
-    console.log("Valid markets:", validMarkets);
+const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ 
+  markets, 
+  onContinue,
+  useMockData = true
+}) => {
+  const [selectedMarkets, setSelectedMarkets] = useState<MarketData[]>([]);
+  const [availableMarkets, setAvailableMarkets] = useState<MarketData[]>([]);
+  const [draggedMarket, setDraggedMarket] = useState<MarketData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch market data from API or use mock data
+  React.useEffect(() => {
+    const fetchMarketData = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        if (useMockData) {
+          console.log("Using mock market data");
+          // Use mock data
+          const mockData = markets.map(market => mockMarketData[market] || {
+            id: market.toLowerCase().replace(/\s+/g, '-'),
+            name: market,
+            match_score: Math.floor(Math.random() * 30) + 60, // Random score between 60-90
+            market_size: `$${(Math.random() * 20 + 5).toFixed(1)} billion`,
+            growth_rate: parseFloat((Math.random() * 5 + 1).toFixed(1)),
+            entry_barriers: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)] as 'Low' | 'Medium' | 'High',
+            regulatory_complexity: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)] as 'Low' | 'Medium' | 'High',
+            strengths: ['Strong consumer demand', 'Favorable trade agreements', 'Growing market']
+          });
+          
+          // Sort by match score
+          mockData.sort((a, b) => b.match_score - a.match_score);
+          
+          setAvailableMarkets(mockData);
+          setSelectedMarkets([]);
+          setIsLoading(false);
+        } else {
+          console.log("Fetching real market data");
+          // Import the assessment API service
+          const { getMarketOptions } = await import('../../../services/assessment-api');
+          
+          // Get product categories from localStorage
+          const savedData = localStorage.getItem('assessmentUserData');
+          const userData = savedData ? JSON.parse(savedData) : {};
+          const productCategories = userData.products?.categories || ['Food Products'];
+          
+          // Fetch market options from API
+          const marketOptions = await getMarketOptions(productCategories, userData);
+          console.log("Received market options:", marketOptions);
+          
+          // Transform to expected format
+          const transformedData = marketOptions.map((market: any) => ({
+            id: market.id || market.name.toLowerCase().replace(/\s+/g, '-'),
+            name: market.name,
+            match_score: Math.round(market.confidence * 100),
+            market_size: market.market_size,
+            growth_rate: typeof market.growth_rate === 'number' ? market.growth_rate : 3.0,
+            entry_barriers: market.entry_barriers || 'Medium',
+            regulatory_complexity: market.regulatory_complexity || 'Medium',
+            strengths: market.strengths || ['Strong consumer demand', 'Favorable trade agreements', 'Growing market']
+          }));
+          
+          // Sort by match score
+          transformedData.sort((a: MarketData, b: MarketData) => b.match_score - a.match_score);
+          
+          setAvailableMarkets(transformedData);
+          setSelectedMarkets([]);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error("Error fetching market data:", err);
+        setError("Failed to load market data. Please try again.");
+        setIsLoading(false);
+      }
+    };
     
-    if (validMarkets.length === 0) {
-      // Fallback to all markets if none of the provided markets are valid
-      console.log("Using all markets as fallback");
-      return Object.values(mockMarketData);
-    }
-    
-    const marketData = validMarkets.map(market => mockMarketData[market]);
-    console.log("Initial market data:", marketData);
-    return marketData;
-  });
+    fetchMarketData();
+  }, [markets, useMockData]);
 
   // Track the currently dragged market
-  const [draggedMarket, setDraggedMarket] = useState<MarketData | null>(null);
   const [dragOverMarket, setDragOverMarket] = useState<string | null>(null);
 
   // Handle start of drag
@@ -120,22 +164,22 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
     console.log(`Dropping ${draggedMarket.name} onto ${targetMarketId}`);
     
     // Find the indices
-    const sourceIndex = prioritizedMarkets.findIndex(m => m.id === draggedMarket.id);
-    const destinationIndex = prioritizedMarkets.findIndex(m => m.id === targetMarketId);
+    const sourceIndex = availableMarkets.findIndex(m => m.id === draggedMarket.id);
+    const destinationIndex = availableMarkets.findIndex(m => m.id === targetMarketId);
     
     if (sourceIndex === -1 || destinationIndex === -1 || sourceIndex === destinationIndex) {
       return;
     }
     
     // Create a new array and reorder
-    const newMarkets = [...prioritizedMarkets];
+    const newMarkets = [...availableMarkets];
     const [removedMarket] = newMarkets.splice(sourceIndex, 1);
     newMarkets.splice(destinationIndex, 0, removedMarket);
     
     console.log(`Moved market from position ${sourceIndex} to ${destinationIndex}`);
     console.log("New market order:", newMarkets.map(m => m.name));
     
-    setPrioritizedMarkets(newMarkets);
+    setAvailableMarkets(newMarkets);
     setDraggedMarket(null);
     setDragOverMarket(null);
   };
@@ -160,7 +204,7 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
       
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          {prioritizedMarkets.map((market) => (
+          {availableMarkets.map((market) => (
             <Box 
               key={market.id}
               draggable
@@ -307,7 +351,7 @@ const MarketPrioritization: React.FC<MarketPrioritizationProps> = ({ markets, on
         <Box sx={{ mt: 4, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
           <Typography variant="subtitle2" gutterBottom>Debug Information</Typography>
           <Typography variant="body2">
-            Market Order: {prioritizedMarkets.map(m => m.name).join(', ')}
+            Market Order: {availableMarkets.map(m => m.name).join(', ')}
           </Typography>
           {draggedMarket && (
             <Typography variant="body2">

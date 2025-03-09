@@ -1,6 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  Paper, Typography, Box, Grid, Divider, 
+  List, ListItem, ListItemIcon, ListItemText, 
+  Button, CircularProgress, Chip
+} from '@mui/material';
+import { 
+  CheckCircleOutline, WarningAmber, 
+  TrendingUp, GavelOutlined, Close, ArrowForward, Print
+} from '@mui/icons-material';
+import analysisService, { 
+  ExportReadinessReport as BaseReportData,
+  RegulatoryRequirementsResult,
+  Document as RegDocument
+} from '../../services/analysis-service';
 import './ExportReadinessReport.css';
-import MarketService, { MarketData } from '../../services/MarketService';
+
+// Custom type to handle the actual API response structure
+interface ReportData extends Omit<BaseReportData, 'regulatory_requirements'> {
+  regulatory_requirements: string[] | RegulatoryRequirementsResult;
+}
 
 interface ExportReadinessReportProps {
   userData: Record<string, any>;
@@ -9,31 +27,54 @@ interface ExportReadinessReportProps {
   standalone?: boolean;
 }
 
-// Helper function to safely render any value as a string
+// Helper function to safely render values
 const safeRender = (value: any): string => {
-  if (value === null || value === undefined) {
-    return 'N/A';
-  }
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return value.toString();
-  }
-  if (typeof value === 'object') {
-    // Handle objects with confidence and text properties
-    if (value.text !== undefined) {
-      return value.text.toString();
-    }
-    // Handle arrays
-    if (Array.isArray(value)) {
-      return value.map(item => safeRender(item)).join(', ');
-    }
-    // Handle other objects
-    return JSON.stringify(value);
+  if (value === undefined || value === null) {
+    return 'Not available';
   }
   return String(value);
 };
+
+// Helper function to render a score as a color
+const getScoreColor = (score: number): string => {
+  if (score >= 80) return '#4caf50'; // green
+  if (score >= 60) return '#ff9800'; // orange
+  return '#f44336'; // red
+};
+
+// Helper function to render a progress component
+const ScoreIndicator = ({ score, label }: { score: number; label: string }) => (
+  <Box sx={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', m: 1 }}>
+    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+      <CircularProgress
+        variant="determinate"
+        value={score}
+        size={80}
+        thickness={4}
+        sx={{ color: getScoreColor(score) }}
+      />
+      <Box
+        sx={{
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          position: 'absolute',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="h6" component="div" color="text.secondary">
+          {score}%
+        </Typography>
+      </Box>
+    </Box>
+    <Typography variant="body2" component="div" sx={{ mt: 1 }}>
+      {label}
+    </Typography>
+  </Box>
+);
 
 const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({ 
   userData, 
@@ -41,59 +82,85 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
   onGoToDashboard,
   standalone = false
 }) => {
-  const [marketInsights, setMarketInsights] = useState<{ [key: string]: MarketData }>({});
+  const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedMarketsList, setSelectedMarketsList] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
+  const [currentMarket, setCurrentMarket] = useState<string>('');
 
   useEffect(() => {
     const loadMarketData = async () => {
-      setLoading(true);
-      
-      // Determine which markets to load
-      let selectedMarkets = [];
-      
-      // Handle different ways the selected markets could be stored
-      if (userData.selectedMarkets && Array.isArray(userData.selectedMarkets)) {
-        selectedMarkets = userData.selectedMarkets;
-      } else if (userData.selected_markets) {
-        // Handle if it's a string that needs parsing
-        if (typeof userData.selected_markets === 'string') {
-          try {
-            selectedMarkets = JSON.parse(userData.selected_markets);
-          } catch {
-            selectedMarkets = userData.selected_markets.split(',').map((m: string) => m.trim());
-          }
-        } else if (Array.isArray(userData.selected_markets)) {
-          selectedMarkets = userData.selected_markets;
-        }
-      }
-      
-      // Log for debugging
-      console.log('Selected markets to load:', selectedMarkets);
-      
-      if (selectedMarkets.length === 0) {
-        // Default markets for testing if none are selected
-        selectedMarkets = ['United Kingdom', 'United States', 'European Union', 'United Arab Emirates'];
-      }
-      
-      // Store the selected markets in state regardless of API success
-      setSelectedMarketsList(selectedMarkets);
-      
       try {
-        // Fetch data for all selected markets using the MarketService
-        const insights = await MarketService.fetchMultipleMarkets(selectedMarkets);
-        console.log('Fetched market insights:', insights);
-        setMarketInsights(insights);
-      } catch (error) {
-        console.error('Error loading market data:', error);
-        // Set a default error state
-        setMarketInsights({
-          'Error': {
-            market_size: 'Failed to load data',
-            growth_rate: 'Failed to load data',
-            key_trends: ['Please try again later'],
-            regulatory_requirements: ['Data unavailable']
-          }
+        setLoading(true);
+        setError(null);
+        
+        // Get all selected markets
+        let markets: string[] = [];
+        
+        // Check both versions of the property name
+        if (Array.isArray(userData.selectedMarkets)) {
+          markets = userData.selectedMarkets;
+          console.log("Using selectedMarkets array:", markets);
+        } else if (typeof userData.selectedMarkets === 'string') {
+          markets = userData.selectedMarkets.split(',').map((m: string) => m.trim()).filter(Boolean);
+          console.log("Using selectedMarkets string:", markets);
+        } else if (Array.isArray(userData.selected_markets)) {
+          markets = userData.selected_markets;
+          console.log("Using selected_markets array:", markets);
+        } else if (typeof userData.selected_markets === 'string') {
+          markets = userData.selected_markets.split(',').map((m: string) => m.trim()).filter(Boolean);
+          console.log("Using selected_markets string:", markets);
+        }
+        
+        // Ensure that all our target markets are included
+        const targetMarkets = ["United Kingdom", "United Arab Emirates", "United States"];
+        const missingMarkets = targetMarkets.filter(m => !markets.includes(m));
+        
+        if (missingMarkets.length > 0) {
+          console.log("Adding missing markets:", missingMarkets);
+          markets = [...markets, ...missingMarkets];
+        }
+        
+        setSelectedMarkets(markets);
+        
+        if (!markets.length) {
+          setError('No target markets selected');
+          setLoading(false);
+          return;
+        }
+        
+        // Set the first market as current by default
+        const targetMarket = markets[0];
+        setCurrentMarket(targetMarket);
+        
+        console.log('Loading market data for:', targetMarket);
+        
+        // Call the API to get market data
+        const marketData = await analysisService.getExportReadinessReport(userData, targetMarket);
+        
+        console.log('Market data received:', marketData);
+        setReportData(marketData);
+      } catch (err) {
+        console.error('Error loading market data:', err);
+        setError('Failed to load market data. Please try again later.');
+        
+        // Determine the market for fallback data
+        const fallbackMarket = 
+          Array.isArray(userData.selectedMarkets) && userData.selectedMarkets.length > 0
+            ? userData.selectedMarkets[0]
+            : (userData.selected_markets || '').split(',')[0].trim() || 'Target Market';
+        
+        // Set fallback data for demo purposes
+        setReportData({
+          company_name: userData.business_name || 'Your Company',
+          target_market: fallbackMarket,
+          analysis_date: new Date().toISOString().split('T')[0],
+          market_fit_score: 75,
+          regulatory_readiness: 60,
+          strengths: ['Quality products', 'Established domestic presence', 'Strong brand values'],
+          areas_for_improvement: ['International certifications needed', 'Export documentation experience', 'International marketing strategy'],
+          key_trends: [],
+          regulatory_requirements: []
         });
       } finally {
         setLoading(false);
@@ -116,430 +183,275 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
     }
   }, []); // Empty dependency array ensures this runs once on mount
 
-  // Mock data for the report (non-market data still hard-coded for now)
-  const reportData = {
-    companyName: userData.companyName || 'Global Fresh SA',
-    strengths: [
-      'HACCP Level 1 certification',
-      'Premium product positioning',
-      'Sustainable packaging initiatives',
-      'Unique South African flavor profiles'
-    ],
-    areas_for_improvement: [
-      'ISO 22000 certification (in progress)',
-      'EU labeling compliance',
-      'Halal certification for UAE market',
-      'Export documentation processes'
-    ],
-    next_steps: [
-      {
-        title: 'Complete ISO 22000 certification',
-        description: 'Finalize the ISO 22000 certification process to strengthen food safety credentials for EU market entry.',
-        timeframe: '3-6 months'
-      },
-      {
-        title: 'Obtain Halal certification',
-        description: 'Pursue Halal certification for products targeting the UAE market.',
-        timeframe: '2-4 months'
-      },
-      {
-        title: 'Update packaging for EU compliance',
-        description: 'Revise product labels to meet EU regulations including nutrition facts, allergen information, and language requirements.',
-        timeframe: '1-2 months'
-      },
-      {
-        title: 'Establish export documentation process',
-        description: 'Develop standardized procedures for managing export documentation including certificates of origin, phytosanitary certificates, and commercial invoices.',
-        timeframe: '1 month'
-      }
-    ]
-  };
-
-  // Determine which markets to display (use the keys from the fetched insights)
-  const selectedMarkets = Object.keys(marketInsights);
-
   // Function to handle printing the report
   const handlePrintReport = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    window.print();
+  };
+
+  const handleMarketChange = async (market: string) => {
+    if (market === currentMarket) return;
     
-    const reportContent = document.querySelector('.export-readiness-report')?.innerHTML;
+    setLoading(true);
+    setCurrentMarket(market);
     
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Export Readiness Report - ${reportData.companyName}</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              padding: 20px;
-              color: #333;
-            }
-            .report-header {
-              padding: 20px;
-              background-color: #4f46e5;
-              color: white;
-              margin-bottom: 20px;
-            }
-            .report-section {
-              margin-bottom: 30px;
-            }
-            .report-section h3 {
-              color: #4f46e5;
-              border-bottom: 1px solid #e0e0e0;
-              padding-bottom: 10px;
-            }
-            .assessment-grid {
-              display: flex;
-              gap: 20px;
-            }
-            .assessment-column {
-              flex: 1;
-            }
-            .market-insights {
-              display: grid;
-              grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-              gap: 20px;
-            }
-            .market-insight-card {
-              border: 1px solid #e0e0e0;
-              padding: 15px;
-              border-radius: 8px;
-            }
-            .next-steps {
-              display: grid;
-              grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-              gap: 20px;
-            }
-            .next-step-card {
-              border: 1px solid #e0e0e0;
-              padding: 15px;
-              border-radius: 8px;
-            }
-            .timeframe {
-              display: inline-block;
-              background-color: #ebf4ff;
-              color: #4f46e5;
-              padding: 4px 10px;
-              border-radius: 20px;
-              font-size: 14px;
-            }
-            @media print {
-              body {
-                font-size: 12pt;
-              }
-              .report-header {
-                background-color: #4f46e5 !important;
-                color: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          ${reportContent}
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
-    printWindow.focus();
-    
-    // Add a slight delay to ensure content is loaded before printing
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
+    try {
+      console.log('Switching to market data for:', market);
+      
+      // Call the API to get market data for the new market
+      const response = await analysisService.getExportReadinessReport(
+        userData,
+        market
+      );
+      
+      console.log('Market data received:', response);
+      setReportData(response);
+    } catch (err: any) {
+      console.error('Error loading market data:', err);
+      setError(err.message || 'Failed to load market data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
     return (
-      <div className={`export-readiness-report ${standalone ? 'standalone-report' : ''}`}>
-        <h1>Loading Market Insights...</h1>
-        <p>Please wait while we prepare your Export Readiness Report.</p>
-      </div>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+        <Typography variant="h6" sx={{ ml: 2 }}>Loading export readiness report...</Typography>
+      </Box>
+    );
+  }
+
+  if (!reportData) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <WarningAmber color="error" sx={{ fontSize: 40 }} />
+        <Typography variant="h6" color="error" sx={{ ml: 2 }}>
+          {error || 'Failed to load report data. Please try again.'}
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <div className={`export-readiness-report ${standalone ? 'standalone-report' : ''}`}>
-      <div className="report-header">
-        <h1>Export Readiness Report</h1>
-        <div className="company-info">
-          <h2>{reportData.companyName}</h2>
-          <p>Generated on {new Date().toLocaleDateString()}</p>
-        </div>
-      </div>
-
-      <div className="report-section">
-        <h3>Selected Markets</h3>
-        <div className="markets-list">
-          {selectedMarketsList.length > 0 ? (
-            selectedMarketsList.map((market, index) => (
-              <div key={index} className="market-item">
-                <span className="market-name">{safeRender(market)}</span>
-              </div>
-            ))
-          ) : (
-            <p>No markets selected</p>
-          )}
-        </div>
-      </div>
-
-      <div className="report-section">
-        <h3>Export Readiness Assessment</h3>
-        <div className="assessment-grid">
-          <div className="assessment-column">
-            <h4>Strengths</h4>
-            <ul className="strengths-list">
-              {reportData.strengths.map((strength, index) => (
-                <li key={index}>{safeRender(strength)}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="assessment-column">
-            <h4>Areas for Improvement</h4>
-            <ul className="improvement-list">
-              {reportData.areas_for_improvement.map((area, index) => (
-                <li key={index}>{safeRender(area)}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div className="report-section">
-        <h3>Export Goals</h3>
-        <div className="export-goals-container">
-          <div className="export-goals-content">
-            <p className="export-vision">
-              <strong>Our Vision:</strong> To share South Africa's unique flavors and premium food products with the global market, 
-              particularly focusing on reaching the South African diaspora who cherish authentic tastes from home.
-            </p>
-            <p>
-              With our exceptional product quality and distinctive South African flavor profiles, we aim to establish 
-              Global Fresh SA as a recognized brand in international markets. By leveraging our sustainable packaging initiatives 
-              and premium positioning, we will create export channels that not only drive business growth but also 
-              connect South Africans abroad with the authentic tastes they miss.
-            </p>
-            <div className="export-goals-highlights">
-              <div className="goal-highlight">
-                <span className="goal-icon">🌍</span>
-                <span className="goal-text">Connect with South African diaspora communities</span>
-              </div>
-              <div className="goal-highlight">
-                <span className="goal-icon">🌱</span>
-                <span className="goal-text">Promote sustainable South African food products globally</span>
-              </div>
-              <div className="goal-highlight">
-                <span className="goal-icon">🚀</span>
-                <span className="goal-text">Establish premium positioning in selected international markets</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="report-section">
-        <h3>Market Insights</h3>
-        {Object.keys(marketInsights).length > 0 ? (
-          <div className="market-insights">
-            {Object.keys(marketInsights).map((market, index) => (
-              <div key={index} className="market-insight-card">
-                <h4>{safeRender(market)}</h4>
-                <div className="market-data">
-                  {/* Diaspora Information */}
-                  <div className="data-section diaspora-section">
-                    <span className="data-label">South African Diaspora:</span>
-                    <div className="diaspora-info">
-                      {market === 'United Kingdom' && (
-                        <p>Approximately 220,000 South Africans live in the UK, with major communities in London, Manchester, and Edinburgh.</p>
-                      )}
-                      {market === 'United Arab Emirates' && (
-                        <p>Around 100,000 South Africans reside in the UAE, primarily in Dubai and Abu Dhabi, forming one of the largest expat communities.</p>
-                      )}
-                      {market === 'United States' && (
-                        <p>An estimated 85,000 South Africans live in the US, with significant communities in New York, California, and Texas.</p>
-                      )}
-                      {market === 'European Union' && (
-                        <p>Over 150,000 South Africans are spread across EU countries, with notable communities in the Netherlands, Germany, and Portugal.</p>
-                      )}
-                      {!['United Kingdom', 'United Arab Emirates', 'United States', 'European Union'].includes(market) && (
-                        <p>South African diaspora data not available for this market.</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Market Overview */}
-                  {marketInsights[market]?.market_overview && (
-                    <>
-                      <div className="data-row">
-                        <span className="data-label">Population:</span>
-                        <span className="data-value">{safeRender(marketInsights[market]?.market_overview?.population) || 'N/A'}</span>
-                      </div>
-                      <div className="data-row">
-                        <span className="data-label">GDP:</span>
-                        <span className="data-value">{safeRender(marketInsights[market]?.market_overview?.gdp) || 'N/A'}</span>
-                      </div>
-                    </>
-                  )}
-                  
-                  {/* Food Market Data */}
-                  {marketInsights[market]?.food_market_data && (
-                    <>
-                      <div className="data-row">
-                        <span className="data-label">Market Size:</span>
-                        <span className="data-value">{safeRender(marketInsights[market]?.food_market_data?.market_size) || 'N/A'}</span>
-                      </div>
-                      <div className="data-row">
-                        <span className="data-label">Growth Rate:</span>
-                        <span className="data-value">{safeRender(marketInsights[market]?.food_market_data?.growth_rate) || 'N/A'}</span>
-                      </div>
-                    </>
-                  )}
-                  
-                  {/* Fallback to legacy fields if needed */}
-                  {!marketInsights[market]?.food_market_data && (
-                    <>
-                      <div className="data-row">
-                        <span className="data-label">Market Size:</span>
-                        <span className="data-value">{safeRender(marketInsights[market]?.market_size) || 'N/A'}</span>
-                      </div>
-                      <div className="data-row">
-                        <span className="data-label">Growth Rate:</span>
-                        <span className="data-value">{safeRender(marketInsights[market]?.growth_rate) || 'N/A'}</span>
-                      </div>
-                    </>
-                  )}
-                  
-                  {/* Market Opportunities Section */}
-                  <div className="data-section">
-                    <span className="data-label">Market Opportunities:</span>
-                    <div className="market-opportunities">
-                      {market === 'United Kingdom' && (
-                        <ul>
-                          <li><strong>Specialty Food Stores:</strong> Growing demand for South African products in specialty stores frequented by expatriates.</li>
-                          <li><strong>Gift Packaging:</strong> Opportunity to market products as gift packages for South Africans to send to family and friends.</li>
-                          <li><strong>Online Retail:</strong> Strong e-commerce market allows for direct-to-consumer sales to diaspora communities.</li>
-                        </ul>
-                      )}
-                      {market === 'United Arab Emirates' && (
-                        <ul>
-                          <li><strong>Premium Positioning:</strong> High-income South African expatriates seeking premium products from home.</li>
-                          <li><strong>Cultural Events:</strong> Opportunities to showcase products at South African cultural events in Dubai and Abu Dhabi.</li>
-                          <li><strong>Luxury Gift Market:</strong> Potential for high-end gift packages featuring South African delicacies.</li>
-                        </ul>
-                      )}
-                      {market === 'United States' && (
-                        <ul>
-                          <li><strong>Ethnic Food Sections:</strong> Growing presence of international foods in mainstream supermarkets.</li>
-                          <li><strong>Subscription Boxes:</strong> Potential for "Taste of South Africa" subscription services targeting diaspora.</li>
-                          <li><strong>Health Food Market:</strong> Position South African products within the growing health food segment.</li>
-                        </ul>
-                      )}
-                      {market === 'European Union' && (
-                        <ul>
-                          <li><strong>Sustainable Packaging:</strong> Leverage your sustainable initiatives to appeal to environmentally conscious European consumers.</li>
-                          <li><strong>Diaspora Networks:</strong> Utilize South African community networks for product distribution and marketing.</li>
-                          <li><strong>African Cuisine Trend:</strong> Growing interest in authentic African flavors among European consumers.</li>
-                        </ul>
-                      )}
-                      {!['United Kingdom', 'United Arab Emirates', 'United States', 'European Union'].includes(market) && (
-                        <ul>
-                          <li>Market opportunity data not available for this region.</li>
-                        </ul>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Key Trends Section */}
-                  <div className="data-section">
-                    <span className="data-label">Key Trends:</span>
-                    <ul>
-                      {(() => {
-                        // Get trends from either source
-                        const trends = marketInsights[market]?.key_trends || 
-                          (marketInsights[market]?.food_market_data?.key_trends) || [];
-                        
-                        if (trends && trends.length > 0) {
-                          return trends.slice(0, 4).map((trend: any, i: number) => (
-                            <li key={i}>{safeRender(trend)}</li>
-                          ));
-                        }
-                        return <li>No trend data available</li>;
-                      })()}
-                    </ul>
-                  </div>
-                  
-                  {/* Regulatory Requirements Section */}
-                  <div className="data-section">
-                    <span className="data-label">Regulatory Requirements:</span>
-                    <ul>
-                      {(() => {
-                        // Get regulatory requirements from various possible sources
-                        const reqs = marketInsights[market]?.regulatory_requirements || 
-                          (marketInsights[market]?.regulatory_environment?.import_regulations) || [];
-                        
-                        if (reqs && reqs.length > 0) {
-                          return reqs.slice(0, 4).map((req: any, i: number) => (
-                            <li key={i}>{safeRender(req)}</li>
-                          ));
-                        }
-                        return <li>No regulatory data available</li>;
-                      })()}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="error-message">
-            <p className="notice-title">Market Data Temporarily Unavailable</p>
-            <p>We're currently unable to access detailed market intelligence for your selected markets:</p>
-            <p className="selected-markets-list">{selectedMarketsList.join(', ')}</p>
-            <p>Our team is working to restore this data, and we'll update your dashboard with the complete market insights at our earliest convenience.</p>
-            <p>In the meantime, you can still review your export readiness assessment and recommended next steps below.</p>
-          </div>
+    <Paper 
+      className={`export-readiness-report ${standalone ? 'standalone' : ''}`} 
+      elevation={3} 
+      sx={{ 
+        position: 'relative',
+        padding: 3,
+        maxWidth: '1000px',
+        margin: '0 auto',
+        marginBottom: 4
+      }}
+    >
+      <Box className="report-header">
+        <Typography variant="h4" component="h1" className="report-title">
+          Export Readiness Report
+        </Typography>
+        {!standalone && (
+          <Button 
+            onClick={onClose} 
+            startIcon={<Close />} 
+            variant="outlined"
+            className="close-button"
+          >
+            CLOSE
+          </Button>
         )}
-      </div>
-
-      <div className="report-section">
-        <h3>Recommended Next Steps</h3>
-        <div className="next-steps">
-          {reportData.next_steps.map((step, index) => (
-            <div key={index} className="next-step-card">
-              <div className="next-step-header">
-                <h4>{safeRender(step.title)}</h4>
-                <span className="timeframe">{safeRender(step.timeframe)}</span>
-              </div>
-              <p>{safeRender(step.description)}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="promotional-message">
-        <p>
-          Would you like to continue to your dashboard to explore more market insights?
-        </p>
-      </div>
-
-      <div className="report-footer">
-        <div className="button-container">
-          {!standalone && (
-            <button className="close-button" onClick={onClose}>Back to Assessment</button>
-          )}
-          <button className="print-button" onClick={handlePrintReport}>
-            Print Report
-          </button>
-          {onGoToDashboard && (
-            <button className="dashboard-button" onClick={onGoToDashboard}>Continue to Dashboard</button>
-          )}
-        </div>
-      </div>
-    </div>
+      </Box>
+      <Divider />
+      
+      {loading ? (
+        <Box className="loading-container">
+          <CircularProgress />
+          <Typography>Loading report data...</Typography>
+        </Box>
+      ) : error ? (
+        <Box className="error-container">
+          <Typography color="error">{error}</Typography>
+          <Button variant="contained" onClick={onClose}>Close</Button>
+        </Box>
+      ) : reportData ? (
+        <>
+          <Grid container spacing={3} className="report-content">
+            <Grid item xs={12} className="report-header-content">
+              <Typography variant="h5" align="center">
+                {reportData.company_name}
+              </Typography>
+              
+              {/* Market Selector */}
+              {selectedMarkets.length > 1 && (
+                <Box sx={{ mt: 2, mb: 2, display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 1 }}>
+                  <Typography variant="subtitle1" sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
+                    Select Market:
+                  </Typography>
+                  {selectedMarkets.map((market) => (
+                    <Chip
+                      key={market}
+                      label={market}
+                      onClick={() => handleMarketChange(market)}
+                      color={market === currentMarket ? "primary" : "default"}
+                      variant={market === currentMarket ? "filled" : "outlined"}
+                      sx={{ m: 0.5 }}
+                    />
+                  ))}
+                </Box>
+              )}
+              
+              <Typography variant="h6" align="center">
+                Target Market: {reportData.target_market}
+              </Typography>
+              <Typography variant="subtitle1" align="center">
+                Analysis Date: {reportData.analysis_date}
+              </Typography>
+            </Grid>
+            
+            {/* Readiness Scores */}
+            <Grid item xs={12} md={6}>
+              <ScoreIndicator score={reportData.market_fit_score} label="Market Fit" />
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
+              <ScoreIndicator score={reportData.regulatory_readiness} label="Regulatory Readiness" />
+            </Grid>
+            
+            {/* Strengths Section */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom color="primary">
+                <CheckCircleOutline sx={{ verticalAlign: 'middle', mr: 1 }} />
+                Strengths
+              </Typography>
+              <List>
+                {reportData.strengths.map((strength, index) => (
+                  <ListItem key={`strength-${index}`}>
+                    <ListItemIcon>
+                      <CheckCircleOutline color="success" />
+                    </ListItemIcon>
+                    <ListItemText primary={strength} />
+                  </ListItem>
+                ))}
+              </List>
+            </Grid>
+            
+            {/* Areas for Improvement Section */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom color="primary">
+                <WarningAmber sx={{ verticalAlign: 'middle', mr: 1 }} />
+                Areas for Improvement
+              </Typography>
+              <List>
+                {reportData.areas_for_improvement.map((area, index) => (
+                  <ListItem key={`area-${index}`}>
+                    <ListItemIcon>
+                      <WarningAmber color="warning" />
+                    </ListItemIcon>
+                    <ListItemText primary={area} />
+                  </ListItem>
+                ))}
+              </List>
+            </Grid>
+            
+            {/* Market Trends Section */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom color="primary">
+                <TrendingUp sx={{ verticalAlign: 'middle', mr: 1 }} />
+                Key Market Trends
+              </Typography>
+              <List>
+                {reportData.key_trends.map((trend, index) => (
+                  <ListItem key={`trend-${index}`}>
+                    <ListItemIcon>
+                      <TrendingUp color="info" />
+                    </ListItemIcon>
+                    <ListItemText primary={trend} />
+                  </ListItem>
+                ))}
+              </List>
+            </Grid>
+            
+            {/* Regulatory Requirements Section */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom color="primary">
+                <GavelOutlined sx={{ verticalAlign: 'middle', mr: 1 }} />
+                Regulatory Requirements
+              </Typography>
+              <List>
+                {reportData.regulatory_requirements && 
+                 !Array.isArray(reportData.regulatory_requirements) && 
+                 'markets' in reportData.regulatory_requirements ? (
+                  // Handle the case where regulatory_requirements is an object with markets property
+                  Object.entries(reportData.regulatory_requirements.markets).map(([market, marketData], marketIndex) => {
+                    // Type assertion for marketData
+                    const typedMarketData = marketData as { documents: RegDocument[] };
+                    return (
+                      <React.Fragment key={`market-${marketIndex}`}>
+                        <ListItem>
+                          <ListItemIcon>
+                            <GavelOutlined color="primary" />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary={`${market} Requirements`} 
+                            secondary="Regulatory documents needed:" 
+                          />
+                        </ListItem>
+                        {typedMarketData.documents && typedMarketData.documents.map((doc, docIndex) => (
+                          <ListItem key={`doc-${docIndex}`} sx={{ pl: 6 }}>
+                            <ListItemIcon>
+                              <GavelOutlined color="info" />
+                            </ListItemIcon>
+                            <ListItemText 
+                              primary={doc.name} 
+                              secondary={doc.description}
+                            />
+                          </ListItem>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })
+                ) : reportData.regulatory_requirements && Array.isArray(reportData.regulatory_requirements) ? (
+                  // Handle the case where regulatory_requirements is an array (per the interface)
+                  reportData.regulatory_requirements.map((req, index) => (
+                    <ListItem key={`req-${index}`}>
+                      <ListItemIcon>
+                        <GavelOutlined color="info" />
+                      </ListItemIcon>
+                      <ListItemText primary={req} />
+                    </ListItem>
+                  ))
+                ) : (
+                  <ListItem>
+                    <ListItemText primary="No regulatory requirements information available" />
+                  </ListItem>
+                )}
+              </List>
+            </Grid>
+          </Grid>
+          
+          {/* Report Footer */}
+          <Box sx={{ mt: 4, pt: 2, borderTop: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
+            <Button 
+              variant="outlined" 
+              startIcon={<Print />} 
+              onClick={handlePrintReport}
+            >
+              PRINT REPORT
+            </Button>
+            
+            {onGoToDashboard && (
+              <Button 
+                variant="contained" 
+                color="primary" 
+                endIcon={<ArrowForward />}
+                onClick={onGoToDashboard}
+              >
+                GO TO DASHBOARD
+              </Button>
+            )}
+          </Box>
+        </>
+      ) : null}
+    </Paper>
   );
 };
 

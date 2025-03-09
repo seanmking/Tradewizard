@@ -1,7 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.chat import router as chat_router
-from api.sidekick import router as sidekick_router
 from api.assessment import router as assessment_router
 
 app = FastAPI(title="TradeWizard API")
@@ -16,8 +14,6 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(chat_router)
-app.include_router(sidekick_router)
 app.include_router(assessment_router)
 
 @app.get("/")

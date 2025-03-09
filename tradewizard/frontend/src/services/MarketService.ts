@@ -43,10 +43,9 @@ const marketAliases: { [key: string]: string } = {
   'us': 'usa',
   'uk': 'uk',
   'unitedkingdom': 'uk',
-  'eu': 'eu',
-  'europeanunion': 'eu',
   'uae': 'uae',
-  'unitedarabemirates': 'uae'
+  'unitedarabemirates': 'uae',
+  'emirates': 'uae'
 };
 
 /**
@@ -58,73 +57,17 @@ export const normalizeMarketName = (market: string): string => {
 };
 
 /**
- * Fetches market intelligence data for a specific market
+ * Fetches market data for a specific market
  */
 export const fetchMarketIntelligence = async (market: string): Promise<MarketData | null> => {
-  const normalizedMarket = normalizeMarketName(market);
-  
   try {
-    // Use the API service to fetch market data
-    const data = await marketIntelligenceApi.getMarketData(normalizedMarket);
-    return data;
+    const normalizedMarket = normalizeMarketName(market);
+    console.log(`Fetching market intelligence for: ${market} (normalized to: ${normalizedMarket})`);
+    return await marketIntelligenceApi.getMarketData(normalizedMarket);
   } catch (error) {
     console.error(`Error fetching market intelligence for ${market}:`, error);
     return null;
   }
-};
-
-/**
- * Extracts key market data needed for the Export Readiness Report
- */
-export const extractMarketDataForReport = (data: MarketData): MarketData => {
-  if (!data) return {
-    market_size: 'Data unavailable',
-    growth_rate: 'Data unavailable',
-    key_trends: ['Data unavailable'],
-    regulatory_requirements: ['Data unavailable']
-  };
-  
-  // Create a copy of the data to avoid modifying the original
-  const result: MarketData = { ...data };
-  
-  // Ensure we have the basic fields for backward compatibility
-  result.market_size = data.market_size || data.food_market_data?.market_size || 'Data unavailable';
-  result.growth_rate = data.growth_rate || data.food_market_data?.growth_rate || 'Data unavailable';
-  
-  // Handle key trends from various possible sources
-  result.key_trends = data.key_trends || 
-    (data.consumer_trends?.map((trend: any) => trend.trend || trend)) || 
-    data.food_market_data?.key_trends || 
-    ['Data unavailable'];
-  
-  // Handle regulatory requirements from various possible sources
-  result.regulatory_requirements = 
-    (data.regulatory_environment?.import_regulations?.labeling_requirements) ||
-    (data.regulatory_environment?.import_regulations?.key_requirements) ||
-    (data.regulatory_requirements?.labeling) ||
-    data.regulatory_requirements || 
-    ['Data unavailable'];
-  
-  // Ensure market_overview exists
-  if (!result.market_overview) {
-    result.market_overview = {
-      population: 'Data unavailable',
-      gdp: 'Data unavailable',
-      gdp_growth: 'Data unavailable',
-      currency: 'Data unavailable'
-    };
-  }
-  
-  // Ensure food_market_data exists
-  if (!result.food_market_data) {
-    result.food_market_data = {
-      market_size: result.market_size,
-      growth_rate: result.growth_rate,
-      key_trends: Array.isArray(result.key_trends) ? result.key_trends : ['Data unavailable']
-    };
-  }
-  
-  return result;
 };
 
 /**
@@ -133,29 +76,95 @@ export const extractMarketDataForReport = (data: MarketData): MarketData => {
 export const fetchMultipleMarkets = async (markets: string[]): Promise<{ [key: string]: MarketData }> => {
   const results: { [key: string]: MarketData } = {};
   
+  console.log("Original markets in fetchMultipleMarkets:", markets);
+  
   // First, deduplicate the markets array to avoid redundant fetches
   const uniqueMarkets = Array.from(new Set(
     markets.map(market => {
       const normalized = normalizeMarketName(market);
+      console.log(`Normalizing market: "${market}" -> "${normalized}"`);
+      
       // Map normalized names back to their primary display name
-      if (normalized === 'usa') return 'United States';
-      if (normalized === 'uk') return 'United Kingdom';
-      if (normalized === 'eu') return 'European Union';
-      if (normalized === 'uae') return 'United Arab Emirates';
-      return market;
+      let displayName = market;
+      if (normalized === 'usa') displayName = 'United States';
+      if (normalized === 'uk') displayName = 'United Kingdom';
+      if (normalized === 'uae') displayName = 'United Arab Emirates';
+      
+      console.log(`Mapped to display name: "${displayName}"`);
+      return displayName;
     })
   ));
   
+  console.log("Unique markets after normalization:", uniqueMarkets);
+  
   const fetchPromises = uniqueMarkets.map(async (market) => {
+    console.log(`Attempting to fetch market data for: "${market}"`);
     const data = await fetchMarketIntelligence(market);
     if (data) {
-      // Store under the original market name only
-      results[market] = extractMarketDataForReport(data);
+      console.log(`Successfully fetched data for: "${market}"`);
+      
+      // Process the structured market data format
+      const processedData = extractMarketDataForReport(data);
+      results[market] = processedData;
+    } else {
+      console.warn(`Failed to fetch data for: "${market}"`);
     }
   });
   
   await Promise.all(fetchPromises);
+  console.log("Final result markets:", Object.keys(results));
   return results;
+};
+
+/**
+ * Extract market data from structured format
+ */
+export const extractMarketDataForReport = (data: any): MarketData => {
+  const result: MarketData = {
+    market_overview: {},
+    food_market_data: {},
+    regulatory_environment: {}
+  };
+  
+  // Handle the structured format
+  if (data.market_overview) {
+    result.market_overview = data.market_overview;
+  }
+  
+  // Extract market size
+  if (data.market_size && data.market_size.value) {
+    result.market_size = data.market_size.value;
+  }
+  
+  // Extract growth rate
+  if (data.growth_rate && data.growth_rate.value) {
+    result.growth_rate = data.growth_rate.value;
+  }
+  
+  // Extract regulatory information
+  if (data.regulations && data.regulations.items) {
+    result.regulatory_requirements = data.regulations.items;
+  } else if (data.regulatory_complexity && data.regulatory_complexity.key_regulations) {
+    result.regulatory_requirements = data.regulatory_complexity.key_regulations.map((reg: any) => reg.name);
+  }
+  
+  // Extract consumer trends
+  if (data.consumer_trends) {
+    result.key_trends = data.consumer_trends.map((trend: any) => trend.name);
+  } else if (data.market_trends && data.market_trends.emerging_trends) {
+    result.key_trends = data.market_trends.emerging_trends.map((trend: any) => trend.trend_name);
+  }
+  
+  // Package food market data
+  if (!result.food_market_data) {
+    result.food_market_data = {};
+  }
+  
+  result.food_market_data.market_size = result.market_size;
+  result.food_market_data.growth_rate = result.growth_rate;
+  result.food_market_data.key_trends = Array.isArray(result.key_trends) ? result.key_trends : ['No trends available'];
+  
+  return result;
 };
 
 export default {

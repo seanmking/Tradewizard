@@ -1,4 +1,5 @@
 import { assessmentService } from './AssessmentService';
+import { API_ENDPOINTS } from './analysis-service';
 
 export interface MarketOption {
   id: string;
@@ -37,13 +38,26 @@ export interface SarahFlowResponse {
   show_account_creation?: boolean;
 }
 
+// Get the full URL for an API endpoint
+function getFullUrl(endpoint: string): string {
+  return `${API_ENDPOINTS.BACKEND_BASE}${endpoint}`;
+}
+
 /**
- * Get the initial question to start the assessment flow
+ * Fetches the initial question to start the assessment flow
  */
 export async function getInitialQuestion(): Promise<{ step_id: string; question: string }> {
   try {
-    console.log('Fetching initial question from:', '/api/assessment/initial-question');
-    const response = await fetch('/api/assessment/initial-question');
+    const url = getFullUrl('/api/assessment/initial-question');
+    console.log('Fetching initial question from:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       console.error('Error response from server:', response.status, response.statusText);
@@ -62,36 +76,39 @@ export async function getInitialQuestion(): Promise<{ step_id: string; question:
 }
 
 /**
- * Process a user response in the assessment flow
+ * Processes a user response in the assessment flow
  */
 export async function processAssessmentResponse(
   step_id: string,
   response: string,
   user_data: Record<string, any> = {}
 ): Promise<AssessmentResponse> {
-  console.log(`Processing response for step ${step_id} with user data:`, user_data);
-  
   try {
-    const apiResponse = await fetch('/api/assessment/process-response', {
+    console.log(`Processing assessment response for step ${step_id}:`, response.substring(0, 50) + '...');
+    
+    const url = getFullUrl('/api/assessment/process-response');
+    const requestData = { step_id, response, user_data };
+    
+    console.log('Making request to:', url);
+    console.log('Request data:', JSON.stringify(requestData, null, 2));
+    
+    const apiResponse = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        step_id,
-        response,
-        user_data
-      })
+      body: JSON.stringify(requestData)
     });
     
     if (!apiResponse.ok) {
+      console.error('Error response from server:', apiResponse.status, apiResponse.statusText);
       const errorText = await apiResponse.text();
-      console.error('API Error:', errorText);
-      throw new Error(`Failed to process assessment response: ${apiResponse.status} ${apiResponse.statusText}`);
+      console.error('Error details:', errorText);
+      throw new Error('Failed to process response');
     }
     
     const data = await apiResponse.json();
-    console.log('API Response:', data);
+    console.log('Response data:', data);
     
     // Ensure user_data exists
     if (!data.user_data) {
@@ -130,11 +147,26 @@ export async function processAssessmentResponse(
  * Start the Sarah-guided assessment flow
  */
 export async function startSarahFlow(): Promise<SarahFlowResponse> {
-  const response = await fetch('/api/assessment/start-sarah-flow');
-  if (!response.ok) {
-    throw new Error('Failed to start Sarah assessment flow');
+  try {
+    const url = getFullUrl('/api/chat/start');
+    console.log('Starting Sarah flow at:', url);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: 'anonymous' })
+    });
+    
+    if (!response.ok) {
+      console.error('Error starting Sarah flow:', response.status, response.statusText);
+      throw new Error('Failed to start Sarah flow');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error in startSarahFlow:', error);
+    throw error;
   }
-  return await response.json();
 }
 
 /**
@@ -144,50 +176,66 @@ export async function processSarahResponse(
   chat_id: string,
   message: string
 ): Promise<SarahFlowResponse> {
-  const apiResponse = await fetch('/api/assessment/sarah-process-response', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      chat_id,
-      message
-    })
-  });
-  
-  if (!apiResponse.ok) {
-    throw new Error('Failed to process Sarah response');
+  try {
+    const url = getFullUrl('/api/chat/message');
+    console.log(`Processing Sarah response for chat ${chat_id}:`, message.substring(0, 50) + '...');
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id,
+        message
+      })
+    });
+    
+    if (!response.ok) {
+      console.error('Error processing Sarah response:', response.status, response.statusText);
+      throw new Error('Failed to process Sarah response');
+    }
+    
+    const data = await response.json();
+    console.log('Sarah response data:', data);
+    
+    // Extract relevant data
+    return {
+      chat_id: data.chat_id,
+      response: data.response.response,
+      next_step: data.response.current_step,
+      extracted_info: data.response.extracted_info || {}
+    };
+  } catch (error) {
+    console.error('Error in processSarahResponse:', error);
+    throw error;
   }
-  
-  const data = await apiResponse.json();
-  
-  // Convert market_options to marketOptions for consistency
-  if (data.market_options) {
-    data.marketOptions = data.market_options;
-    delete data.market_options;
-  }
-  
-  return data;
 }
 
 /**
  * Analyze a website URL to extract business intelligence
  */
 export async function analyzeWebsite(url: string): Promise<Record<string, any>> {
-  const response = await fetch('/api/assessment/analyze-website', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ url })
-  });
-  
-  if (!response.ok) {
-    throw new Error('Failed to analyze website');
+  try {
+    const apiUrl = getFullUrl('/api/website/analyze');
+    console.log('Analyzing website:', url, 'at endpoint:', apiUrl);
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    
+    if (!response.ok) {
+      console.error('Error analyzing website:', response.status, response.statusText);
+      throw new Error('Failed to analyze website');
+    }
+    
+    const data = await response.json();
+    console.log('Website analysis data:', data);
+    return data;
+  } catch (error) {
+    console.error('Error in analyzeWebsite:', error);
+    throw error;
   }
-  
-  const data = await response.json();
-  return data.analysis;
 }
 
 /**
@@ -197,23 +245,73 @@ export async function getMarketIntelligence(
   market_name: string,
   product_categories: string[]
 ): Promise<Record<string, any>> {
-  const response = await fetch('/api/assessment/get-market-intelligence', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      market_name,
-      product_categories
-    })
-  });
-  
-  if (!response.ok) {
-    throw new Error('Failed to get market intelligence');
+  try {
+    const url = getFullUrl('/api/market/intelligence');
+    console.log('Getting market intelligence for:', market_name, 'with categories:', product_categories);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        market_name,
+        product_categories
+      })
+    });
+    
+    if (!response.ok) {
+      console.error('Error getting market intelligence:', response.status, response.statusText);
+      throw new Error('Failed to get market intelligence');
+    }
+    
+    const data = await response.json();
+    console.log('Market intelligence data:', data);
+    return data;
+  } catch (error) {
+    console.error('Error in getMarketIntelligence:', error);
+    throw error;
   }
-  
-  const data = await response.json();
-  return data.intelligence;
+}
+
+/**
+ * Get market options based on product categories
+ */
+export async function getMarketOptions(
+  product_categories: string[],
+  userData?: Record<string, any>
+): Promise<MarketOption[]> {
+  try {
+    const url = getFullUrl('/api/market/options');
+    console.log('Getting market options for categories:', product_categories);
+    
+    // Get user data from localStorage if not provided
+    if (!userData) {
+      const savedData = localStorage.getItem('assessmentUserData');
+      if (savedData) {
+        userData = JSON.parse(savedData);
+      }
+    }
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_categories,
+        user_data: userData
+      })
+    });
+    
+    if (!response.ok) {
+      console.error('Error getting market options:', response.status, response.statusText);
+      throw new Error('Failed to get market options');
+    }
+    
+    const data = await response.json();
+    console.log('Market options data:', data);
+    return data.market_options || [];
+  } catch (error) {
+    console.error('Error in getMarketOptions:', error);
+    throw error;
+  }
 }
 
 // Add a utility function to reset all assessment-related state

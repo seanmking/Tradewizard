@@ -144,18 +144,33 @@ export async function checkHealth(): Promise<{ status: string }> {
 // Market intelligence API functions
 export const marketIntelligenceApi = {
   getMarketData: async (marketKey: string) => {
+    console.log(`getMarketData called with market key: "${marketKey}"`);
+    
     // In a real implementation, this would call the backend API
     // For now, we're using mock data files
     // Map market keys to actual filenames
     const marketFileMap: Record<string, string> = {
       'usa': 'usa',
-      'eu': 'eu',
       'uk': 'uk',
       'uae': 'uae'
     };
     
     const fileName = marketFileMap[marketKey] || marketKey;
-    return apiCall<any>('get', `/market_intelligence/${fileName}.json`, null, null, true);
+    console.log(`Mapped to filename: ${fileName}`);
+    
+    try {
+      const result = await apiCall<any>('get', `/market_intelligence/${fileName}.json`, null, null, true);
+      console.log(`Successfully fetched data for ${fileName}`);
+      return result;
+    } catch (error) {
+      console.error(`Error fetching market data for ${fileName}:`, error);
+      // If usa.json fails, try usa_market.json as a fallback
+      if (fileName === 'usa') {
+        console.log("Trying usa_market.json as fallback");
+        return apiCall<any>('get', `/market_intelligence/usa_market.json`, null, null, true);
+      }
+      throw error;
+    }
   },
   
   // Additional market intelligence endpoints would go here

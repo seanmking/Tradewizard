@@ -99,6 +99,7 @@ interface MarketIntelligenceDashboardProps {
   dashboardData: DashboardData;
   userData: UserData;
   onClose?: () => void;
+  useMockData?: boolean;
 }
 
 const ConfidenceIndicator: React.FC<{ score: number }> = ({ score }) => {
@@ -179,11 +180,49 @@ const BusinessProfilePanel: React.FC<{
 }> = ({ businessProfile, userData }) => {
   if (!businessProfile) return null;
   
+  // Get business name from userData or businessProfile with a fallback
+  const getBestBusinessName = () => {
+    // Try different ways to get business name from userData and dashboardData
+    try {
+      // First try userData.business_name (could be an object with a text property or a string)
+      if (userData.business_name) {
+        if (typeof userData.business_name === 'string') {
+          return userData.business_name;
+        } 
+        // @ts-ignore - handle the case where business_name is an object with text property
+        else if (userData.business_name.text) {
+          // @ts-ignore
+          return userData.business_name.text;
+        }
+      }
+      
+      // Try userData.business_name_text
+      if (userData.business_name_text) {
+        return userData.business_name_text;
+      }
+      
+      // Try businessProfile
+      // @ts-ignore - handle the case where businessProfile has a name property
+      if (businessProfile && businessProfile.name) {
+        // @ts-ignore
+        return businessProfile.name;
+      }
+    } catch (e) {
+      console.error("Error getting business name:", e);
+    }
+    
+    // Fallback
+    return 'Your Business';
+  };
+  
+  const businessName = getBestBusinessName();
+  console.log("Using business name in dashboard:", businessName);
+  
   return (
     <Panel title="Business Profile" confidence={businessProfile.products?.confidence}>
       <div className="profile-content">
         <div className="profile-header">
-          <h2>{safeRender(userData.business_name) || 'Your Business'}</h2>
+          <h2>{safeRender(businessName)}</h2>
           <p>{safeRender(businessProfile.business_details?.estimated_size)} business, operating for {safeRender(businessProfile.business_details?.years_operating)}</p>
         </div>
         
@@ -359,7 +398,8 @@ const TimelinePanel: React.FC<{
 const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = ({
   dashboardData,
   userData,
-  onClose
+  onClose,
+  useMockData = false
 }) => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     overview: true,
@@ -367,17 +407,70 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
     competitors: false,
     timeline: false,
   });
+  const [marketData, setMarketData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Check that we have valid data before rendering
   if (!dashboardData || !userData) {
     return <div className="dashboard-error">Unable to load dashboard data. Please try again later.</div>;
   }
   
-  const selectedMarket = typeof userData.selected_markets === 'string' 
-    ? userData.selected_markets.split(',')[0].trim() 
-    : (Array.isArray(userData.selected_markets) 
-        ? userData.selected_markets[0] 
-        : 'Target');
+  // Extract and log selected markets to debug the issue
+  console.log("UserData in Dashboard:", userData);
+  console.log("Using mock data:", useMockData);
+  
+  let allSelectedMarkets = [];
+  
+  if (typeof userData.selected_markets === 'string') {
+    allSelectedMarkets = userData.selected_markets.split(',').map(m => m.trim()).filter(Boolean);
+    console.log("Selected markets from string:", allSelectedMarkets);
+  } else if (Array.isArray(userData.selected_markets)) {
+    allSelectedMarkets = userData.selected_markets;
+    console.log("Selected markets from array:", allSelectedMarkets);
+  } else if (typeof userData.selectedMarkets === 'string') {
+    allSelectedMarkets = userData.selectedMarkets.split(',').map(m => m.trim()).filter(Boolean);
+    console.log("Selected markets from selectedMarkets string:", allSelectedMarkets);
+  } else if (Array.isArray(userData.selectedMarkets)) {
+    allSelectedMarkets = userData.selectedMarkets;
+    console.log("Selected markets from selectedMarkets array:", allSelectedMarkets);
+  } else {
+    console.log("No selected markets found in userData:", userData);
+    allSelectedMarkets = ["United Kingdom", "United Arab Emirates", "United States"];
+  }
+  
+  const selectedMarket = allSelectedMarkets[0] || 'Target';
+  console.log("Selected primary market:", selectedMarket);
+  
+  // Fetch market intelligence data if not using mock data
+  useEffect(() => {
+    // Only fetch if not using mock data and we have a selected market
+    if (!useMockData && selectedMarket) {
+      setIsLoading(true);
+      
+      // Extract product categories
+      const productCategories = 
+        dashboardData.business_profile?.products?.categories || 
+        userData.products?.categories || 
+        [];
+      
+      console.log("Fetching real market intelligence data for:", selectedMarket, "with categories:", productCategories);
+      
+      // Import the assessment API service
+      import('../../services/assessment-api').then(({ getMarketIntelligence }) => {
+        getMarketIntelligence(selectedMarket, productCategories)
+          .then(data => {
+            console.log("Received market intelligence data:", data);
+            setMarketData(data);
+            setIsLoading(false);
+          })
+          .catch(error => {
+            console.error("Error fetching market intelligence:", error);
+            setIsLoading(false);
+          });
+      });
+    }
+  }, [useMockData, selectedMarket, dashboardData, userData]);
   
   const toggleSection = (section: string) => {
     setExpandedSections({
@@ -386,14 +479,29 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
     });
   };
   
+  // Add this function to get the appropriate data source
+  const getMarketIntelligenceData = () => {
+    if (!useMockData && marketData && marketData.intelligence) {
+      console.log("Using real market intelligence data");
+      return marketData.intelligence;
+    }
+    
+    console.log("Using mock market intelligence data");
+    return dashboardData.market_intelligence || {};
+  };
+  
   return (
     <ErrorBoundary>
       <div className="market-intelligence-dashboard">
         <div className="dashboard-header">
           <h2>Market Intelligence Dashboard</h2>
           <p>Export opportunities for {safeRender(userData.business_name) || 'your business'}</p>
+          {error && <div className="error-message">{error}</div>}
+          {isLoading && <div className="loading-indicator">Loading market intelligence data...</div>}
           {onClose && (
-            <button className="close-dashboard-button" onClick={onClose}>×</button>
+            <button className="close-button" onClick={onClose}>
+              &times;
+            </button>
           )}
         </div>
         
@@ -403,26 +511,50 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
             userData={userData}
           />
           
-          <MarketIntelligencePanel 
-            marketIntelligence={dashboardData.market_intelligence} 
-            selectedMarket={safeRender(selectedMarket)}
-          />
+          <Panel 
+            title={`Market Overview: ${selectedMarket}`}
+            confidence={getMarketIntelligenceData()?.market_size?.confidence || 0.7}
+            isExpanded={expandedSections.overview}
+            toggleExpand={() => toggleSection('overview')}
+          >
+            <MarketIntelligencePanel 
+              marketIntelligence={getMarketIntelligenceData()}
+              selectedMarket={selectedMarket}
+            />
+          </Panel>
           
-          <RegulatoryPanel 
-            regulations={dashboardData.market_intelligence?.regulations?.items.map(item => safeRender(item)) || []} 
-            confidence={dashboardData.market_intelligence?.regulations?.confidence || 0.7}
-          />
+          <Panel 
+            title="Regulatory Requirements"
+            confidence={getMarketIntelligenceData()?.regulations?.confidence || 0.7}
+            isExpanded={expandedSections.regulatory}
+            toggleExpand={() => toggleSection('regulatory')}
+          >
+            <RegulatoryPanel 
+              regulations={getMarketIntelligenceData()?.regulations?.items || []}
+              confidence={getMarketIntelligenceData()?.regulations?.confidence || 0.7}
+            />
+          </Panel>
           
-          <CompetitorPanel />
+          <Panel 
+            title="Competitor Landscape"
+            confidence={dashboardData.competitor_landscape?.confidence || 0.7}
+            isExpanded={expandedSections.competitors}
+            toggleExpand={() => toggleSection('competitors')}
+          >
+            <CompetitorPanel />
+          </Panel>
           
-          <TimelinePanel 
-            months={dashboardData.market_intelligence?.opportunity_timeline?.months || 6}
-            confidence={dashboardData.market_intelligence?.opportunity_timeline?.confidence || 0.75}
-          />
-        </div>
-        
-        <div className="dashboard-footer">
-          <button className="signup-button">Create Account for Full Analysis</button>
+          <Panel 
+            title="Market Entry Timeline"
+            confidence={getMarketIntelligenceData()?.opportunity_timeline?.confidence || 0.7}
+            isExpanded={expandedSections.timeline}
+            toggleExpand={() => toggleSection('timeline')}
+          >
+            <TimelinePanel 
+              months={getMarketIntelligenceData()?.opportunity_timeline?.months || 9}
+              confidence={getMarketIntelligenceData()?.opportunity_timeline?.confidence || 0.7}
+            />
+          </Panel>
         </div>
       </div>
     </ErrorBoundary>

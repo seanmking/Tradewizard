@@ -54,11 +54,21 @@ export const AuthService = {
   
   // Check if a user is logged in
   isLoggedIn: (): boolean => {
-    return localStorage.getItem('isLoggedIn') === 'true';
+    // For demo purposes, also check for isAuthenticated flag
+    return localStorage.getItem('isLoggedIn') === 'true' || localStorage.getItem('isAuthenticated') === 'true';
   },
   
   // Get the current user's information
   getCurrentUser: (): User | null => {
+    // For demo purposes, check for isAuthenticated flag
+    if (localStorage.getItem('isAuthenticated') === 'true') {
+      // Return a demo user
+      return {
+        username: 'Demo User',
+        hasCompletedAssessment: true
+      };
+    }
+    
     const username = localStorage.getItem('username');
     if (!username) return null;
     

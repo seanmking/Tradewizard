@@ -2,19 +2,64 @@ import React, { useState, useEffect } from 'react';
 import { 
   Box, Container, Grid, Paper, Typography, Button, 
   Avatar, LinearProgress, Card, CardContent, CardActions, 
-  Divider, IconButton, Menu, MenuItem 
+  Divider, IconButton, Menu, MenuItem, List, ListItem, ListItemIcon, ListItemText
 } from '@mui/material';
 import { 
   Notifications as NotificationsIcon, 
   Help as HelpIcon, 
   ArrowForward as ArrowForwardIcon,
   BarChart as MarketIcon, 
-  Gavel as RegulatoryIcon, 
-  LocalShipping as OperationsIcon
+  Gavel as GavelIcon, 
+  LocalShipping as OperationsIcon,
+  Business as BusinessIcon,
+  Public as PublicIcon,
+  Flag as FlagIcon,
+  Insights as InsightsIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import AuthService from '../../services/AuthService';
 import { resetAssessmentState } from '../../services/assessment-api';
 import './Dashboard.css';
+
+// Custom circular progress component with label
+const CircularProgressWithLabel = (props: { value: number, size: number, thickness: number }) => {
+  return (
+    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+      <Box
+        sx={{
+          position: 'relative',
+          display: 'inline-flex',
+          borderRadius: '50%',
+          background: `conic-gradient(#4f46e5 ${props.value * 3.6}deg, #e0e0e0 ${props.value * 3.6}deg 360deg)`,
+          width: props.size,
+          height: props.size,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography variant="h4" component="div" color="primary.main">
+            {`${Math.round(props.value)}%`}
+          </Typography>
+          <Typography variant="caption" component="div" color="text.secondary">
+            Readiness
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
 
 // Dynamically import the setup screens with error handling
 const MarketPrioritizationLoader = () => {
@@ -254,7 +299,7 @@ type PillarType = 'market_intelligence' | 'regulatory_compliance' | 'export_oper
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // State
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activePillar, setActivePillar] = useState<PillarType>('dashboard');
   const [setupStep, setSetupStep] = useState<SetupStep>('market_prioritization');
@@ -263,6 +308,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [notificationsAnchorEl, setNotificationsAnchorEl] = useState<null | HTMLElement>(null);
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
   const [welcomeBannerDismissed, setWelcomeBannerDismissed] = useState(false);
+  const [useMockData, setUseMockData] = useState<boolean>(false);
   
   // Dashboard data state (moved inside the component)
   const [dashboardData, setDashboardData] = useState<DashboardData>(mockDashboardData);
@@ -283,13 +329,128 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         (appContainer as HTMLElement).style.display = 'flex';
       }
       
-      // In a real app, we would fetch the dashboard data from an API
-      // For now, we'll use the mock data
-      
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Error loading dashboard:', err);
-      setError('Failed to load dashboard. Please try refreshing the page.');
+      // Check if we have user assessment data in localStorage
+      const savedAssessmentData = localStorage.getItem('assessmentUserData');
+      if (savedAssessmentData) {
+        try {
+          const parsedData = JSON.parse(savedAssessmentData);
+          console.log('Found saved assessment data:', parsedData);
+          
+          // Extract business name
+          let businessName = 'Global Fresh SA'; // Default fallback
+          
+          if (parsedData.business_name) {
+            if (typeof parsedData.business_name === 'string') {
+              businessName = parsedData.business_name;
+            } else if (parsedData.business_name.text) {
+              businessName = parsedData.business_name.text;
+            }
+          } else if (parsedData.business_name_text) {
+            businessName = parsedData.business_name_text;
+          }
+          
+          console.log('Using business name from assessment:', businessName);
+          
+          // Check if this is the demo company (Global Fresh SA)
+          const isGlobalFreshSA = 
+            businessName.toLowerCase().includes('global fresh') || 
+            (parsedData.website_url && 
+             (parsedData.website_url.toLowerCase().includes('globalfresh') || 
+              parsedData.website_url.toLowerCase() === 'globalfreshsa.co.za'));
+          
+          setUseMockData(isGlobalFreshSA);
+          console.log(`Company is ${businessName}. Using mock data: ${isGlobalFreshSA}`);
+          
+          if (isGlobalFreshSA) {
+            // For Global Fresh SA, use the mock data
+            setDashboardData(prev => ({
+              ...mockDashboardData,
+              business_profile: {
+                ...mockDashboardData.business_profile,
+                name: businessName
+              }
+            }));
+            setIsLoading(false);
+          } else {
+            // For real companies, fetch data from the API
+            console.log('Fetching real data from export_intelligence for:', businessName);
+            
+            // Extract product categories
+            const productCategories = parsedData.products?.categories || [];
+            
+            // Extract selected markets
+            let selectedMarkets: string[] = [];
+            if (typeof parsedData.selected_markets === 'string') {
+              selectedMarkets = parsedData.selected_markets.split(',').map((m: string) => m.trim()).filter(Boolean);
+            } else if (Array.isArray(parsedData.selected_markets)) {
+              selectedMarkets = parsedData.selected_markets;
+            } else if (typeof parsedData.selectedMarkets === 'string') {
+              selectedMarkets = parsedData.selectedMarkets.split(',').map((m: string) => m.trim()).filter(Boolean);
+            } else if (Array.isArray(parsedData.selectedMarkets)) {
+              selectedMarkets = parsedData.selectedMarkets;
+            }
+            
+            // Create a basic dashboard structure with the company info
+            const basicDashboardData: DashboardData = {
+              business_profile: {
+                name: businessName,
+                products: {
+                  categories: productCategories,
+                  items: parsedData.products?.items || [],
+                  confidence: parsedData.products?.confidence || 90
+                },
+                current_markets: {
+                  countries: parsedData.current_markets?.countries || ['South Africa'],
+                  confidence: parsedData.current_markets?.confidence || 85
+                },
+                certifications: {
+                  items: parsedData.certifications?.items || [],
+                  confidence: parsedData.certifications?.confidence || 80
+                },
+                business_details: {
+                  founded: parsedData.business_details?.founded || new Date().getFullYear() - 5,
+                  employees: parsedData.business_details?.employees || 20,
+                  annual_revenue: parsedData.business_details?.annual_revenue || 'Unknown',
+                  export_experience: parsedData.export_experience || 'Beginner',
+                  confidence: parsedData.business_details?.confidence || 95
+                }
+              },
+              selected_markets: selectedMarkets,
+              export_readiness: {
+                overall_score: 42,
+                market_intelligence: 65,
+                regulatory_compliance: 35,
+                export_operations: 25
+              },
+              timeline: mockDashboardData.timeline,
+              next_steps: mockDashboardData.next_steps
+            };
+            
+            setDashboardData(basicDashboardData);
+            setIsLoading(false);
+            
+            // In a real implementation, we would fetch additional data from the API
+            // For example:
+            // fetchMarketIntelligence(selectedMarkets[0], productCategories)
+            //   .then(data => {
+            //     // Update dashboard with real market intelligence data
+            //   })
+            //   .catch(err => {
+            //     console.error('Error fetching market intelligence:', err);
+            //   });
+          }
+        } catch (e) {
+          console.error('Error parsing saved assessment data:', e);
+          setIsLoading(false);
+        }
+      } else {
+        // No assessment data, use mock data
+        setUseMockData(true);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error('Error initializing dashboard:', error);
+      setError('Failed to load dashboard data. Please try again later.');
       setIsLoading(false);
     }
   }, []);
@@ -399,117 +560,194 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     const RegulatoryAssessment = RegulatoryAssessmentLoader();
     const ResourcePlanning = ResourcePlanningLoader();
     
-    switch(setupStep) {
+    switch (setupStep) {
       case 'market_prioritization':
         return (
-          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                width: '100%', 
-                p: 3, 
-                mb: 4, 
-                bgcolor: '#f8f9fa', 
-                borderRadius: 2,
-                border: '1px solid #e0e4e8'
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Export Readiness Setup
-              </Typography>
-              <Typography variant="body1">
-                Let's assess {dashboardData.business_profile.name}'s basics in order to create a detailed export-readiness workflow. We will focus on three areas: Market Prioritization, your Export Timeline, and a quick Regulatory Assessment. This will give you a clear understanding of resource requirements.
-              </Typography>
-            </Paper>
+          <DashboardErrorBoundary>
             <MarketPrioritization 
-              markets={dashboardData.selected_markets || ["United Kingdom", "Germany", "United Arab Emirates", "United States"]} 
-              onContinue={handleNextSetupStep} 
+              markets={dashboardData.selected_markets} 
+              onContinue={handleNextSetupStep}
+              useMockData={useMockData}
             />
-          </Box>
+          </DashboardErrorBoundary>
         );
       case 'export_timeline':
-        return <ExportTimeline 
-                onContinue={handleNextSetupStep}
-                onBack={handlePreviousSetupStep}
-              />;
+        return (
+          <DashboardErrorBoundary>
+            <ExportTimeline 
+              onContinue={handleNextSetupStep} 
+              onBack={handlePreviousSetupStep}
+              useMockData={useMockData}
+            />
+          </DashboardErrorBoundary>
+        );
       case 'regulatory_assessment':
-        return <RegulatoryAssessment 
-                markets={dashboardData.selected_markets} 
-                onContinue={handleNextSetupStep}
-                onBack={handlePreviousSetupStep}
-              />;
+        return (
+          <DashboardErrorBoundary>
+            <RegulatoryAssessment 
+              onContinue={handleNextSetupStep} 
+              onBack={handlePreviousSetupStep}
+              useMockData={useMockData}
+            />
+          </DashboardErrorBoundary>
+        );
       case 'resource_planning':
-        return <ResourcePlanning 
-                onContinue={handleNextSetupStep}
-                onBack={handlePreviousSetupStep}
-              />;
+        return (
+          <DashboardErrorBoundary>
+            <ResourcePlanning 
+              onContinue={handleSetupComplete} 
+              onBack={handlePreviousSetupStep}
+              useMockData={useMockData}
+            />
+          </DashboardErrorBoundary>
+        );
       case 'complete':
-        return <Typography>Setup complete</Typography>;
       default:
-        return <Typography>Unknown step</Typography>;
+        return renderDashboardContent();
     }
   };
 
   const renderDashboardContent = () => {
-    // Get the components from the loaders
-    const MarketIntelligencePillar = MarketIntelligencePillarLoader();
-    const RegulatoryCompliancePillar = RegulatoryCompliancePillarLoader();
-    const ExportOperationsPillar = ExportOperationsPillarLoader();
-    
     switch (activePillar) {
-      case 'market_intelligence':
-        return <MarketIntelligencePillar markets={dashboardData.selected_markets} businessProfile={dashboardData.business_profile} />;
-      case 'regulatory_compliance':
-        return <RegulatoryCompliancePillar markets={dashboardData.selected_markets} businessProfile={dashboardData.business_profile} />;
-      case 'export_operations':
-        return <ExportOperationsPillar markets={dashboardData.selected_markets} businessProfile={dashboardData.business_profile} />;
       case 'dashboard':
         return (
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            {/* Export readiness summary */}
+            {/* Welcome banner */}
+            {!welcomeBannerDismissed && (
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 3,
+                  mb: 4,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: 'primary.light',
+                  color: 'white'
+                }}
+              >
+                <Box>
+                  <Typography variant="h5" component="h2" gutterBottom>
+                    Welcome to your Export Dashboard, {username}!
+                  </Typography>
+                  <Typography variant="body1">
+                    Your export journey is underway. Explore the tools and insights to help you succeed in international markets.
+                  </Typography>
+                </Box>
+                <IconButton 
+                  onClick={dismissWelcomeBanner}
+                  sx={{ color: 'white' }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Paper>
+            )}
+            
+            {/* Export Readiness Score */}
             <Paper
+              elevation={3}
               sx={{
                 p: 3,
                 mb: 4,
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: 'center',
+                justifyContent: 'space-between'
               }}
             >
-              <Typography variant="h5" gutterBottom>
-                Export Readiness: {username}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                Target markets: {dashboardData.selected_markets.join(', ')}
-              </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={dashboardData.export_readiness.overall_score} 
-                sx={{ 
-                  height: 10, 
-                  borderRadius: 5,
-                  backgroundColor: 'rgba(0,0,0,0.1)',
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: '#4f46e5'
-                  }
-                }} 
-              />
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                Export readiness: {dashboardData.export_readiness.overall_score}% complete
-              </Typography>
+              <Box sx={{ mb: { xs: 2, md: 0 } }}>
+                <Typography variant="h5" component="h2" gutterBottom>
+                  Export Readiness Score
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Your overall export readiness is currently at {dashboardData.export_readiness.overall_score}%. 
+                  Continue improving your score by completing the recommended actions.
+                </Typography>
+              </Box>
+              <Box sx={{ width: { xs: '100%', md: '40%' }, minWidth: '200px' }}>
+                <CircularProgressWithLabel 
+                  value={dashboardData.export_readiness.overall_score} 
+                  size={160}
+                  thickness={5}
+                />
+              </Box>
             </Paper>
-
-            <Grid container spacing={4}>
-              {/* Pillar Cards */}
-              <Grid item xs={12} md={4}>
+            
+            {/* Main dashboard grid */}
+            <Grid container spacing={3}>
+              {/* Business Profile */}
+              <Grid item xs={12} md={6}>
                 <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Box display="flex" alignItems="center" mb={2}>
                       <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                        <MarketIcon />
+                        <BusinessIcon />
+                      </Avatar>
+                      <Typography variant="h6">Business Profile</Typography>
+                    </Box>
+                    
+                    <Typography variant="body1" gutterBottom>
+                      <strong>{dashboardData.business_profile.name}</strong>
+                    </Typography>
+                    
+                    <Typography variant="body2" color="text.secondary" paragraph>
+                      Products: {dashboardData.business_profile.products.categories.join(', ')}
+                    </Typography>
+                    
+                    <Typography variant="body2" color="text.secondary" paragraph>
+                      Current Markets: {dashboardData.business_profile.current_markets.countries.join(', ')}
+                    </Typography>
+                    
+                    <Typography variant="body2" color="text.secondary">
+                      Founded: {dashboardData.business_profile.business_details.founded} | 
+                      Employees: {dashboardData.business_profile.business_details.employees} | 
+                      Revenue: {dashboardData.business_profile.business_details.annual_revenue}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              {/* Target Markets */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
+                        <PublicIcon />
+                      </Avatar>
+                      <Typography variant="h6">Target Markets</Typography>
+                    </Box>
+                    
+                    <List>
+                      {dashboardData.selected_markets.map((market, index) => (
+                        <ListItem key={index} disablePadding>
+                          <ListItemIcon>
+                            <FlagIcon color={index === 0 ? 'primary' : 'action'} />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary={market} 
+                            secondary={index === 0 ? 'Primary Target Market' : 'Secondary Target Market'} 
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              {/* Export Pillars */}
+              <Grid item xs={12} md={4}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
+                        <InsightsIcon />
                       </Avatar>
                       <Typography variant="h6">Market Intelligence</Typography>
                     </Box>
                     
                     <Typography variant="body2" color="text.secondary" paragraph>
-                      Access market research, competitor analysis, and price benchmarks for your target markets.
+                      Understand your target markets, competition, and opportunities.
                     </Typography>
                     
                     <LinearProgress 
@@ -528,7 +766,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                       endIcon={<ArrowForwardIcon />}
                       onClick={() => handlePillarChange('market_intelligence')}
                     >
-                      Access intelligence
+                      View intelligence
                     </Button>
                   </CardActions>
                 </Card>
@@ -538,14 +776,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Box display="flex" alignItems="center" mb={2}>
-                      <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
-                        <RegulatoryIcon />
+                      <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
+                        <GavelIcon />
                       </Avatar>
                       <Typography variant="h6">Regulatory Compliance</Typography>
                     </Box>
                     
                     <Typography variant="body2" color="text.secondary" paragraph>
-                      Manage certifications, standards, and compliance requirements for your exports.
+                      Navigate regulations, standards, and certification requirements.
                     </Typography>
                     
                     <LinearProgress 
@@ -564,7 +802,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                       endIcon={<ArrowForwardIcon />}
                       onClick={() => handlePillarChange('regulatory_compliance')}
                     >
-                      Manage compliance
+                      View compliance
                     </Button>
                   </CardActions>
                 </Card>
@@ -608,6 +846,39 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             </Grid>
           </Container>
         );
+      case 'market_intelligence':
+        const MarketIntelligencePillar = MarketIntelligencePillarLoader();
+        return <MarketIntelligencePillar 
+          dashboardData={dashboardData} 
+          userData={{
+            business_name: dashboardData.business_profile.name,
+            selected_markets: dashboardData.selected_markets.join(','),
+            products: dashboardData.business_profile.products
+          }}
+          useMockData={useMockData}
+        />;
+      case 'regulatory_compliance':
+        const RegulatoryCompliancePillar = RegulatoryCompliancePillarLoader();
+        return <RegulatoryCompliancePillar 
+          dashboardData={dashboardData} 
+          userData={{
+            business_name: dashboardData.business_profile.name,
+            selected_markets: dashboardData.selected_markets.join(','),
+            products: dashboardData.business_profile.products
+          }}
+          useMockData={useMockData}
+        />;
+      case 'export_operations':
+        const ExportOperationsPillar = ExportOperationsPillarLoader();
+        return <ExportOperationsPillar 
+          dashboardData={dashboardData} 
+          userData={{
+            business_name: dashboardData.business_profile.name,
+            selected_markets: dashboardData.selected_markets.join(','),
+            products: dashboardData.business_profile.products
+          }}
+          useMockData={useMockData}
+        />;
       default:
         return <Typography variant="h6">Unknown pillar</Typography>;
     }
