@@ -29,6 +29,9 @@ function cleanup_processes() {
     # Kill any existing Node.js processes on port 3001 (export-guru-mcp server)
     lsof -ti:3001 | xargs kill -9 2>/dev/null
     
+    # Kill any existing Node.js processes on port 3002 (mock server)
+    lsof -ti:3002 | xargs kill -9 2>/dev/null
+    
     echo_success "Process cleanup completed"
 }
 
@@ -149,7 +152,7 @@ cd ../..
 # Start the mock server
 echo_info "Starting mock server..."
 cd tradewizard
-node mock-server.js &
+PORT=3002 node mock-server.js &
 MOCK_SERVER_PID=$!
 
 # Wait a bit for the mock server to start
@@ -271,7 +274,7 @@ echo_info "Services are available at:"
 echo_info "Backend: http://localhost:5002"
 echo_info "Frontend: http://localhost:3000"
 echo_info "Export-guru-mcp Server: http://localhost:3001"
-echo_info "Mock Server: http://localhost:3001"
+echo_info "Mock Server: http://localhost:3002"
 echo_info "Press Ctrl+C to stop all servers"
 
 # Function to handle cleanup on exit
