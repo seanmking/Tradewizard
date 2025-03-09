@@ -61,8 +61,51 @@ function start_ollama() {
 function start_postgresql() {
     echo_info "Checking PostgreSQL status..."
     
-    # Check if PostgreSQL is already running
-    if ! pg_isready -q; then
+    # Define PostgreSQL commands based on installation method
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - try to find pg_isready in common locations
+        PG_ISREADY="/usr/local/bin/pg_isready"
+        if [ ! -f "$PG_ISREADY" ]; then
+            PG_ISREADY="/opt/homebrew/bin/pg_isready"
+        fi
+        if [ ! -f "$PG_ISREADY" ]; then
+            PG_ISREADY="$(brew --prefix)/bin/pg_isready"
+        fi
+        
+        # If we still can't find it, try to use the full path from Homebrew
+        if [ ! -f "$PG_ISREADY" ]; then
+            echo_info "pg_isready not found in PATH, using alternative check method..."
+            # Check if PostgreSQL is running using brew services
+            if brew services list | grep postgresql | grep started > /dev/null; then
+                echo_info "PostgreSQL is already running according to brew services"
+                PG_RUNNING=true
+            else
+                PG_RUNNING=false
+            fi
+        else
+            # Check if PostgreSQL is already running using pg_isready
+            if "$PG_ISREADY" -q; then
+                PG_RUNNING=true
+            else
+                PG_RUNNING=false
+            fi
+        fi
+    else
+        # Linux or other OS
+        if command -v pg_isready > /dev/null; then
+            if pg_isready -q; then
+                PG_RUNNING=true
+            else
+                PG_RUNNING=false
+            fi
+        else
+            echo_error "pg_isready command not found. Please ensure PostgreSQL is properly installed."
+            exit 1
+        fi
+    fi
+    
+    # Start PostgreSQL if not running
+    if [ "$PG_RUNNING" = false ]; then
         echo_info "Starting PostgreSQL..."
         
         # Start PostgreSQL based on OS
@@ -82,29 +125,70 @@ function start_postgresql() {
         sleep 3
         
         # Check if PostgreSQL started successfully
-        if ! pg_isready -q; then
-            echo_error "Failed to start PostgreSQL"
-            exit 1
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            if [ -f "$PG_ISREADY" ]; then
+                if ! "$PG_ISREADY" -q; then
+                    echo_error "Failed to start PostgreSQL"
+                    exit 1
+                fi
+            else
+                # Alternative check using brew services
+                if ! brew services list | grep postgresql | grep started > /dev/null; then
+                    echo_error "Failed to start PostgreSQL"
+                    exit 1
+                fi
+            fi
+        else
+            if ! pg_isready -q; then
+                echo_error "Failed to start PostgreSQL"
+                exit 1
+            fi
         fi
         echo_success "PostgreSQL started successfully"
     else
         echo_info "PostgreSQL is already running"
     fi
     
+    # Define PostgreSQL commands for database operations
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - try to find psql and createdb in common locations
+        PSQL="/usr/local/bin/psql"
+        CREATEDB="/usr/local/bin/createdb"
+        
+        if [ ! -f "$PSQL" ]; then
+            PSQL="/opt/homebrew/bin/psql"
+        fi
+        if [ ! -f "$CREATEDB" ]; then
+            CREATEDB="/opt/homebrew/bin/createdb"
+        fi
+        
+        # If we still can't find them, try to use the full path from Homebrew
+        if [ ! -f "$PSQL" ]; then
+            PSQL="$(brew --prefix)/bin/psql"
+        fi
+        if [ ! -f "$CREATEDB" ]; then
+            CREATEDB="$(brew --prefix)/bin/createdb"
+        fi
+    else
+        # Linux or other OS
+        PSQL="psql"
+        CREATEDB="createdb"
+    fi
+    
     # Check if our databases exist, create if they don't
     echo_info "Checking databases..."
     
     # Check regulatory_db
-    if ! psql -lqt | cut -d \| -f 1 | grep -qw regulatory_db; then
+    if ! "$PSQL" -lqt | cut -d \| -f 1 | grep -qw regulatory_db; then
         echo_info "Creating regulatory_db database..."
-        createdb regulatory_db
+        "$CREATEDB" regulatory_db
         echo_success "Created regulatory_db database"
     fi
     
     # Check trade_db
-    if ! psql -lqt | cut -d \| -f 1 | grep -qw trade_db; then
+    if ! "$PSQL" -lqt | cut -d \| -f 1 | grep -qw trade_db; then
         echo_info "Creating trade_db database..."
-        createdb trade_db
+        "$CREATEDB" trade_db
         echo_success "Created trade_db database"
     fi
 }
