@@ -1,13 +1,17 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { createMCPServer } from '@smithery/mcp-server';
+// import { createMCPServer } from '@smithery/mcp-server';
 import { registerTools } from './tools';
 import { setupConnectors } from './connectors';
 import { setupOllama } from './utils/ollama';
 import { errorHandler } from './utils/error-handling';
 import { Config } from './types';
+import { setupRegulatoryDbConnector } from './connectors/regulatory-db';
+import { setupTradeDbConnector } from './connectors/trade-db';
+import regulatoryRoutes from './routes/regulatory';
+import tradeRoutes from './routes/trade';
 
-export async function startServer(config: Config) {
+export function startServer(config: Config) {
   // Create Express app
   const app = express();
   
@@ -15,36 +19,41 @@ export async function startServer(config: Config) {
   app.use(cors());
   app.use(express.json());
   
-  // Set up Ollama LLM connection
-  const llm = await setupOllama(config.ollama);
+  // Set up LLM
+  const llm = setupOllama(config.ollama);
   
   // Set up data connectors
-  const connectors = await setupConnectors(config.connectors);
+  const connectors = setupConnectors(config.connectors);
   
-  // Create MCP server
-  const mcpServer = createMCPServer({
-    tools: registerTools(connectors, llm),
-    llm,
-    debug: config.debug,
-    cache: config.cache.enabled ? {
-      ttl: config.cache.ttl,
-      maxSize: config.cache.maxSize
-    } : undefined
+  // Initialize database connectors
+  const regulatoryDb = setupRegulatoryDbConnector({
+    connectionString: process.env.REGULATORY_DB_URL || 'postgresql://seanking@localhost:5432/regulatory_db'
+  });
+
+  const tradeDb = setupTradeDbConnector({
+    connectionString: process.env.TRADE_DB_URL || 'postgresql://seanking@localhost:5432/trade_db'
   });
   
+  // Create MCP server
+  // const mcpServer = createMCPServer();
+  
+  // Register tools
+  // registerTools(mcpServer, { llm, connectors });
+  
   // Register MCP routes
-  app.use('/api/mcp', mcpServer.router);
+  // app.use('/api/mcp', mcpServer.router);
+  
+  // Set up routes
+  app.use('/api/regulatory', regulatoryRoutes);
+  app.use('/api/trade', tradeRoutes);
   
   // Health check endpoint
   app.get('/health', (req: Request, res: Response) => {
-    res.status(200).json({ status: 'ok' });
+    res.json({ status: 'ok' });
   });
   
-  // Error handling
+  // Error handling middleware
   app.use(errorHandler);
   
-  // Start server
-  const server = app.listen(config.port);
-  
-  return server;
+  return app;
 }

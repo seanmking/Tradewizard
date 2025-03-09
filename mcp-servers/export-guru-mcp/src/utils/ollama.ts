@@ -6,15 +6,16 @@ interface OllamaResponse {
   [key: string]: any;
 }
 
-export async function setupOllama(config: OllamaConfig): Promise<LLM> {
+export function setupOllama(config: OllamaConfig): LLM {
   // Check if Ollama is available
-  try {
-    await axios.get(`${config.endpoint}/api/tags`);
-    console.log(`Connected to Ollama at ${config.endpoint}`);
-  } catch (error) {
-    console.warn(`Warning: Could not connect to Ollama at ${config.endpoint}`);
-    console.warn('LLM functionality may be limited');
-  }
+  axios.get(`${config.endpoint}/api/tags`)
+    .then(() => {
+      console.log(`Connected to Ollama at ${config.endpoint}`);
+    })
+    .catch((error) => {
+      console.warn(`Warning: Could not connect to Ollama at ${config.endpoint}`);
+      console.warn('LLM functionality may be limited');
+    });
   
   // Create LLM interface
   const llm: LLM = {

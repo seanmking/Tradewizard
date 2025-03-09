@@ -26,6 +26,9 @@ export const cache = {
    * @returns true if successful, false otherwise
    */
   set: async <T>(key: string, value: T, ttl?: number): Promise<boolean> => {
+    if (ttl === undefined) {
+      return nodeCache.set(key, value);
+    }
     return nodeCache.set(key, value, ttl);
   },
   

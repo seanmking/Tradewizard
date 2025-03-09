@@ -1,3 +1,4 @@
+import { Pool } from 'pg';
 import { RegulatoryRequirement } from '../types';
 import { ApiError } from '../utils/error-handling';
 
@@ -132,495 +133,270 @@ const updateFrequencyInfo = {
  * @returns Object with methods to interact with the Regulatory DB
  */
 export function setupRegulatoryDbConnector(config: RegulatoryDbConfig) {
-  // This implementation uses in-memory data for regulatory requirements
-  // In a production environment, this would connect to a database
+  // Create a connection pool
+  const pool = new Pool({
+    connectionString: config.connectionString,
+  });
   
-  // Comprehensive regulatory requirements database
-  const regulatoryRequirements: RegulatoryRequirement[] = [
-    // South African Domestic Requirements
-    {
-      country: 'ZAF',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Business Registration',
-      description: 'Register as a business with the Companies and Intellectual Property Commission (CIPC) to obtain a company registration number.',
-      agency: 'Companies and Intellectual Property Commission (CIPC)',
-      url: 'https://www.cipc.co.za/',
-      lastUpdated: '2023-12-01',
-      confidence: 1.0
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Tax Registration',
-      description: 'Register for taxes with the South African Revenue Service (SARS).',
-      agency: 'South African Revenue Service (SARS)',
-      url: 'https://www.sars.gov.za/',
-      confidence: 1.0
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Food Safety Certification',
-      description: 'Obtain a Certificate of Acceptability (COA) from the local municipal health authority, as required by Regulation R638 under the Foodstuffs, Cosmetics and Disinfectants Act.',
-      agency: 'Local Municipal Health Department',
-      url: 'https://www.gov.za/',
-      confidence: 1.0
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Alcoholic Beverages',
-      requirementType: 'Liquor License',
-      description: 'Obtain a provincial liquor manufacturing license from the relevant Liquor Board and register for excise duty with SARS.',
-      agency: 'Provincial Liquor Board & SARS',
-      url: 'https://www.sars.gov.za/customs-and-excise/registration-and-licensing/',
-      confidence: 1.0
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Food Safety System',
-      description: 'Implement HACCP (Hazard Analysis and Critical Control Points) food safety management system, especially for products under NRCS compulsory specifications.',
-      agency: 'National Regulator for Compulsory Specifications (NRCS)',
-      url: 'https://www.nrcs.org.za/business-units/food-and-associated-industries',
-      confidence: 1.0
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Quality Certification',
-      description: 'Consider ISO 22000 / FSSC 22000 certification for comprehensive food safety controls, often required to supply major overseas retailers.',
-      agency: 'South African National Accreditation System (SANAS)',
-      url: 'https://www.sanas.co.za/',
-      confidence: 0.9
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Halal Certification',
-      description: 'Obtain Halal certification if products contain animal derivatives and are intended for Muslim consumers or export to Muslim-majority markets.',
-      agency: 'South African National Halaal Authority (SANHA)',
-      url: 'http://www.sanha.org.za',
-      confidence: 0.9
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Export Registration',
-      description: 'Register as an exporter with SARS Customs to obtain an exporter code (Customs Client Number, CCN).',
-      agency: 'South African Revenue Service (SARS)',
-      url: 'https://www.sars.gov.za/customs-and-excise/registration-and-licensing/',
-      confidence: 1.0
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Export Permit',
-      description: 'Check if your product requires an export permit from ITAC (International Trade Administration Commission).',
-      agency: 'International Trade Administration Commission (ITAC)',
-      url: 'http://www.itac.org.za',
-      confidence: 0.9
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Plant Products',
-      requirementType: 'Phytosanitary Certificate',
-      description: 'Obtain a phytosanitary certificate from DALRRD for plant products, certifying the goods are free from pests.',
-      agency: 'Department of Agriculture, Land Reform and Rural Development (DALRRD)',
-      url: 'https://www.dalrrd.gov.za/',
-      confidence: 1.0
-    },
-    {
-      country: 'ZAF',
-      productCategory: 'Animal Products',
-      requirementType: 'Veterinary Health Certificate',
-      description: 'Obtain a veterinary health certificate issued by state vets for animal products (meat, dairy, eggs).',
-      agency: 'Department of Agriculture, Land Reform and Rural Development (DALRRD)',
-      url: 'https://www.dalrrd.gov.za/',
-      confidence: 1.0
-    },
-    
-    // UK Market Requirements
-    {
-      country: 'GBR',
-      productCategory: 'Food and Beverage',
-      requirementType: 'UK Importer Registration',
-      description: 'Ensure your UK importer is registered with the local Environmental Health Authority as a food business operator (FBO).',
-      agency: 'UK Local Authority Environmental Health',
-      url: 'https://www.food.gov.uk/business-guidance/imports-exports',
-      confidence: 1.0
-    },
-    {
-      country: 'GBR',
-      productCategory: 'Food and Beverage',
-      requirementType: 'UK Responsible Address',
-      description: 'Include a UK Responsible Address on the label by 2024 (either the UK importer\'s name and address or the manufacturer\'s UK office).',
-      agency: 'Food Standards Agency (FSA)',
-      url: 'https://www.food.gov.uk/business-guidance/packaging-and-labelling',
-      confidence: 1.0
-    },
-    {
-      country: 'GBR',
-      productCategory: 'Frozen/Canned Goods',
-      requirementType: 'Shelf-life Marking',
-      description: 'Include appropriate "best before" or "use by" date on packaged foods. For products with <3 months shelf-life, use day/month/year format, and for >3 months, at least month/year.',
-      agency: 'Food Standards Agency (FSA)',
-      url: 'https://www.food.gov.uk/business-guidance/packaging-and-labelling',
-      confidence: 1.0
-    },
-    {
-      country: 'GBR',
-      productCategory: 'Processed Foods',
-      requirementType: 'Food Information Regulations',
-      description: 'Adhere to Food Information Regulations (FIR 2014) on labeling – including English-language labels with product name, ingredient list, allergens (emphasized in bold), nutrition information, and net quantity.',
-      agency: 'Food Standards Agency (FSA)',
-      url: 'https://www.food.gov.uk/business-guidance/packaging-and-labelling',
-      confidence: 1.0
-    },
-    {
-      country: 'GBR',
-      productCategory: 'Alcoholic Beverages',
-      requirementType: 'Alcohol Labeling',
-      description: 'Include alcohol by volume (ABV%), allergens (e.g. "contains sulfites" on wine), and UK pregnancy warning or responsibility statements are recommended.',
-      agency: 'Food Standards Agency (FSA)',
-      url: 'https://www.food.gov.uk/business-guidance/packaging-and-labelling',
-      confidence: 1.0
-    },
-    {
-      country: 'GBR',
-      productCategory: 'Non-Alcoholic Beverages',
-      requirementType: 'Sugar Tax Compliance',
-      description: 'Be aware that the UK Soft Drinks Industry Levy (SDIL) imposes a tax on sweetened drinks with >5g sugar/100ml.',
-      agency: 'HM Revenue & Customs (HMRC)',
-      url: 'https://www.gov.uk/guidance/soft-drinks-industry-levy',
-      confidence: 1.0
-    },
-    {
-      country: 'GBR',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Tariff Preference',
-      description: 'Under the UK-SACUM Economic Partnership Agreement, most South African food and drink exports enter duty-free or at reduced tariffs, subject to rules of origin.',
-      agency: 'HM Revenue & Customs (HMRC)',
-      url: 'https://www.gov.uk/guidance/check-tariffs-when-importing-goods-into-the-uk',
-      confidence: 0.9
-    },
-    {
-      country: 'GBR',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Organic Certification',
-      description: 'To label as "Organic" in the UK, products must be certified to organic standards equivalent to UK/EU by a control body recognized by the UK.',
-      agency: 'Department for Environment, Food & Rural Affairs (DEFRA)',
-      url: 'https://www.gov.uk/guidance/importing-organic-food-to-the-uk',
-      confidence: 0.9
-    },
-    {
-      country: 'GBR',
-      productCategory: 'Animal Products',
-      requirementType: 'IPAFFS Pre-notification',
-      description: 'Products of animal origin (meat, dairy, fish, egg) require pre-notification via the IPAFFS system and health certificates.',
-      agency: 'Animal and Plant Health Agency (APHA)',
-      url: 'https://www.gov.uk/guidance/import-of-products-animal-origin-and-high-risk-food-not-of-animal-origin',
-      confidence: 1.0
-    },
-    {
-      country: 'GBR',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Packaging EPR',
-      description: 'UK Importers who place products on UK market must register for Packaging Extended Producer Responsibility and report packaging materials for recycling obligations.',
-      agency: 'UK Environment Agency',
-      url: 'https://www.gov.uk/guidance/packaging-producer-responsibilities',
-      confidence: 0.9
-    },
-    
-    // USA Market Requirements
-    {
-      country: 'USA',
-      productCategory: 'Food and Beverage',
-      requirementType: 'FDA Facility Registration',
-      description: 'Register your food facility with the U.S. FDA before exporting to the US. This is a requirement under the Bioterrorism Act and Food Safety Modernization Act (FSMA).',
-      agency: 'U.S. Food and Drug Administration (FDA)',
-      url: 'https://www.fda.gov/food/online-registration-food-facilities',
-      confidence: 1.0
-    },
-    {
-      country: 'USA',
-      productCategory: 'Alcoholic Beverages',
-      requirementType: 'TTB Label Approval',
-      description: 'Ensure your US importer obtains a TTB Certificate of Label Approval (COLA) for wine, distilled spirits, and malt beverages prior to import and sale in the US.',
-      agency: 'Alcohol and Tobacco Tax and Trade Bureau (TTB)',
-      url: 'https://www.ttb.gov/importers',
-      confidence: 1.0
-    },
-    {
-      country: 'USA',
-      productCategory: 'Canned Foods',
-      requirementType: 'Low-Acid Canned Food Registration',
-      description: 'Register your scheduled process with FDA (filing form FDA 2541 and process details) for acidified or low-acid canned products.',
-      agency: 'U.S. Food and Drug Administration (FDA)',
-      url: 'https://www.fda.gov/food/guidance-regulation-food-and-dietary-supplements/acidified-low-acid-canned-foods',
-      confidence: 1.0
-    },
-    {
-      country: 'USA',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Nutrition Facts Panel',
-      description: 'Include Nutrition Facts Panel on most processed foods, formatted according to FDA\'s latest requirements (which were updated in 2016, e.g. requiring an "Added Sugars" line).',
-      agency: 'U.S. Food and Drug Administration (FDA)',
-      url: 'https://www.fda.gov/food/food-labeling-nutrition',
-      confidence: 1.0
-    },
-    {
-      country: 'USA',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Allergen Labeling',
-      description: 'List "Contains: [allergen names]" for any of the major allergens (milk, eggs, fish, crustacean shellfish, tree nuts, peanuts, wheat, soy, and sesame).',
-      agency: 'U.S. Food and Drug Administration (FDA)',
-      url: 'https://www.fda.gov/food/food-labeling-nutrition/food-allergies',
-      confidence: 1.0
-    },
-    {
-      country: 'USA',
-      productCategory: 'Juices',
-      requirementType: 'Juice HACCP',
-      description: 'Implement a HACCP system for juice processors under 21 CFR Part 120.',
-      agency: 'U.S. Food and Drug Administration (FDA)',
-      url: 'https://www.fda.gov/food/hazard-analysis-critical-control-point-haccp/juice-haccp',
-      confidence: 1.0
-    },
-    {
-      country: 'USA',
-      productCategory: 'Food and Beverage',
-      requirementType: 'AGOA Tariff Preference',
-      description: 'Under the African Growth and Opportunity Act (AGOA), many South African food exports can enter duty-free (currently effective through 2025).',
-      agency: 'U.S. Customs and Border Protection (CBP)',
-      url: 'https://www.trade.gov/agoa-eligibility',
-      confidence: 0.9
-    },
-    {
-      country: 'USA',
-      productCategory: 'Food and Beverage',
-      requirementType: 'USDA Organic Certification',
-      description: 'To market a product as "Organic" in the US, it must comply with the USDA National Organic Program (NOP) standards and be certified by a USDA-accredited organic certifier.',
-      agency: 'USDA Agricultural Marketing Service',
-      url: 'https://www.ams.usda.gov/organic',
-      confidence: 0.9
-    },
-    {
-      country: 'USA',
-      productCategory: 'Food and Beverage',
-      requirementType: 'FDA Prior Notice',
-      description: 'Submit electronic notice of each food shipment before it arrives in the U.S. via FDA\'s Prior Notice system.',
-      agency: 'U.S. Food and Drug Administration (FDA)',
-      url: 'https://www.fda.gov/food/importing-food-products-united-states',
-      confidence: 1.0
-    },
-    {
-      country: 'USA',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Foreign Supplier Verification',
-      description: 'Ensure your U.S. importer has a Foreign Supplier Verification Program (FSVP) to verify that you produce food meeting U.S. safety standards.',
-      agency: 'U.S. Food and Drug Administration (FDA)',
-      url: 'https://www.fda.gov/food/food-safety-modernization-act-fsma/fsma-final-rule-foreign-supplier-verification-programs-fsvp-importers-food-humans-and-animals',
-      confidence: 1.0
-    },
-    
-    // UAE Market Requirements
-    {
-      country: 'ARE',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Product Registration',
-      description: 'Register all food items in the UAE\'s food registration system (e.g. Dubai Municipality\'s "FIRS" or the unified federal system called ZAD) before import.',
-      agency: 'UAE Ministry of Climate Change & Environment / Dubai Municipality',
-      url: 'https://www.dm.gov.ae/business/food-safety/',
-      confidence: 1.0
-    },
-    {
-      country: 'ARE',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Arabic Labeling',
-      description: 'Every product label must be in Arabic (at least sticker translation) and include the product name, ingredients, country of origin, production/expiry dates, manufacturer details, etc.',
-      agency: 'Emirates Authority for Standardization & Metrology (ESMA)',
-      url: 'https://www.moiat.gov.ae/',
-      confidence: 1.0
-    },
-    {
-      country: 'ARE',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Shelf-life Standards',
-      description: 'Ensure products have at least half of their shelf life remaining upon arrival. Production and expiry dates must be printed by the manufacturer on the original label or container in DD/MM/YYYY format.',
-      agency: 'Dubai Municipality Food Safety Department',
-      url: 'https://www.dm.gov.ae/business/food-safety/',
-      confidence: 1.0
-    },
-    {
-      country: 'ARE',
-      productCategory: 'Meat Products',
-      requirementType: 'Halal Certification',
-      description: 'For any meat or gelatin-containing product, obtain a Halal Certificate from a UAE-approved Islamic authority in South Africa, attesting animals were slaughtered according to Islamic law.',
-      agency: 'Emirates Authority for Standardization & Metrology (ESMA)',
-      url: 'https://www.moiat.gov.ae/',
-      confidence: 1.0
-    },
-    {
-      country: 'ARE',
-      productCategory: 'Bottled Water/Juices/Dairy',
-      requirementType: 'Emirates Quality Mark',
-      description: 'Obtain the Emirates Quality Mark (EQM) certification for bottled drinking water, juices, and dairy products, which is mandatory for sale in UAE.',
-      agency: 'Emirates Authority for Standardization & Metrology (ESMA)',
-      url: 'https://www.moiat.gov.ae/',
-      confidence: 1.0
-    },
-    {
-      country: 'ARE',
-      productCategory: 'Sweetened Beverages',
-      requirementType: 'Excise Tax',
-      description: 'Be aware that the UAE imposes 50% excise tax on sweetened beverages (with added sugar or sweetener) and 100% on energy drinks.',
-      agency: 'Federal Tax Authority (UAE)',
-      url: 'https://tax.gov.ae/en/taxes/excise-tax',
-      confidence: 1.0
-    },
-    {
-      country: 'ARE',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Import Duty',
-      description: 'Most food and beverage imports incur a 5% import duty ad valorem as part of the GCC Common External Tariff.',
-      agency: 'UAE Customs',
-      url: 'https://www.moiat.gov.ae/',
-      confidence: 0.9
-    },
-    {
-      country: 'ARE',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Health Certificate',
-      description: 'Provide a general export certificate stating the product is fit for human consumption and freely sold in South Africa.',
-      agency: 'Department of Agriculture, Land Reform and Rural Development (DALRRD)',
-      url: 'https://www.dalrrd.gov.za/',
-      confidence: 0.9
-    },
-    {
-      country: 'ARE',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Certificate of Origin',
-      description: 'Provide a Certificate of Origin for customs documentation to verify origin and for statistics.',
-      agency: 'South African Chamber of Commerce and Industry',
-      url: 'https://sacci.org.za/',
-      confidence: 0.9
-    },
-    {
-      country: 'ARE',
-      productCategory: 'Food and Beverage',
-      requirementType: 'Local Distribution',
-      description: 'Work with a UAE-registered importer or distributor, as foreign companies cannot directly import without a local entity.',
-      agency: 'UAE Ministry of Economy',
-      url: 'https://www.moec.gov.ae/en/home',
-      confidence: 0.9
+  // Test the connection
+  pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+      console.error('Error connecting to regulatory database:', err);
+    } else {
+      console.log('Connected to regulatory database at:', res.rows[0].now);
     }
-  ];
+  });
+  
+  // Initialize the database schema if it doesn't exist
+  const initializeDatabase = async () => {
+    try {
+      // Create the regulatory_requirements table if it doesn't exist
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS regulatory_requirements (
+          id SERIAL PRIMARY KEY,
+          country VARCHAR(100) NOT NULL,
+          product_category VARCHAR(100) NOT NULL,
+          hs_code VARCHAR(20),
+          requirement_type VARCHAR(100) NOT NULL,
+          description TEXT NOT NULL,
+          agency VARCHAR(200),
+          url TEXT,
+          last_updated TIMESTAMP,
+          confidence FLOAT NOT NULL
+        )
+      `);
+      
+      console.log('Regulatory database schema initialized');
+    } catch (error) {
+      console.error('Error initializing regulatory database schema:', error);
+    }
+  };
+  
+  // Initialize the database
+  initializeDatabase();
   
   return {
     /**
-     * Get regulatory requirements for a specific country and product category
+     * Get regulatory requirements for a country and product category
      * @param country Country code
      * @param productCategory Product category
-     * @param hsCode Optional HS code for more specific requirements
-     * @returns List of regulatory requirements
+     * @param hsCode Optional HS code
+     * @returns Array of regulatory requirements
      */
-    getRegulatoryRequirements: async function(
+    getRequirements: async function(
       country: string,
       productCategory: string,
       hsCode?: string
     ): Promise<RegulatoryRequirement[]> {
       try {
-        // Filter requirements by country and product category
-        let filteredRequirements = regulatoryRequirements.filter(req => 
-          req.country.toUpperCase() === country.toUpperCase() &&
-          (req.productCategory.toLowerCase() === productCategory.toLowerCase() ||
-           req.productCategory.toLowerCase() === 'food and beverage')
-        );
+        let query = `
+          SELECT * FROM regulatory_requirements 
+          WHERE country = $1 AND product_category = $2
+        `;
         
-        // Further filter by HS code if provided
-        if (hsCode && hsCode.trim() !== '') {
-          const hsCodeSpecificRequirements = filteredRequirements.filter(req => 
-            req.hsCode === hsCode
-          );
-          
-          // If we have HS code specific requirements, return those
-          // Otherwise, fall back to the general requirements
-          if (hsCodeSpecificRequirements.length > 0) {
-            filteredRequirements = hsCodeSpecificRequirements;
-          }
+        const params = [country, productCategory];
+        
+        if (hsCode) {
+          query += ` AND (hs_code = $3 OR hs_code IS NULL)`;
+          params.push(hsCode);
         }
         
-        return filteredRequirements;
+        const result = await pool.query(query, params);
+        
+        // Map the database results to the RegulatoryRequirement interface
+        return result.rows.map(row => ({
+          country: row.country,
+          productCategory: row.product_category,
+          hsCode: row.hs_code,
+          requirementType: row.requirement_type,
+          description: row.description,
+          agency: row.agency,
+          url: row.url,
+          lastUpdated: row.last_updated ? new Date(row.last_updated).toISOString() : undefined,
+          confidence: row.confidence
+        }));
       } catch (error) {
-        console.error('Error fetching regulatory requirements', error);
+        console.error('Error fetching regulatory requirements:', error);
         throw new ApiError('Failed to fetch regulatory requirements', 500);
       }
     },
     
     /**
-     * Get update frequency information for regulatory requirements
-     * @returns Update frequency information
+     * Add a regulatory requirement
+     * @param requirement Regulatory requirement to add
+     * @returns Success status
      */
-    getUpdateFrequencyInfo: async function() {
-      return updateFrequencyInfo;
+    addRequirement: async function(
+      requirement: RegulatoryRequirement
+    ): Promise<boolean> {
+      try {
+        const query = `
+          INSERT INTO regulatory_requirements (
+            country, product_category, hs_code, requirement_type, 
+            description, agency, url, last_updated, confidence
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `;
+        
+        const params = [
+          requirement.country,
+          requirement.productCategory,
+          requirement.hsCode || null,
+          requirement.requirementType,
+          requirement.description,
+          requirement.agency || null,
+          requirement.url || null,
+          requirement.lastUpdated ? new Date(requirement.lastUpdated) : null,
+          requirement.confidence
+        ];
+        
+        await pool.query(query, params);
+        
+        return true;
+      } catch (error) {
+        console.error('Error adding regulatory requirement:', error);
+        throw new ApiError('Failed to add regulatory requirement', 500);
+      }
     },
     
     /**
-     * Check if regulatory requirements need to be updated
-     * @param country Country code
-     * @returns Object indicating if update is needed and when last updated
+     * Update a regulatory requirement
+     * @param id Requirement ID
+     * @param requirement Updated requirement data
+     * @returns Success status
      */
-    checkUpdateStatus: async function(country?: string) {
-      // Get all requirements or filter by country
-      const requirements = country 
-        ? regulatoryRequirements.filter(req => req.country.toUpperCase() === country.toUpperCase())
-        : regulatoryRequirements;
-      
-      // Find the oldest lastUpdated date
-      const oldestUpdate = requirements.reduce((oldest, req) => {
-        if (!req.lastUpdated) return oldest;
-        return !oldest || new Date(req.lastUpdated) < new Date(oldest) ? req.lastUpdated : oldest;
-      }, '');
-      
-      // Calculate days since last update
-      const daysSinceUpdate = oldestUpdate 
-        ? Math.floor((Date.now() - new Date(oldestUpdate).getTime()) / (1000 * 60 * 60 * 24))
-        : null;
-      
-      // Determine if update is needed based on country's recommended frequency
-      let updateNeeded = false;
-      let recommendedFrequency = '';
-      
-      if (country) {
-        const countryCode = country.toUpperCase();
-        if (countryCode === 'ZAF') {
-          updateNeeded = daysSinceUpdate !== null && daysSinceUpdate > 180; // 6 months
-          recommendedFrequency = updateFrequencyInfo.southAfrica.frequency;
-        } else if (countryCode === 'GBR') {
-          updateNeeded = daysSinceUpdate !== null && daysSinceUpdate > 90; // 3 months
-          recommendedFrequency = updateFrequencyInfo.unitedKingdom.frequency;
-        } else if (countryCode === 'USA') {
-          updateNeeded = daysSinceUpdate !== null && daysSinceUpdate > 180; // 6 months
-          recommendedFrequency = updateFrequencyInfo.unitedStates.frequency;
-        } else if (countryCode === 'ARE') {
-          updateNeeded = daysSinceUpdate !== null && daysSinceUpdate > 365; // 12 months
-          recommendedFrequency = updateFrequencyInfo.unitedArabEmirates.frequency;
-        } else {
-          updateNeeded = daysSinceUpdate !== null && daysSinceUpdate > 180; // Default to 6 months
-          recommendedFrequency = 'semiannual';
+    updateRequirement: async function(
+      id: number,
+      requirement: Partial<RegulatoryRequirement>
+    ): Promise<boolean> {
+      try {
+        // Build the SET clause dynamically based on the provided fields
+        const updates: string[] = [];
+        const params: any[] = [];
+        let paramIndex = 1;
+        
+        if (requirement.country !== undefined) {
+          updates.push(`country = $${paramIndex++}`);
+          params.push(requirement.country);
         }
-      } else {
-        // If no country specified, recommend update if any country is due
-        updateNeeded = daysSinceUpdate !== null && daysSinceUpdate > 90; // Default to quarterly
-        recommendedFrequency = 'quarterly';
+        
+        if (requirement.productCategory !== undefined) {
+          updates.push(`product_category = $${paramIndex++}`);
+          params.push(requirement.productCategory);
+        }
+        
+        if (requirement.hsCode !== undefined) {
+          updates.push(`hs_code = $${paramIndex++}`);
+          params.push(requirement.hsCode);
+        }
+        
+        if (requirement.requirementType !== undefined) {
+          updates.push(`requirement_type = $${paramIndex++}`);
+          params.push(requirement.requirementType);
+        }
+        
+        if (requirement.description !== undefined) {
+          updates.push(`description = $${paramIndex++}`);
+          params.push(requirement.description);
+        }
+        
+        if (requirement.agency !== undefined) {
+          updates.push(`agency = $${paramIndex++}`);
+          params.push(requirement.agency);
+        }
+        
+        if (requirement.url !== undefined) {
+          updates.push(`url = $${paramIndex++}`);
+          params.push(requirement.url);
+        }
+        
+        if (requirement.lastUpdated !== undefined) {
+          updates.push(`last_updated = $${paramIndex++}`);
+          params.push(requirement.lastUpdated ? new Date(requirement.lastUpdated) : null);
+        }
+        
+        if (requirement.confidence !== undefined) {
+          updates.push(`confidence = $${paramIndex++}`);
+          params.push(requirement.confidence);
+        }
+        
+        if (updates.length === 0) {
+          return true; // Nothing to update
+        }
+        
+        // Add the ID as the last parameter
+        params.push(id);
+        
+        const query = `
+          UPDATE regulatory_requirements 
+          SET ${updates.join(', ')} 
+          WHERE id = $${paramIndex}
+        `;
+        
+        await pool.query(query, params);
+        
+        return true;
+      } catch (error) {
+        console.error('Error updating regulatory requirement:', error);
+        throw new ApiError('Failed to update regulatory requirement', 500);
       }
-      
-      return {
-        updateNeeded,
-        lastUpdated: oldestUpdate || 'Never',
-        daysSinceUpdate: daysSinceUpdate || 'Unknown',
-        recommendedFrequency
-      };
+    },
+    
+    /**
+     * Delete a regulatory requirement
+     * @param id Requirement ID
+     * @returns Success status
+     */
+    deleteRequirement: async function(id: number): Promise<boolean> {
+      try {
+        await pool.query('DELETE FROM regulatory_requirements WHERE id = $1', [id]);
+        return true;
+      } catch (error) {
+        console.error('Error deleting regulatory requirement:', error);
+        throw new ApiError('Failed to delete regulatory requirement', 500);
+      }
+    },
+    
+    /**
+     * Search for regulatory requirements
+     * @param searchTerm Search term
+     * @returns Array of matching regulatory requirements
+     */
+    searchRequirements: async function(searchTerm: string): Promise<RegulatoryRequirement[]> {
+      try {
+        const query = `
+          SELECT * FROM regulatory_requirements 
+          WHERE 
+            country ILIKE $1 OR 
+            product_category ILIKE $1 OR 
+            requirement_type ILIKE $1 OR 
+            description ILIKE $1 OR 
+            agency ILIKE $1
+        `;
+        
+        const result = await pool.query(query, [`%${searchTerm}%`]);
+        
+        return result.rows.map(row => ({
+          country: row.country,
+          productCategory: row.product_category,
+          hsCode: row.hs_code,
+          requirementType: row.requirement_type,
+          description: row.description,
+          agency: row.agency,
+          url: row.url,
+          lastUpdated: row.last_updated ? new Date(row.last_updated).toISOString() : undefined,
+          confidence: row.confidence
+        }));
+      } catch (error) {
+        console.error('Error searching regulatory requirements:', error);
+        throw new ApiError('Failed to search regulatory requirements', 500);
+      }
+    },
+    
+    /**
+     * Close the database connection pool
+     */
+    close: async function(): Promise<void> {
+      await pool.end();
     }
   };
 } 

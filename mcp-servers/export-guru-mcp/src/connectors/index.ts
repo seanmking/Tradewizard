@@ -13,13 +13,13 @@ export interface Connectors {
   wits: ReturnType<typeof setupWITSConnector>;
 }
 
-export async function setupConnectors(config: ConnectorsConfig): Promise<Connectors> {
+export function setupConnectors(config: ConnectorsConfig): Connectors {
   // Set up all connectors
-  const tradeMap = await setupTradeMapConnector(config.tradeMap);
-  const comtrade = await setupComtradeConnector(config.comtrade);
-  const regulatoryDb = await setupRegulatoryDbConnector(config.regulatoryDb);
-  const internalDb = await setupInternalDbConnector(config.internalDb);
-  const wits = await setupWITSConnector(config.wits);
+  const tradeMap = setupTradeMapConnector(config.tradeMap);
+  const comtrade = setupComtradeConnector(config.comtrade);
+  const regulatoryDb = setupRegulatoryDbConnector(config.regulatoryDb);
+  const internalDb = setupInternalDbConnector(config.internalDb);
+  const wits = setupWITSConnector(config.wits);
   
   return {
     tradeMap,

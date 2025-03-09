@@ -2,13 +2,7 @@ import { Connectors } from '../connectors';
 import { LLM, Tool, RegulatoryRequirement } from '../types';
 
 /**
- * Get regulatory requirements for a specific market and product category
- * @param country Target country
- * @param productCategory Product category
- * @param hsCode Optional HS code for more specific requirements
- * @param connectors Data connectors
- * @param llm LLM for enhanced analysis
- * @returns List of regulatory requirements
+ * Get regulatory requirements for a country and product category
  */
 async function getRegulatoryRequirements(
   country: string,
@@ -18,27 +12,25 @@ async function getRegulatoryRequirements(
   llm: LLM
 ): Promise<RegulatoryRequirement[]> {
   try {
-    // Normalize country code
-    const countryCode = country.toUpperCase();
+    // Convert country name to ISO code if needed
+    const countryCode = await getCountryCode(country, llm);
     
     // Get regulatory requirements from database
-    const requirements = await connectors.regulatoryDb.getRegulatoryRequirements(
+    const requirements = await connectors.regulatoryDb.getRequirements(
       countryCode,
       productCategory,
       hsCode
     );
     
-    // If we have requirements from the database, return them
+    // If we have requirements, return them
     if (requirements && requirements.length > 0) {
       return requirements;
     }
     
-    // If no requirements found, use LLM to generate them
-    return generateRegulatoryRequirements(country, productCategory, hsCode, llm);
+    // If no requirements found, generate them using LLM
+    return generateRegulatoryRequirements(countryCode, productCategory, hsCode, llm);
   } catch (error) {
-    console.error('Error getting regulatory requirements:', error);
-    
-    // Fallback to LLM-generated requirements
+    console.error('Error fetching regulatory requirements:', error);
     return generateRegulatoryRequirements(country, productCategory, hsCode, llm);
   }
 }
@@ -602,17 +594,70 @@ function estimateComplianceCost(missingRequirements: RegulatoryRequirement[]): s
   }
 }
 
+/**
+ * Convert country name to ISO code if needed
+ */
+async function getCountryCode(country: string, llm: LLM): Promise<string> {
+  // If already looks like a country code (3 letters, all caps)
+  if (/^[A-Z]{3}$/.test(country)) {
+    return country;
+  }
+  
+  // Simple mapping for common countries
+  const countryMap: Record<string, string> = {
+    'south africa': 'ZAF',
+    'uk': 'GBR',
+    'united kingdom': 'GBR',
+    'great britain': 'GBR',
+    'usa': 'USA',
+    'united states': 'USA',
+    'united states of america': 'USA',
+    'uae': 'ARE',
+    'united arab emirates': 'ARE',
+    'china': 'CHN',
+    'japan': 'JPN',
+    'australia': 'AUS',
+    'india': 'IND',
+    'germany': 'DEU',
+    'france': 'FRA',
+    'italy': 'ITA',
+    'spain': 'ESP',
+    'netherlands': 'NLD',
+    'brazil': 'BRA',
+    'canada': 'CAN'
+  };
+  
+  const normalizedCountry = country.toLowerCase().trim();
+  
+  if (countryMap[normalizedCountry]) {
+    return countryMap[normalizedCountry];
+  }
+  
+  // For other countries, return the original input
+  // In a production system, we would use a more comprehensive lookup
+  return country.toUpperCase();
+}
+
 export function registerRegulatoryTools(connectors: Connectors, llm: LLM): Tool[] {
   return [
     {
       name: 'getRegulatoryRequirements',
-      description: 'Get regulatory requirements for a specific country and product category',
+      description: 'Get regulatory requirements for exporting a product to a specific country',
       parameters: {
         type: 'object',
         properties: {
-          country: { type: 'string', description: 'Target country (name or code)' },
-          productCategory: { type: 'string', description: 'Product category' },
-          hsCode: { type: 'string', description: 'Optional HS code for more specific requirements' }
+          country: {
+            type: 'string',
+            description: 'The destination country for export'
+          },
+          productCategory: {
+            type: 'string',
+            description: 'The category of product being exported'
+          },
+          hsCode: {
+            type: 'string',
+            description: 'The Harmonized System (HS) code for the product'
+          }
         },
         required: ['country', 'productCategory']
       },
@@ -626,16 +671,24 @@ export function registerRegulatoryTools(connectors: Connectors, llm: LLM): Tool[
     },
     {
       name: 'calculateComplianceReadiness',
-      description: 'Calculate compliance readiness based on user data and requirements',
+      description: 'Calculate compliance readiness score based on user certifications',
       parameters: {
         type: 'object',
         properties: {
-          country: { type: 'string', description: 'Target country (name or code)' },
-          productCategory: { type: 'string', description: 'Product category' },
-          userCertifications: { 
-            type: 'array', 
-            items: { type: 'string' }, 
-            description: 'List of user certifications' 
+          country: {
+            type: 'string',
+            description: 'The destination country for export'
+          },
+          productCategory: {
+            type: 'string',
+            description: 'The category of product being exported'
+          },
+          userCertifications: {
+            type: 'array',
+            items: {
+              type: 'string'
+            },
+            description: 'List of certifications the user already has'
           }
         },
         required: ['country', 'productCategory', 'userCertifications']
@@ -650,13 +703,17 @@ export function registerRegulatoryTools(connectors: Connectors, llm: LLM): Tool[
     },
     {
       name: 'getUpdateFrequencyInfo',
-      description: 'Get information about how often regulatory requirements should be updated',
+      description: 'Get information about how frequently regulatory requirements are updated',
       parameters: {
         type: 'object',
         properties: {},
         required: []
       },
-      handler: async () => connectors.regulatoryDb.getUpdateFrequencyInfo()
+      handler: async () => {
+        return {
+          message: "This functionality is no longer available in the updated database connector."
+        };
+      }
     },
     {
       name: 'checkRegulatoryUpdateStatus',
@@ -664,11 +721,19 @@ export function registerRegulatoryTools(connectors: Connectors, llm: LLM): Tool[
       parameters: {
         type: 'object',
         properties: {
-          country: { type: 'string', description: 'Optional country code to check update status for specific country' }
+          country: {
+            type: 'string',
+            description: 'Country code to check update status for'
+          }
         },
         required: []
       },
-      handler: async (params) => connectors.regulatoryDb.checkUpdateStatus(params.country)
+      handler: async (params) => {
+        return {
+          message: "This functionality is no longer available in the updated database connector.",
+          country: params.country
+        };
+      }
     }
   ];
 } 

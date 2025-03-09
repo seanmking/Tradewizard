@@ -171,3 +171,57 @@ export interface MarketReport {
   recommendations: string[];
   generatedDate: string;
 }
+
+/**
+ * Trade data record
+ */
+export interface TradeData {
+  reporterCountry: string;
+  partnerCountry: string;
+  year: number;
+  month?: number;
+  hsCode: string;
+  productDescription?: string;
+  tradeFlow: string; // 'export' or 'import'
+  valueUsd: number;
+  quantity?: number;
+  quantityUnit?: string;
+  source: string;
+  lastUpdated?: string;
+}
+
+/**
+ * Query parameters for trade data
+ */
+export interface TradeDataQuery {
+  reporterCountry?: string;
+  partnerCountry?: string;
+  hsCode?: string;
+  hsCodeMatchType?: 'exact' | 'prefix';
+  year?: number;
+  month?: number;
+  tradeFlow?: string;
+  sortBy?: string;
+  sortDirection?: 'ASC' | 'DESC';
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Trade partner information
+ */
+export interface TradePartner {
+  countryCode: string;
+  countryName: string;
+}
+
+/**
+ * Trade partner statistics
+ */
+export interface TradePartnerStats {
+  partnerCountry: string;
+  totalValueUsd: number;
+  productCount: number;
+  year: number;
+  tradeFlow: string;
+}
