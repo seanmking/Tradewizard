@@ -1,14 +1,21 @@
 {
+  "business_details": {
+    "estimated_size": "Medium",
+    "years_operating": "< 5 years",
+    "confidence": 0.6
+  },
+  "company_name": "Supplier of Frozen Pies & Savouries, Cape Town",
+  "description": "Frozen pies and Savouries suppliers in Cape Town, South Africa. Order online and have it delivered to your door. Global Cuisine Cape Town provides delectable food and Halal frozen snacks, as well as a variety of tasty dishes for special occasions and every day.",
   "products": {
-    "categories": [
-      "General Products"
-    ],
     "items": [
+      "ROTI",
       "QUICHE",
       "RISSOLES",
-      "PUFF PASTRY",
-      "SAMOOSAS",
-      "Vegan/Vegetarian"
+      "SIGNATURE ITEMS",
+      "SPRINGROLLS"
+    ],
+    "categories": [
+      "General Products"
     ],
     "confidence": 0.7
   },
@@ -20,11 +27,37 @@
   },
   "certifications": {
     "items": [],
+    "confidence": 0.4
+  },
+  "contact_info": {
+    "phone": "2020",
+    "email": null,
+    "address": null,
+    "social_media": [
+      "linkedin",
+      "facebook",
+      "instagram"
+    ],
+    "confidence": 0.8
+  },
+  "team_info": {
+    "members": [],
     "confidence": 0.5
   },
-  "business_details": {
-    "estimated_size": "Medium",
-    "years_operating": "< 5 years",
-    "confidence": 0.6
+  "facilities_info": {
+    "locations": [],
+    "features": [],
+    "confidence": 0.5
+  },
+  "distribution_info": {
+    "retail_locations": [],
+    "online_platforms": [],
+    "export_markets": [],
+    "confidence": 0.5
+  },
+  "sustainability_info": {
+    "initiatives": [],
+    "certifications": [],
+    "confidence": 0.5
   }
 }

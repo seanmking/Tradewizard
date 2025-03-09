@@ -177,6 +177,139 @@ class ScraperMonitor:
         }
 ```
 
+### Phase 5: TradeWizard Architecture Improvement (Weeks 9-12)
+*Fifth priority - platform scalability and resilience*
+
+The TradeWizard application currently suffers from architectural issues that limit its scalability and reliability. We'll implement a phased approach to address these issues while minimizing disruption to existing functionality.
+
+1. **Phase 5.1: Immediate Fixes (Week 9)**
+   - Resolve namespace conflicts between `export_intelligence` and `tradewizard.backend`
+   - Fix function reference errors in existing API endpoints
+   - Add consistent error handling and logging throughout
+
+   ```python
+   # Update backend imports to have a consistent pattern
+   try:
+       # Try the most reliable import path first
+       from tradewizard.backend.analysis import market_analysis
+       from tradewizard.backend.analysis import regulatory
+       logger.info("Imported analysis modules from tradewizard.backend")
+   except ImportError:
+       # Fall back to export_intelligence if needed
+       from export_intelligence.analysis import market_analysis
+       from export_intelligence.analysis import regulatory
+       logger.info("Imported analysis modules from export_intelligence")
+   ```
+
+2. **Phase 5.2: Batch Processing Implementation (Week 10)**
+   - Modify API endpoints to handle multiple markets in single requests
+   - Update frontend components to use batch APIs
+   - Implement proper caching for frequently accessed reference data
+
+   ```python
+   @app.route('/api/export-readiness', methods=['POST'])
+   def export_readiness_report_endpoint():
+       """Generate reports for multiple markets in one request"""
+       data = request.json
+       user_data = data.get('userData', {})
+       markets = data.get('markets', [])
+       
+       if isinstance(markets, str):
+           # Handle comma-separated string format
+           markets = [m.strip() for m in markets.split(',')]
+           
+       results = []
+       for market in markets:
+           # Generate report for each market
+           report = generate_market_report(user_data, market)
+           results.append(report)
+           
+       return jsonify({
+           "reports": results,
+           "metadata": {
+               "processed_markets": len(results),
+               "timestamp": datetime.now().isoformat()
+           }
+       })
+   ```
+
+3. **Phase 5.3: Module Structure Refactoring (Week 11)**
+   - Reorganize code to eliminate namespace confusion
+   - Implement proper separation of concerns
+   - Create dedicated service layer for business logic
+
+   ```
+   tradewizard/
+   ├── backend/
+   │   ├── analysis/       # Analysis business logic
+   │   │   ├── __init__.py
+   │   │   ├── market.py        # Market analysis functionality
+   │   │   ├── regulatory.py    # Regulatory analysis
+   │   │   ├── resources.py     # Resource planning
+   │   │   └── common.py        # Shared utilities
+   │   ├── api/
+   │   │   ├── __init__.py
+   │   │   ├── market.py        # Market API endpoints
+   │   │   ├── regulatory.py    # Regulatory API endpoints
+   │   │   └── resources.py     # Resource API endpoints
+   │   ├── services/
+   │   │   ├── __init__.py
+   │   │   ├── data.py          # Data access services
+   │   │   ├── cache.py         # Caching services
+   │   │   └── integration.py   # External integration services
+   │   ├── common/
+   │   │   ├── __init__.py
+   │   │   ├── config.py        # Configuration
+   │   │   ├── logging.py       # Logging setup
+   │   │   └── errors.py        # Error handling
+   │   └── app.py               # Main Flask application
+   └── frontend/
+       ├── public/
+       │   └── assets/          # Static assets
+       └── src/
+           ├── api/
+           │   ├── client.js    # API client configuration
+           │   └── endpoints.js # API endpoint definitions
+           ├── components/
+           │   ├── common/      # Reusable components
+           │   ├── market/      # Market analysis components
+           │   ├── regulatory/  # Regulatory components
+           │   └── resources/   # Resource planning components
+           ├── services/
+           │   ├── analysis.js  # Analysis service
+           │   ├── auth.js      # Authentication service
+           │   └── storage.js   # Local storage service
+           ├── utils/
+           │   ├── formatting.js # Data formatting utilities
+           │   └── validation.js # Input validation
+           └── App.js           # Main application component
+   ```
+
+4. **Phase 5.4: Scaling Enhancements (Week 12)**
+   - Implement database connection pooling
+   - Add regional data caching strategy
+   - Create monitoring and health check endpoints
+   - Implement proper error handling and retries
+
+   ```python
+   # Cache frequently accessed reference data
+   market_data_cache = {}
+
+   def get_market_data(market, refresh=False):
+       """Get market data with caching"""
+       cache_key = f"market_{market.lower()}"
+       
+       if refresh or cache_key not in market_data_cache:
+           # Fetch fresh data from database
+           data = db.fetch_market_data(market)
+           market_data_cache[cache_key] = {
+               "data": data,
+               "timestamp": datetime.now()
+           }
+           
+       return market_data_cache[cache_key]["data"]
+   ```
+
 ## Technical Debt & TODOs
 
 ### Architecture Concerns
@@ -249,6 +382,20 @@ class ScraperMonitor:
 # Technical debt: Relying solely on scraped data without authoritative regional information creates incomplete analysis
 ```
 
+### Multi-Market Processing
+
+```python
+# TODO: Implement efficient batch processing for multiple markets
+# Technical debt: Current single-market API design causes excessive API calls and potential race conditions
+```
+
+### Module Namespace Confusion
+
+```python
+# TODO: Standardize import patterns and module organization
+# Technical debt: Inconsistent use of export_intelligence vs tradewizard.backend namespaces causes function reference errors
+```
+
 ## Recommended Architecture
 
 ```
@@ -288,4 +435,53 @@ export_intelligence/
 └── main.py               # Main entry point
 ```
 
-This architecture properly separates concerns, enables testing in isolation, and creates clear boundaries that will make maintenance and extension much easier as the system grows. 
+## TradeWizard Improved Architecture
+
+```
+tradewizard/
+├── backend/
+│   ├── analysis/
+│   │   ├── __init__.py
+│   │   ├── market.py        # Market analysis functionality
+│   │   ├── regulatory.py    # Regulatory analysis
+│   │   ├── resources.py     # Resource planning
+│   │   └── common.py        # Shared utilities
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── market.py        # Market API endpoints
+│   │   ├── regulatory.py    # Regulatory API endpoints
+│   │   └── resources.py     # Resource API endpoints
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── data.py          # Data access services
+│   │   ├── cache.py         # Caching services
+│   │   └── integration.py   # External integration services
+│   ├── common/
+│   │   ├── __init__.py
+│   │   ├── config.py        # Configuration
+│   │   ├── logging.py       # Logging setup
+│   │   └── errors.py        # Error handling
+│   └── app.py               # Main Flask application
+└── frontend/
+    ├── public/
+    │   └── assets/          # Static assets
+    └── src/
+        ├── api/
+        │   ├── client.js    # API client configuration
+        │   └── endpoints.js # API endpoint definitions
+        ├── components/
+        │   ├── common/      # Reusable components
+        │   ├── market/      # Market analysis components
+        │   ├── regulatory/  # Regulatory components
+        │   └── resources/   # Resource planning components
+        ├── services/
+        │   ├── analysis.js  # Analysis service
+        │   ├── auth.js      # Authentication service
+        │   └── storage.js   # Local storage service
+        ├── utils/
+        │   ├── formatting.js # Data formatting utilities
+        │   └── validation.js # Input validation
+        └── App.js           # Main application component
+```
+
+This architecture properly separates concerns, enables testing in isolation, and creates clear boundaries that will make maintenance and extension much easier as the system grows. The phased approach allows for incremental improvements while maintaining functionality and minimizing disruption. 

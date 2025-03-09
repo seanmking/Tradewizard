@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import Chat from './components/Chat/Chat';
-import { SideKick } from './components/SideKick/SideKick';
 import InitialAssessmentFlow from './components/Assessment/InitialAssessmentFlow';
 import Dashboard from './components/Dashboard/Dashboard';
 import AccountCreation from './components/Auth/AccountCreation';
@@ -17,12 +15,6 @@ const RESET_ASSESSMENT_EVENT = 'resetAssessment';
 const AssessmentIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-  </svg>
-);
-
-const SideKickIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
   </svg>
 );
 
@@ -70,9 +62,10 @@ const LogoIcon = () => (
   </svg>
 );
 
+// Update TabType to remove sidekick
+type TabType = 'assessment' | 'documents' | 'markets' | 'dashboard' | 'profile';
+
 const App = () => {
-  type TabType = 'assessment' | 'sidekick' | 'documents' | 'markets' | 'dashboard' | 'profile';
-  
   // State for managing current user
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [username, setUsername] = useState<string>('');
@@ -89,17 +82,21 @@ const App = () => {
       setUsername(user.username);
       setHasCompletedAssessment(user.hasCompletedAssessment);
       
-      // Store the current active tab in localStorage
-      const savedTab = localStorage.getItem('activeTab');
-      if (savedTab && ['assessment', 'dashboard', 'sidekick', 'documents', 'markets', 'profile'].includes(savedTab)) {
-        setActiveTab(savedTab as TabType);
+      // Check for tab query parameter in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      
+      if (tabParam && ['assessment', 'dashboard', 'documents', 'markets', 'profile'].includes(tabParam)) {
+        // If tab parameter is valid, use it
+        setActiveTab(tabParam as TabType);
+        localStorage.setItem('activeTab', tabParam);
       } else {
-        // Default to assessment if no valid tab is saved
+        // Always start on the assessment page if no valid tab parameter
         setActiveTab('assessment');
         localStorage.setItem('activeTab', 'assessment');
       }
     } else {
-      // For users that aren't logged in, always show assessment
+      // If not authenticated, always start on assessment
       setActiveTab('assessment');
       localStorage.setItem('activeTab', 'assessment');
     }
@@ -126,6 +123,26 @@ const App = () => {
       if (dashboardTab) {
         dashboardTab.classList.add('active');
       }
+      
+      // Force the dashboard to be visible
+      const dashboardWrapper = document.querySelector('.dashboard-wrapper');
+      if (dashboardWrapper) {
+        (dashboardWrapper as HTMLElement).style.display = 'block';
+      }
+      
+      // Update URL without reloading the page
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', 'dashboard');
+      window.history.pushState({}, '', url);
+      
+      // For demo purposes, don't require authentication
+      // Comment out the login modal for demo
+      /*
+      // If not authenticated, show login modal
+      if (!isAuthenticated) {
+        setShowAuthModal('login');
+      }
+      */
     };
     
     window.addEventListener('navigateToAssessment', handleNavigateToAssessment);
@@ -178,6 +195,30 @@ const App = () => {
     } else {
       // Just set active tab to dashboard but allow returning to assessment later
       setActiveTab('dashboard');
+      localStorage.setItem('activeTab', 'dashboard');
+      
+      // Force the dashboard to be visible
+      const dashboardWrapper = document.querySelector('.dashboard-wrapper');
+      if (dashboardWrapper) {
+        (dashboardWrapper as HTMLElement).style.display = 'block';
+      }
+      
+      // Update URL without reloading the page
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', 'dashboard');
+      window.history.pushState({}, '', url);
+      
+      // Ensure the tab is visually updated immediately
+      const assessmentTab = document.querySelector('.assessment-tab');
+      const dashboardTab = document.querySelector('.dashboard-tab');
+      
+      if (assessmentTab) {
+        assessmentTab.classList.remove('active');
+      }
+      
+      if (dashboardTab) {
+        dashboardTab.classList.add('active');
+      }
     }
   };
   
@@ -238,25 +279,30 @@ const App = () => {
               setActiveTab('dashboard');
               localStorage.setItem('activeTab', 'dashboard');
               
-              // If not authenticated, show login modal
+              // For demo purposes, allow access to dashboard without authentication
+              // If not authenticated, we'll still show the dashboard
+              // Comment out the login modal for demo
+              /*
               if (!isAuthenticated) {
                 setShowAuthModal('login');
+                return;
               }
+              */
+              
+              // Force the dashboard to be visible
+              const dashboardWrapper = document.querySelector('.dashboard-wrapper');
+              if (dashboardWrapper) {
+                (dashboardWrapper as HTMLElement).style.display = 'block';
+              }
+              
+              // Update URL without reloading the page
+              const url = new URL(window.location.href);
+              url.searchParams.set('tab', 'dashboard');
+              window.history.pushState({}, '', url);
             }}
           >
             <DashboardIcon />
             <span>Dashboard</span>
-          </a>
-          <a 
-            href="#" 
-            className={activeTab === 'sidekick' ? 'active' : ''}
-            onClick={(e) => {
-              e.preventDefault();
-              setActiveTab('sidekick');
-            }}
-          >
-            <SideKickIcon />
-            <span>SideKick</span>
           </a>
           <a 
             href="#" 
@@ -315,6 +361,9 @@ const App = () => {
             </div>
             
             <div className="dashboard-wrapper">
+              {/* For demo purposes, always show the dashboard */}
+              <Dashboard onLogout={handleLogout} />
+              {/* Comment out the authentication check for demo
               {isAuthenticated ? (
                 <Dashboard onLogout={handleLogout} />
               ) : (
@@ -339,24 +388,7 @@ const App = () => {
                   </div>
                 </div>
               )}
-            </div>
-          </>
-        )}
-        
-        {activeTab === 'sidekick' && (
-          <>
-            <div className="content-header">
-              <div className="header-icons">
-                <NotificationIcon />
-                <HelpIcon />
-                <div onClick={() => isAuthenticated ? setShowAuthModal('profile') : setShowAuthModal('login')}>
-                  <ProfileIcon />
-                </div>
-              </div>
-            </div>
-            
-            <div className="sidekick-wrapper">
-              <SideKick />
+              */}
             </div>
           </>
         )}

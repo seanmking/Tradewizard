@@ -275,7 +275,7 @@ class BsScraper:
                         if country == 'africa':
                             markets.append('Africa')
                         elif country == 'europe':
-                            markets.append('European Union')
+                            markets.append('United Kingdom')
                         elif country == 'asia':
                             markets.append('Asia')
                         elif country == 'americas':

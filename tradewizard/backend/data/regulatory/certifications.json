@@ -45,11 +45,11 @@
     {
       "name": "EU Organic Certification",
       "standard": "834/2007 & 889/2008",
-      "description": "Organic certification valid in UK and EU markets",
+      "description": "Organic certification valid in UK markets",
       "timeline": "12-18 months (including transition period)",
       "cost_range": "R85,000-R150,000",
       "renewal": "Annual audit",
-      "countries": ["uk", "eu"],
+      "countries": ["uk"],
       "provider_examples": ["Control Union", "Ecocert", "Soil Association"]
     },
     {
