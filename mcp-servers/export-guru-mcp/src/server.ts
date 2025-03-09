@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { createMCPServer } from '@smithery/mcp-server';
 import { registerTools } from './tools';
@@ -36,7 +36,7 @@ export async function startServer(config: Config) {
   app.use('/api/mcp', mcpServer.router);
   
   // Health check endpoint
-  app.get('/health', (req, res) => {
+  app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'ok' });
   });
   

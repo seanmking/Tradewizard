@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Container, Grid, Paper, Typography, Button, 
   Avatar, LinearProgress, Card, CardContent, CardActions, 
-  Divider, IconButton, Menu, MenuItem, List, ListItem, ListItemIcon, ListItemText
+  Divider, IconButton, Menu, MenuItem, List, ListItem, ListItemIcon, ListItemText, Alert,
+  CircularProgress
 } from '@mui/material';
 import { 
   Notifications as NotificationsIcon, 
@@ -20,6 +21,7 @@ import {
 import AuthService from '../../services/AuthService';
 import { resetAssessmentState } from '../../services/assessment-api';
 import './Dashboard.css';
+import { withCache } from '../../utils/cache';
 
 // Custom circular progress component with label
 const CircularProgressWithLabel = (props: { value: number, size: number, thickness: number }) => {
@@ -313,6 +315,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Dashboard data state (moved inside the component)
   const [dashboardData, setDashboardData] = useState<DashboardData>(mockDashboardData);
 
+  // Add state for API data
+  const [marketIntelligenceData, setMarketIntelligenceData] = useState<any>(null);
+  const [regulatoryData, setRegulatoryData] = useState<any>(null);
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+
   useEffect(() => {
     try {
       // Get the current user information
@@ -454,6 +462,165 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       setIsLoading(false);
     }
   }, []);
+
+  // Add a utility function for retrying API calls
+  const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3, delay = 1000) => {
+    let retries = 0;
+    
+    while (retries < maxRetries) {
+      try {
+        const response = await fetch(url, options);
+        
+        if (response.ok) {
+          return await response.json();
+        }
+        
+        // Handle different HTTP error codes
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Authentication error. Please log in again.');
+        } else if (response.status === 429) {
+          // Rate limiting - wait longer before retrying
+          await new Promise(resolve => setTimeout(resolve, delay * 2));
+          retries++;
+          continue;
+        } else if (response.status >= 500) {
+          // Server error - retry
+          await new Promise(resolve => setTimeout(resolve, delay));
+          retries++;
+          continue;
+        } else {
+          throw new Error(`API request failed: ${response.statusText}`);
+        }
+      } catch (error) {
+        if (retries >= maxRetries - 1) {
+          throw error;
+        }
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, delay));
+        retries++;
+      }
+    }
+    
+    throw new Error('Maximum retries exceeded');
+  };
+
+  // Create a cached version of the fetch function
+  const fetchExportReadinessReportWithCache = withCache(
+    async (
+      businessName: string,
+      productCategories: string[],
+      targetMarkets: string[],
+      certifications: string[],
+      businessDetails: any
+    ) => {
+      // Use the retry mechanism for the API call
+      return await fetchWithRetry(
+        '/api/mcp/tools',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tool: 'generateExportReadinessReport',
+            params: {
+              businessName,
+              productCategories,
+              targetMarkets,
+              certifications,
+              businessDetails
+            }
+          }),
+        }
+      );
+    },
+    (businessName, productCategories, targetMarkets, certifications, businessDetails) => 
+      `dashboard_export_readiness_${businessName}_${targetMarkets.join('_')}_${productCategories.join('_')}`,
+    { ttl: 1800000 } // 30 minutes cache
+  );
+
+  // Function to fetch dashboard data from MCP server
+  const fetchDashboardData = useCallback(async () => {
+    if (!dashboardData || !dashboardData.business_profile) {
+      return;
+    }
+    
+    setIsLoadingData(true);
+    setApiError(null);
+    
+    try {
+      // Extract data from dashboardData
+      const businessName = dashboardData.business_profile.name || '';
+      const productCategories = dashboardData.business_profile.products?.categories || [];
+      const targetMarkets = dashboardData.selected_markets || [];
+      const certifications = dashboardData.business_profile.certifications?.items || [];
+      const businessDetails = {
+        founded: dashboardData.business_profile.business_details?.founded || 0,
+        employees: dashboardData.business_profile.business_details?.employees || 0,
+        annual_revenue: dashboardData.business_profile.business_details?.annual_revenue || '',
+        export_experience: dashboardData.business_profile.business_details?.export_experience || ''
+      };
+      
+      // Use the cached fetch function
+      const data = await fetchExportReadinessReportWithCache(
+        businessName,
+        productCategories,
+        targetMarkets,
+        certifications,
+        businessDetails
+      );
+      
+      // Check if the response contains an error
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      // Update dashboard data with the fetched data
+      setDashboardData(prevData => {
+        if (!prevData) return mockDashboardData; // Return mock data as fallback
+        
+        return {
+          ...prevData,
+          export_readiness: {
+            overall_score: data.exportReadiness.overallScore * 100,
+            market_intelligence: data.exportReadiness.marketIntelligence * 100,
+            regulatory_compliance: data.exportReadiness.regulatoryCompliance * 100,
+            export_operations: data.exportReadiness.exportOperations * 100
+          },
+          next_steps: data.nextSteps.map((step: any, index: number) => ({
+            id: index + 1,
+            title: step.title,
+            description: step.description,
+            pillar: step.pillar,
+            estimated_time: step.estimatedTime
+          }))
+        };
+      });
+      
+      // Store the data for use in other components
+      setMarketIntelligenceData(data.marketIntelligence || null);
+      setRegulatoryData(data.regulatoryCompliance || null);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      
+      // Set a user-friendly error message
+      if (err instanceof Error) {
+        setApiError(err.message);
+      } else {
+        setApiError('Failed to fetch dashboard data. Please try again later.');
+      }
+    } finally {
+      setIsLoadingData(false);
+    }
+  }, [dashboardData, fetchExportReadinessReportWithCache, mockDashboardData, setDashboardData, setMarketIntelligenceData, setRegulatoryData]);
+
+  useEffect(() => {
+    // Fetch dashboard data when the component mounts
+    if (dashboardData && dashboardData.business_profile) {
+      fetchDashboardData();
+    }
+  }, [dashboardData, fetchDashboardData]);
 
   const handleSetupComplete = () => {
     setSetupComplete(true);
@@ -608,6 +775,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   };
 
   const renderDashboardContent = () => {
+    if (isLoadingData) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+    
+    if (apiError) {
+      return (
+        <Box sx={{ p: 3 }}>
+          <Alert severity="error">{apiError}</Alert>
+        </Box>
+      );
+    }
+
     switch (activePillar) {
       case 'dashboard':
         return (

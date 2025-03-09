@@ -35,6 +35,9 @@ export interface ConnectorsConfig {
     user: string;
     password: string;
   };
+  wits: {
+    baseUrl: string;
+  };
 }
 
 export interface CacheConfig {

@@ -35,6 +35,9 @@ export async function loadConfig(): Promise<Config> {
         database: 'export_guru',
         user: '',
         password: ''
+      },
+      wits: {
+        baseUrl: 'https://wits.worldbank.org/API/V1/SDMX/V21/rest'
       }
     },
     cache: {
@@ -76,6 +79,9 @@ export async function loadConfig(): Promise<Config> {
         database: process.env.DB_NAME || defaultConfig.connectors.internalDb.database,
         user: process.env.DB_USER || defaultConfig.connectors.internalDb.user,
         password: process.env.DB_PASSWORD || defaultConfig.connectors.internalDb.password
+      },
+      wits: {
+        baseUrl: process.env.WITS_BASE_URL || defaultConfig.connectors.wits.baseUrl
       }
     },
     cache: {

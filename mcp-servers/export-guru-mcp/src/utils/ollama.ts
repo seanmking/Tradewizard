@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { LLM, OllamaConfig } from '../types';
 
+interface OllamaResponse {
+  response: string;
+  [key: string]: any;
+}
+
 export async function setupOllama(config: OllamaConfig): Promise<LLM> {
   // Check if Ollama is available
   try {
@@ -15,7 +20,7 @@ export async function setupOllama(config: OllamaConfig): Promise<LLM> {
   const llm: LLM = {
     complete: async (options) => {
       try {
-        const response = await axios.post(`${config.endpoint}/api/generate`, {
+        const response = await axios.post<OllamaResponse>(`${config.endpoint}/api/generate`, {
           model: config.model,
           prompt: options.prompt,
           options: {
@@ -29,7 +34,10 @@ export async function setupOllama(config: OllamaConfig): Promise<LLM> {
         return response.data.response;
       } catch (error) {
         console.error('Error calling Ollama:', error);
-        throw new Error(`Failed to complete LLM request: ${error.message}`);
+        if (error instanceof Error) {
+          throw new Error(`Failed to complete LLM request: ${error.message}`);
+        }
+        throw new Error('Failed to complete LLM request: Unknown error');
       }
     }
   };

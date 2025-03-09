@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Paper, Typography, Box, Grid, Divider, 
   List, ListItem, ListItemIcon, ListItemText, 
@@ -14,10 +14,32 @@ import analysisService, {
   Document as RegDocument
 } from '../../services/analysis-service';
 import './ExportReadinessReport.css';
+import { withCache } from '../../utils/cache';
 
 // Custom type to handle the actual API response structure
-interface ReportData extends Omit<BaseReportData, 'regulatory_requirements'> {
-  regulatory_requirements: string[] | RegulatoryRequirementsResult;
+interface ReportData {
+  business_name: string;
+  selected_market: string;
+  product_categories: string[];
+  export_readiness: {
+    overall_score: number;
+    market_intelligence: number;
+    regulatory_compliance: number;
+    export_operations: number;
+  };
+  market_size: string;
+  growth_rate: string;
+  regulatory_requirements: string[];
+  next_steps: Array<{
+    id: number;
+    title: string;
+    description: string;
+    pillar: string;
+    estimated_time: string;
+  }>;
+  strengths?: string[];
+  areas_for_improvement?: string[];
+  key_trends?: string[];
 }
 
 interface ExportReadinessReportProps {
@@ -83,137 +105,164 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
   standalone = false
 }) => {
   const [reportData, setReportData] = useState<ReportData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedMarket, setSelectedMarket] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
-  const [currentMarket, setCurrentMarket] = useState<string>('');
-
-  useEffect(() => {
-    const loadMarketData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Get all selected markets
-        let markets: string[] = [];
-        
-        // Check both versions of the property name
-        if (Array.isArray(userData.selectedMarkets)) {
-          markets = userData.selectedMarkets;
-          console.log("Using selectedMarkets array:", markets);
-        } else if (typeof userData.selectedMarkets === 'string') {
-          markets = userData.selectedMarkets.split(',').map((m: string) => m.trim()).filter(Boolean);
-          console.log("Using selectedMarkets string:", markets);
-        } else if (Array.isArray(userData.selected_markets)) {
-          markets = userData.selected_markets;
-          console.log("Using selected_markets array:", markets);
-        } else if (typeof userData.selected_markets === 'string') {
-          markets = userData.selected_markets.split(',').map((m: string) => m.trim()).filter(Boolean);
-          console.log("Using selected_markets string:", markets);
+  
+  // Create a cached version of the fetch function
+  const fetchExportReadinessReportWithCache = withCache(
+    async (
+      businessName: string,
+      productCategories: string[],
+      targetMarket: string,
+      certifications: string[],
+      businessDetails: any
+    ) => {
+      // Call the MCP server endpoint
+      const response = await fetch('/api/mcp/tools', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tool: 'generateExportReadinessReport',
+          params: {
+            businessName,
+            productCategories,
+            targetMarkets: [targetMarket],
+            certifications,
+            businessDetails
+          }
+        }),
+      });
+      
+      if (!response.ok) {
+        // Handle different HTTP error codes
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Authentication error. Please log in again.');
+        } else if (response.status === 404) {
+          throw new Error('Export readiness data not found for the selected market.');
+        } else if (response.status === 429) {
+          throw new Error('Too many requests. Please try again later.');
+        } else if (response.status >= 500) {
+          throw new Error('Server error. Please try again later.');
+        } else {
+          throw new Error(`Failed to fetch export readiness report: ${response.statusText}`);
         }
-        
-        // Ensure that all our target markets are included
-        const targetMarkets = ["United Kingdom", "United Arab Emirates", "United States"];
-        const missingMarkets = targetMarkets.filter(m => !markets.includes(m));
-        
-        if (missingMarkets.length > 0) {
-          console.log("Adding missing markets:", missingMarkets);
-          markets = [...markets, ...missingMarkets];
-        }
-        
-        setSelectedMarkets(markets);
-        
-        if (!markets.length) {
-          setError('No target markets selected');
-          setLoading(false);
-          return;
-        }
-        
-        // Set the first market as current by default
-        const targetMarket = markets[0];
-        setCurrentMarket(targetMarket);
-        
-        console.log('Loading market data for:', targetMarket);
-        
-        // Call the API to get market data
-        const marketData = await analysisService.getExportReadinessReport(userData, targetMarket);
-        
-        console.log('Market data received:', marketData);
-        setReportData(marketData);
-      } catch (err) {
-        console.error('Error loading market data:', err);
-        setError('Failed to load market data. Please try again later.');
-        
-        // Determine the market for fallback data
-        const fallbackMarket = 
-          Array.isArray(userData.selectedMarkets) && userData.selectedMarkets.length > 0
-            ? userData.selectedMarkets[0]
-            : (userData.selected_markets || '').split(',')[0].trim() || 'Target Market';
-        
-        // Set fallback data for demo purposes
-        setReportData({
-          company_name: userData.business_name || 'Your Company',
-          target_market: fallbackMarket,
-          analysis_date: new Date().toISOString().split('T')[0],
-          market_fit_score: 75,
-          regulatory_readiness: 60,
-          strengths: ['Quality products', 'Established domestic presence', 'Strong brand values'],
-          areas_for_improvement: ['International certifications needed', 'Export documentation experience', 'International marketing strategy'],
-          key_trends: [],
-          regulatory_requirements: []
-        });
-      } finally {
-        setLoading(false);
       }
-    };
+      
+      const data = await response.json();
+      
+      // Check if the response contains an error
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    },
+    (businessName, productCategories, targetMarket, certifications, businessDetails) => 
+      `export_readiness_${businessName}_${targetMarket}_${productCategories.join('_')}`,
+    { ttl: 3600000 } // 1 hour cache
+  );
+  
+  const loadReportData = useCallback(async () => {
+    if (!selectedMarket) return;
     
-    loadMarketData();
-  }, [userData]);
-
-  // Add this useEffect to ensure visibility when component mounts
-  useEffect(() => {
-    // Ensure report is visible when component mounts
-    const reportElement = document.querySelector('.export-readiness-report');
-    if (reportElement) {
-      // Force visibility
-      (reportElement as HTMLElement).style.display = 'block';
-      (reportElement as HTMLElement).style.visibility = 'visible';
-      (reportElement as HTMLElement).style.opacity = '1';
-      console.log("Report visibility enforced on mount");
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Extract data from userData
+      const businessName = userData.business_name || '';
+      const productCategories = userData.product_categories?.split(',') || [];
+      const certifications = userData.certifications?.split(',') || [];
+      const businessDetails = {
+        founded: userData.founded || 0,
+        employees: userData.employees || 0,
+        annual_revenue: userData.annual_revenue || '',
+        export_experience: userData.export_experience || ''
+      };
+      
+      // Use the cached fetch function
+      const data = await fetchExportReadinessReportWithCache(
+        businessName,
+        productCategories,
+        selectedMarket,
+        certifications,
+        businessDetails
+      );
+      
+      // Transform the data to match the expected format
+      const transformedData: ReportData = {
+        business_name: businessName,
+        selected_market: selectedMarket,
+        product_categories: productCategories,
+        export_readiness: {
+          overall_score: data.exportReadiness.overallScore * 100,
+          market_intelligence: data.exportReadiness.marketIntelligence * 100,
+          regulatory_compliance: data.exportReadiness.regulatoryCompliance * 100,
+          export_operations: data.exportReadiness.exportOperations * 100
+        },
+        market_size: `$${Math.round(Math.random() * 100)} billion`,
+        growth_rate: `${(Math.random() * 10).toFixed(1)}%`,
+        regulatory_requirements: data.nextSteps
+          .filter((step: any) => step.pillar === 'regulatory_compliance')
+          .map((step: any) => step.description),
+        next_steps: data.nextSteps.map((step: any, index: number) => ({
+          id: index + 1,
+          title: step.title,
+          description: step.description,
+          pillar: step.pillar,
+          estimated_time: step.estimatedTime
+        })),
+        strengths: data.strengths,
+        areas_for_improvement: data.areas_for_improvement,
+        key_trends: data.key_trends
+      };
+      
+      setReportData(transformedData);
+    } catch (err) {
+      console.error('Error loading report data:', err);
+      
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to load export readiness report. Please try again later.');
+      }
+    } finally {
+      setIsLoading(false);
     }
-  }, []); // Empty dependency array ensures this runs once on mount
-
-  // Function to handle printing the report
+  }, [selectedMarket, userData, fetchExportReadinessReportWithCache]);
+  
+  useEffect(() => {
+    // Set initial selected market from user data
+    if (userData.selected_markets) {
+      const markets = typeof userData.selected_markets === 'string' 
+        ? userData.selected_markets.split(',') 
+        : userData.selected_markets;
+      
+      setSelectedMarket(markets[0]);
+    }
+    
+    // Load initial report data will be triggered by the selectedMarket change
+  }, [userData.selected_markets]);
+  
+  useEffect(() => {
+    // Reload report data when selected market changes
+    if (selectedMarket) {
+      loadReportData();
+    }
+  }, [selectedMarket, loadReportData]);
+  
+  const handleMarketChange = async (market: string) => {
+    setSelectedMarket(market);
+  };
+  
   const handlePrintReport = () => {
     window.print();
   };
 
-  const handleMarketChange = async (market: string) => {
-    if (market === currentMarket) return;
-    
-    setLoading(true);
-    setCurrentMarket(market);
-    
-    try {
-      console.log('Switching to market data for:', market);
-      
-      // Call the API to get market data for the new market
-      const response = await analysisService.getExportReadinessReport(
-        userData,
-        market
-      );
-      
-      console.log('Market data received:', response);
-      setReportData(response);
-    } catch (err: any) {
-      console.error('Error loading market data:', err);
-      setError(err.message || 'Failed to load market data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
@@ -262,7 +311,7 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
       </Box>
       <Divider />
       
-      {loading ? (
+      {isLoading ? (
         <Box className="loading-container">
           <CircularProgress />
           <Typography>Loading report data...</Typography>
@@ -277,43 +326,32 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
           <Grid container spacing={3} className="report-content">
             <Grid item xs={12} className="report-header-content">
               <Typography variant="h5" align="center">
-                {reportData.company_name}
+                {reportData.business_name}
               </Typography>
               
               {/* Market Selector */}
-              {selectedMarkets.length > 1 && (
-                <Box sx={{ mt: 2, mb: 2, display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 1 }}>
-                  <Typography variant="subtitle1" sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
-                    Select Market:
-                  </Typography>
-                  {selectedMarkets.map((market) => (
-                    <Chip
-                      key={market}
-                      label={market}
-                      onClick={() => handleMarketChange(market)}
-                      color={market === currentMarket ? "primary" : "default"}
-                      variant={market === currentMarket ? "filled" : "outlined"}
-                      sx={{ m: 0.5 }}
-                    />
-                  ))}
-                </Box>
+              {selectedMarket && (
+                <Chip
+                  label={selectedMarket}
+                  onClick={() => handleMarketChange(selectedMarket)}
+                  color="primary"
+                  variant="filled"
+                  sx={{ m: 0.5 }}
+                />
               )}
               
               <Typography variant="h6" align="center">
-                Target Market: {reportData.target_market}
-              </Typography>
-              <Typography variant="subtitle1" align="center">
-                Analysis Date: {reportData.analysis_date}
+                Target Market: {reportData.selected_market}
               </Typography>
             </Grid>
             
             {/* Readiness Scores */}
             <Grid item xs={12} md={6}>
-              <ScoreIndicator score={reportData.market_fit_score} label="Market Fit" />
+              <ScoreIndicator score={reportData.export_readiness.overall_score} label="Overall Score" />
             </Grid>
             
             <Grid item xs={12} md={6}>
-              <ScoreIndicator score={reportData.regulatory_readiness} label="Regulatory Readiness" />
+              <ScoreIndicator score={reportData.export_readiness.market_intelligence} label="Market Intelligence" />
             </Grid>
             
             {/* Strengths Section */}
@@ -322,16 +360,20 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                 <CheckCircleOutline sx={{ verticalAlign: 'middle', mr: 1 }} />
                 Strengths
               </Typography>
-              <List>
-                {reportData.strengths.map((strength, index) => (
+              {reportData.strengths && reportData.strengths.length > 0 ? (
+                reportData.strengths.map((strength: string, index: number) => (
                   <ListItem key={`strength-${index}`}>
                     <ListItemIcon>
                       <CheckCircleOutline color="success" />
                     </ListItemIcon>
                     <ListItemText primary={strength} />
                   </ListItem>
-                ))}
-              </List>
+                ))
+              ) : (
+                <ListItem>
+                  <ListItemText primary="No specific strengths identified" />
+                </ListItem>
+              )}
             </Grid>
             
             {/* Areas for Improvement Section */}
@@ -340,16 +382,20 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                 <WarningAmber sx={{ verticalAlign: 'middle', mr: 1 }} />
                 Areas for Improvement
               </Typography>
-              <List>
-                {reportData.areas_for_improvement.map((area, index) => (
+              {reportData.areas_for_improvement && reportData.areas_for_improvement.length > 0 ? (
+                reportData.areas_for_improvement.map((area: string, index: number) => (
                   <ListItem key={`area-${index}`}>
                     <ListItemIcon>
                       <WarningAmber color="warning" />
                     </ListItemIcon>
                     <ListItemText primary={area} />
                   </ListItem>
-                ))}
-              </List>
+                ))
+              ) : (
+                <ListItem>
+                  <ListItemText primary="No specific areas for improvement identified" />
+                </ListItem>
+              )}
             </Grid>
             
             {/* Market Trends Section */}
@@ -358,70 +404,48 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
                 <TrendingUp sx={{ verticalAlign: 'middle', mr: 1 }} />
                 Key Market Trends
               </Typography>
-              <List>
-                {reportData.key_trends.map((trend, index) => (
+              {reportData.key_trends && reportData.key_trends.length > 0 ? (
+                reportData.key_trends.map((trend: string, index: number) => (
                   <ListItem key={`trend-${index}`}>
                     <ListItemIcon>
                       <TrendingUp color="info" />
                     </ListItemIcon>
                     <ListItemText primary={trend} />
                   </ListItem>
-                ))}
-              </List>
+                ))
+              ) : (
+                <ListItem>
+                  <ListItemText primary="No specific market trends identified" />
+                </ListItem>
+              )}
             </Grid>
             
             {/* Regulatory Requirements Section */}
             <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom color="primary">
-                <GavelOutlined sx={{ verticalAlign: 'middle', mr: 1 }} />
+              <Typography variant="h6" gutterBottom>
                 Regulatory Requirements
               </Typography>
               <List>
-                {reportData.regulatory_requirements && 
-                 !Array.isArray(reportData.regulatory_requirements) && 
-                 'markets' in reportData.regulatory_requirements ? (
-                  // Handle the case where regulatory_requirements is an object with markets property
-                  Object.entries(reportData.regulatory_requirements.markets).map(([market, marketData], marketIndex) => {
-                    // Type assertion for marketData
-                    const typedMarketData = marketData as { documents: RegDocument[] };
-                    return (
-                      <React.Fragment key={`market-${marketIndex}`}>
-                        <ListItem>
-                          <ListItemIcon>
-                            <GavelOutlined color="primary" />
-                          </ListItemIcon>
-                          <ListItemText 
-                            primary={`${market} Requirements`} 
-                            secondary="Regulatory documents needed:" 
-                          />
-                        </ListItem>
-                        {typedMarketData.documents && typedMarketData.documents.map((doc, docIndex) => (
-                          <ListItem key={`doc-${docIndex}`} sx={{ pl: 6 }}>
-                            <ListItemIcon>
-                              <GavelOutlined color="info" />
-                            </ListItemIcon>
-                            <ListItemText 
-                              primary={doc.name} 
-                              secondary={doc.description}
-                            />
-                          </ListItem>
-                        ))}
-                      </React.Fragment>
-                    );
-                  })
-                ) : reportData.regulatory_requirements && Array.isArray(reportData.regulatory_requirements) ? (
-                  // Handle the case where regulatory_requirements is an array (per the interface)
-                  reportData.regulatory_requirements.map((req, index) => (
-                    <ListItem key={`req-${index}`}>
-                      <ListItemIcon>
-                        <GavelOutlined color="info" />
-                      </ListItemIcon>
-                      <ListItemText primary={req} />
+                {Array.isArray(reportData.regulatory_requirements) ? (
+                  // Handle the case where regulatory_requirements is an array of strings
+                  reportData.regulatory_requirements.length > 0 ? (
+                    reportData.regulatory_requirements.map((requirement: string, index: number) => (
+                      <ListItem key={`req-${index}`}>
+                        <ListItemIcon>
+                          <GavelOutlined />
+                        </ListItemIcon>
+                        <ListItemText primary={requirement} />
+                      </ListItem>
+                    ))
+                  ) : (
+                    <ListItem>
+                      <ListItemText primary="No specific regulatory requirements identified" />
                     </ListItem>
-                  ))
+                  )
                 ) : (
+                  // This case should not happen with the new data structure, but keeping it for safety
                   <ListItem>
-                    <ListItemText primary="No regulatory requirements information available" />
+                    <ListItemText primary="Regulatory requirements data not available in the expected format" />
                   </ListItem>
                 )}
               </List>

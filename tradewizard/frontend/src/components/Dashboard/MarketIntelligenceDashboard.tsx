@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './MarketIntelligenceDashboard.css';
+import { CircularProgress } from '@mui/material';
+import { Alert } from '@mui/material';
+import { withCache } from '../../utils/cache';
 
 // ErrorBoundary component to catch errors in the dashboard
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, errorMessage: string}> {
@@ -92,6 +95,7 @@ interface UserData {
   website?: string;
   motivation?: string;
   selected_markets?: string;
+  product_categories?: string;
   [key: string]: any;
 }
 
@@ -401,95 +405,160 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
   onClose,
   useMockData = false
 }) => {
+  const [selectedMarket, setSelectedMarket] = useState<string>(userData.selected_markets?.split(',')[0] || 'USA');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    overview: true,
-    regulatory: false,
-    competitors: false,
-    timeline: false,
+    'business-profile': true,
+    'market-intelligence': true,
+    'regulatory': true,
+    'competitor': true,
+    'timeline': true
   });
-  const [marketData, setMarketData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [marketData, setMarketData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  
-  // Check that we have valid data before rendering
-  if (!dashboardData || !userData) {
-    return <div className="dashboard-error">Unable to load dashboard data. Please try again later.</div>;
-  }
-  
-  // Extract and log selected markets to debug the issue
-  console.log("UserData in Dashboard:", userData);
-  console.log("Using mock data:", useMockData);
-  
-  let allSelectedMarkets = [];
-  
-  if (typeof userData.selected_markets === 'string') {
-    allSelectedMarkets = userData.selected_markets.split(',').map(m => m.trim()).filter(Boolean);
-    console.log("Selected markets from string:", allSelectedMarkets);
-  } else if (Array.isArray(userData.selected_markets)) {
-    allSelectedMarkets = userData.selected_markets;
-    console.log("Selected markets from array:", allSelectedMarkets);
-  } else if (typeof userData.selectedMarkets === 'string') {
-    allSelectedMarkets = userData.selectedMarkets.split(',').map(m => m.trim()).filter(Boolean);
-    console.log("Selected markets from selectedMarkets string:", allSelectedMarkets);
-  } else if (Array.isArray(userData.selectedMarkets)) {
-    allSelectedMarkets = userData.selectedMarkets;
-    console.log("Selected markets from selectedMarkets array:", allSelectedMarkets);
-  } else {
-    console.log("No selected markets found in userData:", userData);
-    allSelectedMarkets = ["United Kingdom", "United Arab Emirates", "United States"];
-  }
-  
-  const selectedMarket = allSelectedMarkets[0] || 'Target';
-  console.log("Selected primary market:", selectedMarket);
-  
-  // Fetch market intelligence data if not using mock data
-  useEffect(() => {
-    // Only fetch if not using mock data and we have a selected market
-    if (!useMockData && selectedMarket) {
-      setIsLoading(true);
-      
-      // Extract product categories
-      const productCategories = 
-        dashboardData.business_profile?.products?.categories || 
-        userData.products?.categories || 
-        [];
-      
-      console.log("Fetching real market intelligence data for:", selectedMarket, "with categories:", productCategories);
-      
-      // Import the assessment API service
-      import('../../services/assessment-api').then(({ getMarketIntelligence }) => {
-        getMarketIntelligence(selectedMarket, productCategories)
-          .then(data => {
-            console.log("Received market intelligence data:", data);
-            setMarketData(data);
-            setIsLoading(false);
-          })
-          .catch(error => {
-            console.error("Error fetching market intelligence:", error);
-            setIsLoading(false);
-          });
+
+  // Create a cached version of the fetch function
+  const fetchMarketIntelligenceWithCache = withCache(
+    async (market: string, productCategories: string[]) => {
+      const response = await fetch('/api/mcp/tools', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tool: 'getMarketIntelligence',
+          params: {
+            market,
+            productCategories
+          }
+        }),
       });
+
+      if (!response.ok) {
+        // Handle different HTTP error codes
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Authentication error. Please log in again.');
+        } else if (response.status === 404) {
+          throw new Error('Market intelligence data not found for the selected market.');
+        } else if (response.status === 429) {
+          throw new Error('Too many requests. Please try again later.');
+        } else if (response.status >= 500) {
+          throw new Error('Server error. Please try again later.');
+        } else {
+          throw new Error(`Failed to fetch market intelligence: ${response.statusText}`);
+        }
+      }
+
+      const data = await response.json();
+      
+      // Check if the response contains an error
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    },
+    (market, productCategories) => `market_intelligence_${market}_${productCategories.join('_')}`,
+    { ttl: 1800000 } // 30 minutes cache (in milliseconds)
+  );
+
+  const fetchMarketIntelligence = useCallback(async () => {
+    if (useMockData) {
+      // Use the provided mock data
+      return;
     }
-  }, [useMockData, selectedMarket, dashboardData, userData]);
-  
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Get product categories from user data
+      const productCategories = userData.product_categories?.split(',') || [];
+      
+      // Use the cached fetch function
+      const data = await fetchMarketIntelligenceWithCache(selectedMarket, productCategories);
+      
+      setMarketData(data);
+      
+      // Update dashboard data with the fetched market intelligence
+      const updatedDashboardData = {
+        ...dashboardData,
+        market_intelligence: {
+          market_size: {
+            value: data.marketSize || 'Unknown',
+            confidence: data.confidence || 0.7
+          },
+          growth_rate: {
+            value: data.growthRate || 'Unknown',
+            confidence: data.confidence || 0.7
+          },
+          regulations: {
+            items: data.regulatoryRequirements?.map((req: any) => req.description) || [],
+            confidence: data.confidence || 0.7
+          },
+          opportunity_timeline: {
+            months: data.opportunityTimeline?.months || 6,
+            confidence: data.confidence || 0.7
+          }
+        }
+      };
+      
+      // Update the dashboard data
+      // Note: In a real implementation, you would use a state management solution
+      // or pass a callback to update the parent component's state
+    } catch (err) {
+      console.error('Error fetching market intelligence:', err);
+      
+      // Set a user-friendly error message
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to fetch market intelligence data. Please try again later.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [useMockData, userData.product_categories, selectedMarket, fetchMarketIntelligenceWithCache, dashboardData]);
+
+  useEffect(() => {
+    // Fetch market intelligence data when the component mounts or selected market changes
+    fetchMarketIntelligence();
+  }, [fetchMarketIntelligence]);
+
   const toggleSection = (section: string) => {
     setExpandedSections({
       ...expandedSections,
-      [section]: !expandedSections[section],
+      [section]: !expandedSections[section]
     });
   };
-  
-  // Add this function to get the appropriate data source
+
   const getMarketIntelligenceData = () => {
-    if (!useMockData && marketData && marketData.intelligence) {
-      console.log("Using real market intelligence data");
-      return marketData.intelligence;
+    // If we have real-time data, use it; otherwise, fall back to the provided data
+    if (marketData) {
+      return {
+        market_size: {
+          value: marketData.marketSize || 'Unknown',
+          confidence: marketData.confidence || 0.7
+        },
+        growth_rate: {
+          value: marketData.growthRate || 'Unknown',
+          confidence: marketData.confidence || 0.7
+        },
+        regulations: {
+          items: marketData.regulatoryRequirements?.map((req: any) => req.description) || [],
+          confidence: marketData.confidence || 0.7
+        },
+        opportunity_timeline: {
+          months: marketData.opportunityTimeline?.months || 6,
+          confidence: marketData.confidence || 0.7
+        }
+      };
     }
     
-    console.log("Using mock market intelligence data");
-    return dashboardData.market_intelligence || {};
+    // Fall back to the provided data
+    return dashboardData.market_intelligence;
   };
-  
+
   return (
     <ErrorBoundary>
       <div className="market-intelligence-dashboard">
@@ -514,8 +583,8 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
           <Panel 
             title={`Market Overview: ${selectedMarket}`}
             confidence={getMarketIntelligenceData()?.market_size?.confidence || 0.7}
-            isExpanded={expandedSections.overview}
-            toggleExpand={() => toggleSection('overview')}
+            isExpanded={expandedSections['market-intelligence']}
+            toggleExpand={() => toggleSection('market-intelligence')}
           >
             <MarketIntelligencePanel 
               marketIntelligence={getMarketIntelligenceData()}
@@ -538,8 +607,8 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
           <Panel 
             title="Competitor Landscape"
             confidence={dashboardData.competitor_landscape?.confidence || 0.7}
-            isExpanded={expandedSections.competitors}
-            toggleExpand={() => toggleSection('competitors')}
+            isExpanded={expandedSections.competitor}
+            toggleExpand={() => toggleSection('competitor')}
           >
             <CompetitorPanel />
           </Panel>
@@ -556,6 +625,20 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
             />
           </Panel>
         </div>
+        
+        {isLoading && (
+          <div className="loading-overlay">
+            <div className="loading-spinner">
+              <CircularProgress />
+            </div>
+          </div>
+        )}
+        
+        {error && (
+          <div className="error-message">
+            <Alert severity="error">{error}</Alert>
+          </div>
+        )}
       </div>
     </ErrorBoundary>
   );
