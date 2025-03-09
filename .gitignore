@@ -93,4 +93,57 @@ instance/
 .frontend_pid
 
 # Test harness
+test_harness.html
+
+# Ignore embedded Git repositories
+postgresql-mcp-server/
+
+# Node.js dependencies
+node_modules/
+
+# Build files
+dist/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+
+# Local development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Development
+*.log
+.DS_Store
+.backend_pid
+.frontend_pid
+
+# Test harness
 test_harness.html 
