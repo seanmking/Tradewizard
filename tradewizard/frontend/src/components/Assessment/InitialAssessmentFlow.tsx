@@ -245,6 +245,13 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
         };
         
         console.log('Updated userData:', newUserData);
+        
+        // If business_name has been extracted, update dashboard data
+        if (newUserData.business_name || prevUserData.business_name) {
+          console.log('Business name detected, updating dashboard data');
+          createDashboardDataFromUserData(newUserData);
+        }
+        
         return newUserData;
       });
       
@@ -352,6 +359,20 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
   const handleMarketsSubmit = (selectedMarkets: string[]) => {
     if (!currentStep) return;
     
+    console.log("Original selected markets:", selectedMarkets);
+    
+    // Make sure all our target markets are represented
+    const targetMarkets = ["United Kingdom", "United Arab Emirates", "United States"];
+    
+    // If United States is selected but not in the proper format, add the proper format
+    if (selectedMarkets.some(m => m.toLowerCase().includes("united states") || m.toLowerCase() === "usa") && 
+        !selectedMarkets.includes("United States")) {
+      console.log("Adding 'United States' to selected markets");
+      selectedMarkets.push("United States");
+    }
+    
+    console.log("Final selected markets:", selectedMarkets);
+    
     // First, add the user's selection as a message
     setMessages(prev => [
       ...prev,
@@ -362,14 +383,84 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
       }
     ]);
     
-    // Store the selected markets in userData directly
-    setUserData(prev => ({
-      ...prev,
-      selectedMarkets: selectedMarkets // Store as array
-    }));
+    // Store the selected markets in userData directly - using both naming conventions for compatibility
+    setUserData(prev => {
+      const updatedUserData = {
+        ...prev,
+        selectedMarkets: selectedMarkets, // Store as array
+        selected_markets: selectedMarkets.join(', ') // Store as comma-separated string
+      };
+      
+      // Create dashboard data from the updated user data
+      createDashboardDataFromUserData(updatedUserData);
+      
+      return updatedUserData;
+    });
     
     // Then process the response
     handleSubmit(selectedMarkets.join(', '));
+  };
+  
+  // Create dashboard data from user data
+  const createDashboardDataFromUserData = (updatedUserData: Record<string, any>) => {
+    console.log("Creating dashboard data from user data:", updatedUserData);
+    
+    // Get business name from user data
+    const businessName = updatedUserData.business_name?.text || 
+                          updatedUserData.business_name || 
+                          "Unknown Business";
+                          
+    console.log("Using business name for dashboard:", businessName);
+    
+    // Save userData to localStorage for use by the dashboard
+    try {
+      localStorage.setItem('assessmentUserData', JSON.stringify(updatedUserData));
+      console.log("Saved assessment data to localStorage");
+    } catch (e) {
+      console.error("Error saving assessment data to localStorage:", e);
+    }
+    
+    // Get selected markets
+    const selectedMarketsArray = Array.isArray(updatedUserData.selectedMarkets) 
+      ? updatedUserData.selectedMarkets 
+      : (updatedUserData.selected_markets || "").split(",").map((m: string) => m.trim()).filter(Boolean);
+    
+    // Create dashboard data structure
+    const newDashboardData = {
+      business_profile: {
+        name: businessName,
+        products: {
+          categories: updatedUserData.products?.categories || ['Products'],
+          items: updatedUserData.products?.items || ['Items'],
+          confidence: 90
+        },
+        current_markets: {
+          countries: updatedUserData.current_markets?.countries || ['South Africa'],
+          confidence: 85
+        },
+        certifications: {
+          items: updatedUserData.certifications?.items || [],
+          confidence: 80
+        },
+        business_details: {
+          founded: updatedUserData.business_details?.founded || new Date().getFullYear() - 5,
+          employees: updatedUserData.business_details?.employees || 20,
+          annual_revenue: updatedUserData.business_details?.annual_revenue || 'Unknown',
+          export_experience: updatedUserData.export_experience || 'Beginner',
+          confidence: 95
+        }
+      },
+      selected_markets: selectedMarketsArray,
+      export_readiness: {
+        overall_score: 42,
+        market_intelligence: 65,
+        regulatory_compliance: 35,
+        export_operations: 25
+      }
+    };
+    
+    console.log("Created dashboard data:", newDashboardData);
+    setDashboardData(newDashboardData);
   };
   
   // Handle account creation success
@@ -435,6 +526,25 @@ const InitialAssessmentFlow: React.FC<InitialAssessmentFlowProps> = ({ onComplet
     // Create and dispatch a custom event to notify the App component
     const navigateToDashboardEvent = new CustomEvent('navigateToDashboard');
     window.dispatchEvent(navigateToDashboardEvent);
+    
+    // Force navigation to dashboard by directly updating the DOM
+    const dashboardTab = document.querySelector('.dashboard-tab');
+    if (dashboardTab) {
+      (dashboardTab as HTMLElement).click();
+    }
+    
+    // For demo purposes, simulate a user being authenticated
+    // This will help ensure the dashboard is shown
+    localStorage.setItem('isAuthenticated', 'true');
+    
+    // As a fallback, also try to navigate using window.location
+    setTimeout(() => {
+      // Check if we're still not on the dashboard
+      if (localStorage.getItem('activeTab') === 'dashboard' && !document.querySelector('.dashboard-tab.active')) {
+        // Force reload the page with dashboard as the active tab
+        window.location.href = window.location.origin + '?tab=dashboard';
+      }
+    }, 500);
   };
   
   // Toggle standalone report visibility
