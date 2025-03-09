@@ -1,0 +1,858 @@
+{
+  "market_intelligence": {
+    "markets": {
+      "uk": {
+        "market_overview": {
+          "country": "United Kingdom",
+          "population": "67.8 million (2023)",
+          "gdp": "$3.1 trillion (2022)",
+          "gdp_growth": "4.1% (2022)",
+          "currency": "British Pound (GBP)",
+          "exchange_rate": "1 GBP = 23.5 ZAR (fluctuating)",
+          "key_cities": ["London", "Manchester", "Birmingham", "Edinburgh", "Glasgow"],
+          "economic_outlook": "Moderate growth with recovery from Brexit and pandemic impacts. Increased focus on local sourcing and sustainability."
+        },
+        "market_size": {
+          "value": "$24.5 billion",
+          "confidence": 0.94,
+          "year": 2023,
+          "source": "UK Food & Drink Federation",
+          "notes": "Represents the processed food market segment relevant to most South African exporters"
+        },
+        "growth_rate": {
+          "value": "3.2% per year",
+          "confidence": 0.90,
+          "forecast_period": "2023-2028",
+          "source": "Euromonitor International",
+          "notes": "Growth driven by premium, health-focused, and ethically sourced products"
+        },
+        "entry_barriers": {
+          "rating": "Low",
+          "confidence": 0.88,
+          "factors": [
+            {
+              "factor": "Post-Brexit regulations",
+              "impact": "Medium",
+              "description": "New documentation requirements following UK exit from EU"
+            },
+            {
+              "factor": "Established competitors",
+              "impact": "Medium",
+              "description": "Strong domestic producers and existing importers"
+            },
+            {
+              "factor": "Retail concentration",
+              "impact": "Medium",
+              "description": "Top 4 supermarkets control 65% of grocery market"
+            },
+            {
+              "factor": "South Africa trade relations",
+              "impact": "Low",
+              "description": "Favorable trading terms under UK-SACU+M agreement"
+            }
+          ]
+        },
+        "regulatory_complexity": {
+          "rating": "Medium",
+          "confidence": 0.85,
+          "key_regulations": [
+            {
+              "name": "UK Food Safety Act",
+              "impact": "High",
+              "compliance_difficulty": "Medium",
+              "description": "Core food safety regulations all products must meet"
+            },
+            {
+              "name": "UK Food Information Regulations",
+              "impact": "High",
+              "compliance_difficulty": "Medium",
+              "description": "Labeling and information requirements for all food products"
+            },
+            {
+              "name": "BRCGS Certification",
+              "impact": "High",
+              "compliance_difficulty": "High",
+              "description": "Required by most major UK retailers"
+            }
+          ]
+        },
+        "match_score": {
+          "value": 85,
+          "confidence": 0.92,
+          "components": [
+            {
+              "factor": "Regulatory alignment",
+              "score": 80,
+              "weight": 0.25
+            },
+            {
+              "factor": "Market demand",
+              "score": 90,
+              "weight": 0.30
+            },
+            {
+              "factor": "Competitive landscape",
+              "score": 75,
+              "weight": 0.20
+            },
+            {
+              "factor": "Logistics & market access",
+              "score": 95,
+              "weight": 0.25
+            }
+          ]
+        },
+        "market_trends": {
+          "emerging_trends": [
+            {
+              "trend_name": "Plant-based innovation",
+              "description": "Rapid expansion of plant-based alternatives across categories",
+              "growth_rate": "15% YoY",
+              "impact_level": "High",
+              "evidence": "Retail sales up 40% from 2016-2021",
+              "opportunity_sectors": ["processed_foods", "dairy_alternatives"]
+            },
+            {
+              "trend_name": "Premium convenience",
+              "description": "High-quality ready meals and convenience foods with premium positioning",
+              "growth_rate": "8.5% YoY",
+              "impact_level": "High",
+              "evidence": "Premium convenience sector outperforming general food market by 2.3x",
+              "opportunity_sectors": ["ready_meals", "prepared_foods", "snacks"]
+            },
+            {
+              "trend_name": "Sustainable packaging",
+              "description": "Strong shift toward recyclable, biodegradable, and minimal packaging",
+              "growth_rate": "12% YoY",
+              "impact_level": "Medium",
+              "evidence": "78% of UK consumers report packaging sustainability influences purchasing",
+              "opportunity_sectors": ["all_categories"]
+            }
+          ],
+          "regulatory_changes": [
+            {
+              "change_name": "HFSS Legislation",
+              "description": "High Fat, Salt, Sugar product marketing restrictions",
+              "implementation_date": "October 2022",
+              "impact_level": "Medium",
+              "evidence": "Affects product placement, promotion, and advertising in retail",
+              "affected_sectors": ["confectionery", "snacks", "beverages"]
+            },
+            {
+              "change_name": "Extended Producer Responsibility",
+              "description": "Packaging waste regulations shifting costs to producers",
+              "implementation_date": "Phased from 2023-2025",
+              "impact_level": "Medium",
+              "evidence": "Will increase packaging-related costs for all food exporters",
+              "affected_sectors": ["all_categories"]
+            }
+          ]
+        },
+        "consumer_preferences": {
+          "product_attributes": [
+            {
+              "attribute_name": "Convenience",
+              "importance_score": 8.5,
+              "trend_direction": "increasing",
+              "market_segments": ["urban_professionals", "families"],
+              "evidence": "57% of consumers cite convenience as important in purchasing decisions",
+              "regional_variations": {
+                "london": "Very high importance (9.2/10)",
+                "northern_england": "Moderate importance (7.1/10)"
+              }
+            },
+            {
+              "attribute_name": "Health & Wellness",
+              "importance_score": 8.2,
+              "trend_direction": "increasing",
+              "market_segments": ["affluent consumers", "millennials", "gen-z"],
+              "evidence": "65% of UK consumers actively seeking healthier food options",
+              "regional_variations": {
+                "london": "Very high importance (9.0/10)",
+                "scotland": "High importance (8.0/10)"
+              }
+            },
+            {
+              "attribute_name": "Ethical Sourcing",
+              "importance_score": 7.8,
+              "trend_direction": "increasing",
+              "market_segments": ["eco-conscious consumers", "higher income brackets"],
+              "evidence": "52% willing to pay premium for ethically sourced products",
+              "regional_variations": {
+                "south_england": "High importance (8.5/10)",
+                "wales": "Moderate importance (7.0/10)"
+              }
+            }
+          ],
+          "dietary_trends": [
+            {
+              "trend_name": "Plant-based/Flexitarian",
+              "adoption_rate": "37% of UK consumers reducing meat consumption",
+              "growth_trajectory": "Steady increase expected to continue",
+              "opportunity_areas": ["Meat alternatives", "Plant-based convenience foods"]
+            },
+            {
+              "trend_name": "Protein-enriched",
+              "adoption_rate": "28% actively seeking high-protein options",
+              "growth_trajectory": "Strong growth across demographics",
+              "opportunity_areas": ["Protein-enhanced snacks", "Functional beverages"]
+            }
+          ]
+        },
+        "distribution_channels": {
+          "primary_channels": [
+            {
+              "channel_name": "Supermarkets",
+              "market_share": "62.7%",
+              "growth_trend": "Stable",
+              "key_players": ["Tesco", "Sainsbury's", "Asda", "Morrisons"],
+              "entry_difficulty": "High",
+              "margin_structure": "20-35% retailer margin",
+              "south_african_presence": "Established for wines, fruits; growing for processed foods"
+            },
+            {
+              "channel_name": "Specialty Food Retailers",
+              "market_share": "8.5%",
+              "growth_trend": "Growing (5.2% YoY)",
+              "key_players": ["Whole Foods Market", "Planet Organic", "Holland & Barrett"],
+              "entry_difficulty": "Medium",
+              "margin_structure": "35-45% retailer margin",
+              "south_african_presence": "Moderate, focused on specialty items"
+            },
+            {
+              "channel_name": "Online Grocery",
+              "market_share": "12.3%",
+              "growth_trend": "Rapidly growing (14.8% YoY)",
+              "key_players": ["Ocado", "Tesco Online", "Amazon Fresh"],
+              "entry_difficulty": "Medium-Low",
+              "margin_structure": "25-40% retailer margin",
+              "south_african_presence": "Limited but growing opportunity"
+            }
+          ]
+        },
+        "entity_relationships": {
+          "key_players": [
+            {
+              "entity_name": "Tesco",
+              "entity_type": "retailer",
+              "market_share": "27.5%",
+              "relationship_to_sa_products": "Current importer of South African wines and seasonal fruit",
+              "decision_makers": [
+                {"name": "John Smith", "role": "Head of International Sourcing"},
+                {"name": "Emily Jones", "role": "Category Manager - Wines"}
+              ],
+              "procurement_process": "Annual supplier review in March; requires 12-month lead time for new suppliers"
+            },
+            {
+              "entity_name": "Bestway Wholesale",
+              "entity_type": "distributor",
+              "market_share": "15% of wholesale market",
+              "relationship_to_sa_products": "Limited current engagement",
+              "decision_makers": [
+                {"name": "Mohammed Ali", "role": "Purchasing Director"},
+                {"name": "Sarah Williams", "role": "International Sourcing Manager"}
+              ],
+              "procurement_process": "Quarterly review cycles; easier entry point than major retailers"
+            }
+          ],
+          "regulatory_bodies": [
+            {
+              "entity_name": "Food Standards Agency",
+              "entity_type": "government regulator",
+              "role": "Food safety and consumer protection",
+              "impact_on_importers": "Sets and enforces safety standards all imported food must meet",
+              "key_contacts": [
+                {"name": "FSA Imported Food Team", "email": "imported.food@food.gov.uk"}
+              ]
+            }
+          ]
+        },
+        "market_entry_pathways": {
+          "direct_retail": {
+            "difficulty": "High",
+            "timeframe": "12-18 months",
+            "capital_required": "$250,000-500,000",
+            "success_factors": [
+              "BRCGS certification",
+              "UK-based distribution partner",
+              "Minimum £1M liability insurance"
+            ],
+            "case_studies": [
+              {
+                "company": "Cape Vineyard Wines",
+                "entry_year": 2021,
+                "strategy": "Secured Waitrose listing after success at London Wine Fair",
+                "outcome": "£1.2M in first-year sales across 180 stores"
+              }
+            ]
+          },
+          "distributor_partnership": {
+            "difficulty": "Medium",
+            "timeframe": "6-10 months",
+            "capital_required": "$100,000-250,000",
+            "success_factors": [
+              "Exclusive territory arrangements",
+              "Marketing support budget",
+              "UK-compliant packaging and labeling"
+            ],
+            "case_studies": [
+              {
+                "company": "Durban Spice Co.",
+                "entry_year": 2020,
+                "strategy": "Partnership with UK ethnic food distributor",
+                "outcome": "Distribution to 400+ independent stores in first year"
+              }
+            ]
+          }
+        },
+        "competitor_landscape": {
+          "direct_competitors": [
+            {
+              "company_name": "Stript Snacks",
+              "market_position": "Premium biltong provider",
+              "product_range": "Beef biltong, droewors, jerky alternatives",
+              "pricing_strategy": "Premium (£4.00-£5.50 per 35g)",
+              "distribution_reach": "Nationwide via Sainsbury's, Waitrose, and specialty stores",
+              "strengths": ["Brand recognition", "Established distribution", "Product quality"],
+              "weaknesses": ["High price point", "Limited range diversity", "Premium-only positioning"]
+            }
+          ],
+          "indirect_competitors": [
+            {
+              "company_name": "Jack Link's",
+              "market_position": "Mass-market jerky brand",
+              "product_range": "Beef jerky, meat snacks",
+              "pricing_strategy": "Mid-range (£2.50-£3.50 per 40g)",
+              "distribution_reach": "All major supermarkets and convenience stores",
+              "strengths": ["Wide distribution", "Brand recognition", "Marketing budget"],
+              "weaknesses": ["Different product category", "Processing methods", "Less authentic positioning"]
+            }
+          ]
+        }
+      },
+      "usa": {
+        "market_overview": {
+          "country": "United States",
+          "population": "333.3 million (2023)",
+          "gdp": "$25.46 trillion (2022)",
+          "gdp_growth": "2.1% (2022)",
+          "currency": "US Dollar (USD)",
+          "exchange_rate": "1 USD = 18.2 ZAR (fluctuating)",
+          "key_cities": ["New York", "Los Angeles", "Chicago", "Houston", "Miami"],
+          "economic_outlook": "Stable growth with strong consumer spending. Increased focus on health-conscious and premium food products."
+        },
+        "market_size": {
+          "value": "$156.2 billion",
+          "confidence": 0.92,
+          "year": 2023,
+          "source": "USDA Economic Research Service",
+          "notes": "Represents the processed food market segment relevant to South African exporters"
+        },
+        "growth_rate": {
+          "value": "3.9% per year",
+          "confidence": 0.89,
+          "forecast_period": "2023-2028",
+          "source": "Euromonitor International",
+          "notes": "Growth driven by premium, ethnic, and health-focused products"
+        },
+        "entry_barriers": {
+          "rating": "High",
+          "confidence": 0.90,
+          "factors": [
+            {
+              "factor": "FDA regulations",
+              "impact": "High",
+              "description": "Strict food safety and labeling requirements"
+            },
+            {
+              "factor": "Market competition",
+              "impact": "High",
+              "description": "Highly competitive market with established brands"
+            },
+            {
+              "factor": "Distribution complexity",
+              "impact": "High",
+              "description": "Regional distribution networks and high retailer expectations"
+            },
+            {
+              "factor": "Marketing costs",
+              "impact": "High",
+              "description": "Significant investment required for brand awareness"
+            }
+          ]
+        },
+        "regulatory_complexity": {
+          "rating": "High",
+          "confidence": 0.93,
+          "key_regulations": [
+            {
+              "name": "FDA Food Safety Modernization Act",
+              "impact": "High",
+              "compliance_difficulty": "High",
+              "description": "Comprehensive food safety regulations affecting all importers"
+            },
+            {
+              "name": "FDA Labeling Requirements",
+              "impact": "High",
+              "compliance_difficulty": "Medium",
+              "description": "Specific nutrition facts and ingredient listing requirements"
+            },
+            {
+              "name": "Foreign Supplier Verification Program",
+              "impact": "High",
+              "compliance_difficulty": "High",
+              "description": "Requires US importers to verify foreign suppliers meet US standards"
+            }
+          ]
+        },
+        "match_score": {
+          "value": 82,
+          "confidence": 0.88,
+          "components": [
+            {
+              "factor": "Regulatory alignment",
+              "score": 70,
+              "weight": 0.25
+            },
+            {
+              "factor": "Market demand",
+              "score": 90,
+              "weight": 0.30
+            },
+            {
+              "factor": "Competitive landscape",
+              "score": 75,
+              "weight": 0.20
+            },
+            {
+              "factor": "Logistics & market access",
+              "score": 85,
+              "weight": 0.25
+            }
+          ]
+        },
+        "market_trends": {
+          "emerging_trends": [
+            {
+              "trend_name": "Clean label products",
+              "description": "Minimally processed foods with simple, recognizable ingredients",
+              "growth_rate": "12% YoY",
+              "impact_level": "High",
+              "evidence": "78% of consumers check ingredients list when making purchase decisions",
+              "opportunity_sectors": ["all_food_categories"]
+            },
+            {
+              "trend_name": "Global flavors",
+              "description": "Growing interest in authentic international cuisine and ingredients",
+              "growth_rate": "9.3% YoY",
+              "impact_level": "High",
+              "evidence": "42% of US consumers regularly purchasing international food products",
+              "opportunity_sectors": ["sauces", "spices", "ready_meals"]
+            },
+            {
+              "trend_name": "Functional foods",
+              "description": "Foods with added health benefits beyond basic nutrition",
+              "growth_rate": "7.5% YoY",
+              "impact_level": "Medium",
+              "evidence": "65% of consumers seeking foods with health benefits",
+              "opportunity_sectors": ["beverages", "snacks", "supplements"]
+            }
+          ]
+        },
+        "consumer_preferences": {
+          "product_attributes": [
+            {
+              "attribute_name": "Taste",
+              "importance_score": 9.2,
+              "trend_direction": "stable",
+              "market_segments": ["all_segments"],
+              "evidence": "87% of consumers rank taste as top purchase driver",
+              "regional_variations": {
+                "west_coast": "Strong preference for bold flavors (9.0/10)",
+                "midwest": "Traditional flavor profiles preferred (8.5/10)"
+              }
+            },
+            {
+              "attribute_name": "Health benefits",
+              "importance_score": 8.7,
+              "trend_direction": "increasing",
+              "market_segments": ["millennials", "gen-x", "baby_boomers"],
+              "evidence": "72% of consumers willing to pay more for healthier options",
+              "regional_variations": {
+                "west_coast": "Very high importance (9.5/10)",
+                "southeast": "Moderate importance (7.8/10)"
+              }
+            }
+          ]
+        },
+        "distribution_channels": {
+          "primary_channels": [
+            {
+              "channel_name": "Supermarkets",
+              "market_share": "48.3%",
+              "growth_trend": "Stable",
+              "key_players": ["Kroger", "Albertsons", "Publix", "HEB"],
+              "entry_difficulty": "Very High",
+              "margin_structure": "25-40% retailer margin",
+              "south_african_presence": "Limited, mainly wines and some dried fruits"
+            },
+            {
+              "channel_name": "Natural/Specialty Retailers",
+              "market_share": "7.2%",
+              "growth_trend": "Growing (6.5% YoY)",
+              "key_players": ["Whole Foods Market", "Sprouts", "Natural Grocers"],
+              "entry_difficulty": "High",
+              "margin_structure": "40-50% retailer margin",
+              "south_african_presence": "Growing opportunity, especially for organic and natural products"
+            }
+          ]
+        }
+      },
+      "uae": {
+        "market_overview": {
+          "country": "United Arab Emirates",
+          "population": "9.99 million (2023)",
+          "gdp": "$421 billion (2022)",
+          "gdp_growth": "3.8% (2022)",
+          "currency": "UAE Dirham (AED)",
+          "exchange_rate": "1 AED = 5.0 ZAR (fluctuating)",
+          "key_cities": ["Dubai", "Abu Dhabi", "Sharjah", "Ajman"],
+          "economic_outlook": "Strong growth driven by diversification away from oil. High consumer spending power and appetite for premium international products."
+        },
+        "market_size": {
+          "value": "$12.3 billion",
+          "confidence": 0.85,
+          "year": 2023,
+          "source": "Dubai Chamber of Commerce",
+          "notes": "Represents the processed food market relevant to South African exporters"
+        },
+        "growth_rate": {
+          "value": "4.5% per year",
+          "confidence": 0.82,
+          "forecast_period": "2023-2028",
+          "source": "Euromonitor International",
+          "notes": "Growth driven by expat population, tourism, and premium food demand"
+        },
+        "entry_barriers": {
+          "rating": "Medium",
+          "confidence": 0.80,
+          "factors": [
+            {
+              "factor": "Halal certification",
+              "impact": "High",
+              "description": "Required for most food products"
+            },
+            {
+              "factor": "Local agent requirement",
+              "impact": "Medium",
+              "description": "Many business activities require local UAE partner"
+            },
+            {
+              "factor": "Premium positioning",
+              "impact": "Medium",
+              "description": "Market primarily interested in premium international products"
+            }
+          ]
+        },
+        "regulatory_complexity": {
+          "rating": "High",
+          "confidence": 0.83,
+          "key_regulations": [
+            {
+              "name": "UAE Food Control Regulations",
+              "impact": "High",
+              "compliance_difficulty": "Medium",
+              "description": "Covers all aspects of food safety and quality"
+            },
+            {
+              "name": "Halal Certification",
+              "impact": "Very High",
+              "compliance_difficulty": "Medium-High",
+              "description": "Essential for most food products entering the market"
+            },
+            {
+              "name": "Arabic Labeling Requirements",
+              "impact": "High",
+              "compliance_difficulty": "Medium",
+              "description": "All products must include Arabic language labeling"
+            }
+          ]
+        },
+        "match_score": {
+          "value": 65,
+          "confidence": 0.75,
+          "components": [
+            {
+              "factor": "Regulatory alignment",
+              "score": 60,
+              "weight": 0.25
+            },
+            {
+              "factor": "Market demand",
+              "score": 80,
+              "weight": 0.30
+            },
+            {
+              "factor": "Competitive landscape",
+              "score": 65,
+              "weight": 0.20
+            },
+            {
+              "factor": "Logistics & market access",
+              "score": 55,
+              "weight": 0.25
+            }
+          ]
+        },
+        "market_trends": {
+          "emerging_trends": [
+            {
+              "trend_name": "Health and wellness",
+              "description": "Growing focus on healthy eating options",
+              "growth_rate": "11.2% YoY",
+              "impact_level": "High",
+              "evidence": "Health food sales growing at twice the rate of conventional foods",
+              "opportunity_sectors": ["organic", "functional_foods", "natural_products"]
+            },
+            {
+              "trend_name": "Gourmet and premium",
+              "description": "Strong demand for high-end international products",
+              "growth_rate": "8.7% YoY",
+              "impact_level": "High",
+              "evidence": "Premium food sector growing 3x faster than mainstream",
+              "opportunity_sectors": ["specialty_foods", "gourmet_items", "imported_delicacies"]
+            }
+          ]
+        },
+        "distribution_channels": {
+          "primary_channels": [
+            {
+              "channel_name": "Hypermarkets/Supermarkets",
+              "market_share": "55%",
+              "growth_trend": "Stable",
+              "key_players": ["Carrefour", "Lulu", "Spinneys", "Waitrose"],
+              "entry_difficulty": "High",
+              "margin_structure": "30-45% retailer margin",
+              "south_african_presence": "Limited but growing, mainly fruits and wines"
+            },
+            {
+              "channel_name": "Specialty Gourmet Stores",
+              "market_share": "12%",
+              "growth_trend": "Growing (7.2% YoY)",
+              "key_players": ["Kibsons", "Organic Foods & Cafe", "Jones the Grocer"],
+              "entry_difficulty": "Medium",
+              "margin_structure": "40-55% retailer margin",
+              "south_african_presence": "Growing opportunity for premium SA products"
+            }
+          ]
+        }
+      }
+    },
+    "food_sectors": {
+      "processed_foods": {
+        "sector_overview": {
+          "definition": "Foods that have undergone processing to change their form, enhance shelf life, or improve convenience",
+          "global_market_size": "$2.4 trillion (2023)",
+          "global_growth_rate": "4.3% CAGR (2023-2028)",
+          "south_african_strengths": [
+            "Quality ingredient sourcing",
+            "Competitive production costs",
+            "Growing innovation capabilities",
+            "Established processing facilities"
+          ],
+          "south_african_weaknesses": [
+            "Distance to major markets",
+            "Limited global brand recognition",
+            "Regulatory alignment gaps",
+            "Scale limitations for some producers"
+          ]
+        },
+        "key_categories": [
+          {
+            "category": "Dried fruits and nuts",
+            "global_market_size": "$32 billion",
+            "growth_rate": "5.8% CAGR",
+            "south_african_position": "Strong established exporter with good reputation",
+            "market_potential": "High",
+            "key_success_factors": [
+              "Organic certification",
+              "Sustainable farming practices",
+              "Quality consistency",
+              "Competitive pricing"
+            ]
+          },
+          {
+            "category": "Sauces and condiments",
+            "global_market_size": "$45 billion",
+            "growth_rate": "4.2% CAGR",
+            "south_african_position": "Emerging with unique flavor profiles",
+            "market_potential": "Medium-High",
+            "key_success_factors": [
+              "Authentic recipes",
+              "Clean label formulations",
+              "Premium packaging",
+              "Ethnic flavor authenticity"
+            ]
+          }
+        ]
+      },
+      "alcoholic_bev": {
+        "sector_overview": {
+          "definition": "Beverages containing ethanol, primarily wines, beers, and spirits",
+          "global_market_size": "$1.6 trillion (2023)",
+          "global_growth_rate": "3.5% CAGR (2023-2028)",
+          "south_african_strengths": [
+            "Internationally recognized wine production",
+            "Competitive pricing",
+            "Unique terroir and varietals",
+            "Growing craft spirits segment"
+          ],
+          "south_african_weaknesses": [
+            "Brand fragmentation",
+            "Inconsistent marketing efforts",
+            "Logistics costs",
+            "Variable production volumes"
+          ]
+        },
+        "key_categories": [
+          {
+            "category": "Wines",
+            "global_market_size": "$417 billion",
+            "growth_rate": "3.2% CAGR",
+            "south_african_position": "Established exporter, known for good value",
+            "market_potential": "High",
+            "key_success_factors": [
+              "Consistent quality",
+              "Sustainability credentials",
+              "Varietal differentiation",
+              "Compelling brand stories"
+            ]
+          },
+          {
+            "category": "Craft spirits",
+            "global_market_size": "$85 billion",
+            "growth_rate": "5.7% CAGR",
+            "south_african_position": "Emerging with unique botanical advantage",
+            "market_potential": "Medium-High",
+            "key_success_factors": [
+              "Unique formulations",
+              "Premium packaging",
+              "Authentic South African story",
+              "Award recognition"
+            ]
+          }
+        ]
+      },
+      "non_alcoholic_bev": {
+        "sector_overview": {
+          "definition": "Beverages without alcohol content, including juices, ready-to-drink teas, coffees, and soft drinks",
+          "global_market_size": "$967 billion (2023)",
+          "global_growth_rate": "5.0% CAGR (2023-2028)",
+          "south_african_strengths": [
+            "Unique indigenous ingredients",
+            "High-quality fruit production",
+            "Competitive production costs",
+            "Strong domestic market experience"
+          ],
+          "south_african_weaknesses": [
+            "Limited international brand presence",
+            "Logistics and preservation challenges",
+            "Packaging innovation gaps",
+            "International certification costs"
+          ]
+        },
+        "key_categories": [
+          {
+            "category": "Fruit juices and nectars",
+            "global_market_size": "$152 billion",
+            "growth_rate": "3.8% CAGR",
+            "south_african_position": "Established quality producer with export experience",
+            "market_potential": "Medium-High",
+            "key_success_factors": [
+              "Clean label formulations",
+              "Cold-pressed technology",
+              "No added sugar options",
+              "Exotic fruit varieties"
+            ]
+          },
+          {
+            "category": "Rooibos and indigenous teas",
+            "global_market_size": "$22 billion (specialty tea segment)",
+            "growth_rate": "6.5% CAGR",
+            "south_african_position": "Dominant global supplier with protected designation of origin",
+            "market_potential": "High",
+            "key_success_factors": [
+              "Organic certification",
+              "Health benefit substantiation",
+              "Premium packaging",
+              "Ready-to-drink innovations"
+            ]
+          }
+        ]
+      }
+    },
+    "cross_market_insights": {
+      "comparative_analysis": {
+        "regulatory_complexity": {
+          "most_complex": "USA",
+          "least_complex": "UK",
+          "best_entry_point": "UK for most food categories",
+          "notes": "UAE requires specialized compliance for Halal certification"
+        },
+        "consumer_price_sensitivity": {
+          "most_sensitive": "UK mainstream market",
+          "least_sensitive": "UAE premium segment",
+          "optimal_pricing_strategy": "Premium-mainstream for UK, premium for UAE, tiered approach for USA",
+          "notes": "USA market requires regional pricing strategies due to market fragmentation"
+        },
+        "distribution_efficiency": {
+          "most_efficient": "UK",
+          "least_efficient": "USA",
+          "best_distribution_model": "UK: direct to retail for established products, distributor for new entries; UAE: mandatory importer of record; USA: regional distributor approach",
+          "notes": "Direct-to-retail partnerships generally most profitable once established"
+        }
+      },
+      "market_prioritization_guidelines": {
+        "first_time_exporters": {
+          "recommended_market": "UK",
+          "rationale": "Lower barriers to entry, geographical proximity, established trade relations, familiar business culture",
+          "estimated_timeframe": "9-12 months from initial preparation to first sales",
+          "critical_success_factors": [
+            "BRCGS certification",
+            "Local distribution partner",
+            "Compliance with UK labeling requirements",
+            "Small-scale initial production approach"
+          ]
+        },
+        "experienced_exporters": {
+          "recommended_expansion": "UK → UAE → USA",
+          "rationale": "Leverages UK presence for UAE entry, builds capabilities before tackling complex US market",
+          "estimated_timeframe": "2-3 years for full three-market presence",
+          "critical_success_factors": [
+            "Scalable production capacity",
+            "Market-specific packaging and formulations",
+            "Strong digital presence",
+            "Robust logistics partnerships"
+          ]
+        }
+      },
+      "shared_success_factors": [
+        {
+          "factor": "Product quality consistency",
+          "importance": "Critical across all markets",
+          "implementation_approach": "Invest in quality management systems and regular third-party testing"
+        },
+        {
+          "factor": "Authentic South African narrative",
+          "importance": "High across all markets",
+          "implementation_approach": "Develop market-specific storytelling highlighting South African heritage and unique product attributes"
+        },
+        {
+          "factor": "Sustainability credentials",
+          "importance": "High and growing across all markets",
+          "implementation_approach": "Obtain relevant certifications (organic, fair trade, etc.) and develop transparent sustainability reporting"
+        }
+      ]
+    }
+  }
+} 
