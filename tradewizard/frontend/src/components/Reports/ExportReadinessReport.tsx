@@ -175,7 +175,17 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
       // Extract data from userData
       const businessName = userData.business_name || '';
       const productCategories = userData.product_categories?.split(',') || [];
-      const certifications = userData.certifications?.split(',') || [];
+      
+      // Fix for certifications - handle both string and object formats
+      let certifications: string[] = [];
+      if (userData.certifications) {
+        if (typeof userData.certifications === 'string') {
+          certifications = userData.certifications.split(',');
+        } else if (userData.certifications.items && Array.isArray(userData.certifications.items)) {
+          certifications = userData.certifications.items;
+        }
+      }
+      
       const businessDetails = {
         founded: userData.founded || 0,
         employees: userData.employees || 0,
