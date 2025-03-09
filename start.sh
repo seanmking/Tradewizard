@@ -26,7 +26,7 @@ function cleanup_processes() {
     # Kill any existing Python processes on port 5002
     lsof -ti:5002 | xargs kill -9 2>/dev/null
     
-    # Kill any existing Node.js processes on port 3001 (mock server)
+    # Kill any existing Node.js processes on port 3001 (export-guru-mcp server)
     lsof -ti:3001 | xargs kill -9 2>/dev/null
     
     echo_success "Process cleanup completed"
@@ -54,6 +54,58 @@ function start_ollama() {
     fi
 }
 
+# Start PostgreSQL function
+function start_postgresql() {
+    echo_info "Checking PostgreSQL status..."
+    
+    # Check if PostgreSQL is already running
+    if ! pg_isready -q; then
+        echo_info "Starting PostgreSQL..."
+        
+        # Start PostgreSQL based on OS
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            brew services start postgresql@15
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux
+            sudo service postgresql start
+        else
+            # Windows or other
+            echo_error "Automatic PostgreSQL startup not supported on this OS. Please start PostgreSQL manually."
+            exit 1
+        fi
+        
+        # Wait for PostgreSQL to start
+        sleep 3
+        
+        # Check if PostgreSQL started successfully
+        if ! pg_isready -q; then
+            echo_error "Failed to start PostgreSQL"
+            exit 1
+        fi
+        echo_success "PostgreSQL started successfully"
+    else
+        echo_info "PostgreSQL is already running"
+    fi
+    
+    # Check if our databases exist, create if they don't
+    echo_info "Checking databases..."
+    
+    # Check regulatory_db
+    if ! psql -lqt | cut -d \| -f 1 | grep -qw regulatory_db; then
+        echo_info "Creating regulatory_db database..."
+        createdb regulatory_db
+        echo_success "Created regulatory_db database"
+    fi
+    
+    # Check trade_db
+    if ! psql -lqt | cut -d \| -f 1 | grep -qw trade_db; then
+        echo_info "Creating trade_db database..."
+        createdb trade_db
+        echo_success "Created trade_db database"
+    fi
+}
+
 # Check if running on Windows and adjust commands accordingly
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
     # Windows with Git Bash or similar
@@ -70,6 +122,29 @@ cleanup_processes
 
 # Start Ollama
 start_ollama
+
+# Start PostgreSQL
+start_postgresql
+
+# Start the export-guru-mcp server
+echo_info "Starting export-guru-mcp server..."
+cd mcp-servers/export-guru-mcp
+node src/simple-server.js &
+MCP_SERVER_PID=$!
+
+# Wait a bit for the server to start
+sleep 2
+
+# Check if the server is running
+if ! kill -0 $MCP_SERVER_PID 2>/dev/null; then
+    echo_error "Export-guru-mcp server failed to start."
+    exit 1
+fi
+
+echo_success "Export-guru-mcp server started successfully (PID: $MCP_SERVER_PID)"
+
+# Return to the root directory
+cd ../..
 
 # Start the mock server
 echo_info "Starting mock server..."
@@ -184,11 +259,18 @@ FRONTEND_PID=$!
 # Wait a bit for the frontend to start
 sleep 5
 
+# Seed the database if needed
+echo_info "Seeding the database..."
+cd ../../mcp-servers/export-guru-mcp
+npm run seed
+cd ../../tradewizard/frontend
+
 echo_success "Frontend server started successfully (PID: $FRONTEND_PID)"
 echo_success "TradeWizard is now running!"
 echo_info "Services are available at:"
 echo_info "Backend: http://localhost:5002"
 echo_info "Frontend: http://localhost:3000"
+echo_info "Export-guru-mcp Server: http://localhost:3001"
 echo_info "Mock Server: http://localhost:3001"
 echo_info "Press Ctrl+C to stop all servers"
 
@@ -196,8 +278,8 @@ echo_info "Press Ctrl+C to stop all servers"
 function cleanup_on_exit() {
     echo_info "Shutting down..."
     
-    # Kill the backend, frontend, and mock servers
-    kill $BACKEND_PID $FRONTEND_PID $MOCK_SERVER_PID 2>/dev/null
+    # Kill the backend, frontend, mock server, and export-guru-mcp server
+    kill $BACKEND_PID $FRONTEND_PID $MOCK_SERVER_PID $MCP_SERVER_PID 2>/dev/null
     
     # Cleanup any remaining processes on the ports
     cleanup_processes
@@ -205,6 +287,16 @@ function cleanup_on_exit() {
     # Stop Ollama if we started it
     if [ ! -z "$OLLAMA_PID" ]; then
         kill $OLLAMA_PID 2>/dev/null
+    fi
+    
+    # Stop PostgreSQL if we started it
+    echo_info "Stopping PostgreSQL..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - don't stop PostgreSQL as it might be used by other applications
+        echo_info "PostgreSQL will continue running. Stop it manually if needed with: brew services stop postgresql@15"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux - don't stop PostgreSQL as it might be used by other applications
+        echo_info "PostgreSQL will continue running. Stop it manually if needed with: sudo service postgresql stop"
     fi
     
     exit 0
