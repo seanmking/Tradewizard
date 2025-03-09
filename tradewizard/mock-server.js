@@ -2,7 +2,8 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const app = express();
-const PORT = 3001;
+// Use environment variable PORT or default to 3002
+const PORT = process.env.PORT || 3002;
 
 // Enable CORS for all routes
 app.use(cors());

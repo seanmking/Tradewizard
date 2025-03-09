@@ -164,10 +164,25 @@ function start_postgresql() {
         
         # If we still can't find them, try to use the full path from Homebrew
         if [ ! -f "$PSQL" ]; then
-            PSQL="$(brew --prefix)/bin/psql"
+            PSQL="$(brew --prefix postgresql@15)/bin/psql"
         fi
         if [ ! -f "$CREATEDB" ]; then
-            CREATEDB="$(brew --prefix)/bin/createdb"
+            CREATEDB="$(brew --prefix postgresql@15)/bin/createdb"
+        fi
+        
+        # Final check if commands exist
+        if [ ! -f "$PSQL" ]; then
+            echo_error "Could not find psql command. Please ensure PostgreSQL is properly installed."
+            echo_info "You may need to run: brew install postgresql@15"
+            echo_info "And add it to your PATH: echo 'export PATH=\"$(brew --prefix postgresql@15)/bin:\$PATH\"' >> ~/.zshrc"
+            exit 1
+        fi
+        
+        if [ ! -f "$CREATEDB" ]; then
+            echo_error "Could not find createdb command. Please ensure PostgreSQL is properly installed."
+            echo_info "You may need to run: brew install postgresql@15"
+            echo_info "And add it to your PATH: echo 'export PATH=\"$(brew --prefix postgresql@15)/bin:\$PATH\"' >> ~/.zshrc"
+            exit 1
         fi
     else
         # Linux or other OS
