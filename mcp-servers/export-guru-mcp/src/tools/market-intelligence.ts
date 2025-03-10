@@ -293,22 +293,26 @@ export function registerMarketIntelligenceTools(connectors: Connectors, llm: LLM
     {
       name: 'getMarketIntelligence',
       description: 'Get market intelligence for a specific market and product category',
-      parameters: {
-        type: 'object',
-        properties: {
-          market: { type: 'string', description: 'Target market (country name or code)' },
-          productCategories: { 
-            type: 'array', 
-            items: { type: 'string' }, 
-            description: 'List of product categories' 
-          },
-          hsCode: { 
-            type: 'string', 
-            description: 'Optional HS code for more specific analysis' 
-          }
+      parameters: [
+        {
+          name: 'market',
+          description: 'Target market (country name or code)',
+          type: 'string',
+          required: true
         },
-        required: ['market', 'productCategories']
-      },
+        {
+          name: 'productCategories',
+          description: 'List of product categories',
+          type: 'array',
+          required: true
+        },
+        {
+          name: 'hsCode',
+          description: 'Optional HS code for more specific analysis',
+          type: 'string',
+          required: false
+        }
+      ],
       handler: async (params) => getMarketIntelligence(
         params.market,
         params.productCategories,

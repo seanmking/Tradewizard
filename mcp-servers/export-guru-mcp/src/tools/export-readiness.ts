@@ -13,41 +13,33 @@ export function registerExportReadinessTools(connectors: Connectors, llm: LLM): 
     {
       name: 'getExportReadinessFramework',
       description: 'Get the complete export readiness assessment framework for South African SMEs',
-      parameters: {
-        type: 'object',
-        properties: {},
-        required: []
-      },
+      parameters: [],
       handler: async () => getExportReadinessFramework()
     },
     {
       name: 'getExportReadinessDimensionQuestions',
       description: 'Get questions for a specific dimension of the export readiness assessment',
-      parameters: {
-        type: 'object',
-        properties: {
-          dimensionName: { 
-            type: 'string', 
-            description: 'Name of the dimension (e.g., "Financial Readiness", "Operational Capability", etc.)' 
-          }
-        },
-        required: ['dimensionName']
-      },
+      parameters: [
+        {
+          name: 'dimensionName',
+          description: 'Name of the dimension (e.g., "Financial Readiness", "Operational Capability", etc.)',
+          type: 'string',
+          required: true
+        }
+      ],
       handler: async (params) => getQuestionsForDimension(params.dimensionName)
     },
     {
       name: 'calculateExportReadinessScore',
       description: 'Calculate export readiness score based on assessment responses',
-      parameters: {
-        type: 'object',
-        properties: {
-          responses: { 
-            type: 'object', 
-            description: 'Object containing responses to questions, keyed by question ID with values from 1-5' 
-          }
-        },
-        required: ['responses']
-      },
+      parameters: [
+        {
+          name: 'responses',
+          description: 'Object containing responses to questions, keyed by question ID with values from 1-5',
+          type: 'object',
+          required: true
+        }
+      ],
       handler: async (params) => calculateExportReadinessScore(params.responses)
     }
   ];

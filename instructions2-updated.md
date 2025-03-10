@@ -1,20 +1,45 @@
-# Export Guru MCP: Comprehensive Implementation Plan (Updated)
+# Export Guru Agent: Comprehensive Implementation Plan (Updated)
 
-This document outlines the comprehensive implementation plan for enhancing the Export Guru MCP with advanced regulatory data capabilities and integration with other export intelligence components. The plan is structured in phases to ensure systematic development while maintaining alignment with the MCP's role as a data access and pass-through layer.
+This document outlines the comprehensive implementation plan for transforming the Export Guru MCP into an autonomous Export Agent with advanced regulatory data capabilities and integration with other export intelligence components. The plan is structured in phases to ensure systematic development while evolving from a data access and pass-through layer into a proactive, intelligent agent that guides SMEs throughout their export journey.
 
-> **Update Note**: This plan has been enhanced based on learnings from real-world implementation challenges, particularly addressing data flow gaps, error handling deficiencies, data structure inconsistencies, integration testing gaps, and frontend-backend misalignment.
+> **Update Note**: This plan has been enhanced based on learnings from real-world implementation challenges and the strategic decision to transform the system into an autonomous agent that delivers continuous value through proactive monitoring, personalized guidance, and adaptive learning capabilities.
+
+## Core Capabilities Overview
+
+The TradeWizard system consists of three distinct core capabilities:
+
+1. **Databases and APIs for Data Sources**
+   - Regulatory databases containing export requirements
+   - Trade data APIs (TradeMap, WITS, Comtrade)
+   - Market intelligence sources
+   - Internal databases for business profiles and historical data
+
+2. **MCP (Middleware Component Provider)**
+   - Connects to various data sources and APIs
+   - Provides specialized tools for business analysis, regulatory compliance, and market intelligence
+   - Integrates with LLM functionality for enhanced data processing
+   - Exposes endpoints for the agent to access
+
+3. **AI Agent (Autonomous Layer)**
+   - Autonomously interacts with users throughout their export journey
+   - Maintains state and context across interactions
+   - Proactively monitors for changes and opportunities
+   - Learns from patterns and outcomes
+   - Takes autonomous actions based on triggers
 
 ## Development Phases & Priorities
 
-### Phase 0: Initial Prototype (Weeks 1-2)
-*Foundation validation - proving the architecture*
+### Phase 0: Initial Prototype & Agent Foundation (Weeks 1-2)
+*Foundation validation - proving the architecture and agent concept*
 
-1. **Minimal Viable MCP Server**
+1. **Minimal Viable MCP Server with Agent Core**
    - Implement core MCP server infrastructure with 1-2 key tools
    - Create basic regulatory data connector and tool
    - Establish LLM integration pattern with simple prompts
    - **Add robust error handling with fallback mechanisms**
    - **Implement data structure validation at system boundaries**
+   - **Create initial Agent Core module for orchestration**
+   - **Implement basic State Manager for business context persistence**
 
    ```typescript
    // Example minimal regulatory tool in regulatory.ts
@@ -65,19 +90,206 @@ This document outlines the comprehensive implementation plan for enhancing the E
    }
    ```
 
-2. **Data Flow Validation**
+   ```typescript
+   // Example Agent Core implementation in agent/core.ts
+   export class ExportAgentCore {
+     private stateManager: StateManager;
+     private connectors: Connectors;
+     private tools: Tools;
+     
+     constructor(
+       stateManager: StateManager,
+       connectors: Connectors,
+       tools: Tools
+     ) {
+       this.stateManager = stateManager;
+       this.connectors = connectors;
+       this.tools = tools;
+     }
+     
+     // Handle user requests with context from state
+     async handleRequest(businessId: string, request: AgentRequest): Promise<AgentResponse> {
+       // Get business state
+       const businessState = await this.stateManager.getBusinessState(businessId);
+       
+       // Enhance request with context
+       const enhancedRequest = this.enrichRequestWithContext(request, businessState);
+       
+       // Process request using appropriate tools
+       const result = await this.processRequest(enhancedRequest);
+       
+       // Update state based on interaction
+       await this.stateManager.updateBusinessState(businessId, result);
+       
+       return result;
+     }
+     
+     private enrichRequestWithContext(request: AgentRequest, state: BusinessState): EnhancedRequest {
+       // Add context from business state to the request
+       return {
+         ...request,
+         businessContext: {
+           products: state.products,
+           targetMarkets: state.targetMarkets,
+           certifications: state.certifications,
+           exportHistory: state.exportHistory
+         }
+       };
+     }
+     
+     private async processRequest(request: EnhancedRequest): Promise<AgentResponse> {
+       // Determine which tools to use based on request type
+       // Process the request using appropriate tools
+       // Return structured response
+       // Implementation details...
+     }
+   }
+   ```
+
+2. **Data Flow Validation & State Management**
    - Implement and test complete data flow from database to LLM to frontend
    - Validate data transformation patterns
    - Measure performance and identify bottlenecks
    - **Add comprehensive logging at each step of the data flow**
    - **Implement data structure consistency checks between components**
+   - **Create business state schema for persistent context**
+   - **Implement state persistence and retrieval mechanisms**
 
-3. **Success Metrics Definition**
+   ```typescript
+   // Example State Manager implementation in agent/state-manager.ts
+   export class StateManager {
+     private db: Database;
+     
+     constructor(db: Database) {
+       this.db = db;
+     }
+     
+     async getBusinessState(businessId: string): Promise<BusinessState> {
+       try {
+         // Retrieve business state from database
+         const state = await this.db.businessStates.findOne({ businessId });
+         
+         if (!state) {
+           // Return empty state if not found
+           return this.createEmptyBusinessState(businessId);
+         }
+         
+         return state;
+       } catch (error) {
+         console.error(`Error retrieving business state: ${error.message}`);
+         // Return empty state as fallback
+         return this.createEmptyBusinessState(businessId);
+       }
+     }
+     
+     async updateBusinessState(businessId: string, updates: Partial<BusinessState>): Promise<void> {
+       try {
+         // Update business state in database
+         await this.db.businessStates.updateOne(
+           { businessId },
+           { $set: updates },
+           { upsert: true }
+         );
+         
+         // Record state change in history
+         await this.recordStateChange(businessId, updates);
+       } catch (error) {
+         console.error(`Error updating business state: ${error.message}`);
+         throw error;
+       }
+     }
+     
+     private createEmptyBusinessState(businessId: string): BusinessState {
+       return {
+         businessId,
+         products: [],
+         targetMarkets: [],
+         certifications: [],
+         exportHistory: [],
+         lastInteraction: new Date(),
+         createdAt: new Date()
+       };
+     }
+     
+     private async recordStateChange(businessId: string, changes: Partial<BusinessState>): Promise<void> {
+       await this.db.stateHistory.insertOne({
+         businessId,
+         changes,
+         timestamp: new Date()
+       });
+     }
+   }
+   ```
+
+3. **Success Metrics Definition & Agent Behavior Specification**
    - Establish baseline performance metrics
    - Define accuracy and completeness metrics for regulatory data
    - Create monitoring framework for ongoing assessment
    - **Add user experience metrics to measure real-world effectiveness**
    - **Implement automated testing for critical user journeys**
+   - **Define initial autonomous behaviors and triggers**
+   - **Create specifications for agent learning capabilities**
+
+   ```typescript
+   // Example Agent Behavior Specification in agent/behaviors/specs.ts
+   export const AgentBehaviorSpecs = {
+     autonomousTriggers: [
+       {
+         type: 'REGULATORY_CHANGE',
+         description: 'Triggered when regulations change in a target market',
+         conditions: [
+           'Business has the market in their target list',
+           'Change affects product categories the business exports'
+         ],
+         actions: [
+           'Update compliance requirements',
+           'Generate impact assessment',
+           'Notify business if high impact'
+         ],
+         priority: 'HIGH'
+       },
+       {
+         type: 'CERTIFICATION_EXPIRATION',
+         description: 'Triggered when a business certification is approaching expiration',
+         conditions: [
+           'Certification expiration within 60 days',
+           'Certification is required for active markets'
+         ],
+         actions: [
+           'Generate renewal reminder',
+           'Provide renewal process information',
+           'Add to business action items'
+         ],
+         priority: 'MEDIUM'
+       }
+       // Additional triggers...
+     ],
+     
+     learningCapabilities: [
+       {
+         type: 'MARKET_SELECTION_PATTERNS',
+         description: 'Learn patterns of successful market selection',
+         dataPoints: [
+           'Business characteristics',
+           'Selected markets',
+           'Export outcomes'
+         ],
+         applicationMethod: 'Recommend markets based on similar business success patterns'
+       },
+       {
+         type: 'COMPLIANCE_JOURNEY_OPTIMIZATION',
+         description: 'Learn optimal paths for regulatory compliance',
+         dataPoints: [
+           'Compliance steps taken',
+           'Timeline achieved',
+           'Resources required'
+         ],
+         applicationMethod: 'Recommend efficient compliance pathways'
+       }
+       // Additional learning capabilities...
+     ]
+   };
+   ```
 
 ### Phase 0.5: Data Validation Framework (Weeks 2-3)
 *Ensuring data integrity - preventing errors before they occur*
@@ -145,7 +357,38 @@ This document outlines the comprehensive implementation plan for enhancing the E
    - Develop replay mechanisms for failed user journeys
    - Implement user journey analytics
 
-### Phase 1: Regulatory Data Enhancement (Weeks 3-5)
+### Phase 0.85: Event System & Agent Behavior Implementation (Weeks 3-4)
+*Building agent autonomy - enabling proactive capabilities*
+
+1. **Event System Implementation**
+   - Create `event-system.ts` for event publishing and subscription
+   - Implement event types for various triggers
+   - Add event persistence for reliability
+   - Develop event processing pipeline
+   - Implement event prioritization mechanism
+
+2. **Autonomous Behavior Implementation**
+   - Create `agent-behaviors.ts` for autonomous agent behaviors
+   - Implement regulatory monitoring behavior
+   - Add certification expiration monitoring
+   - Develop market opportunity detection
+   - Implement business profile change handling
+
+3. **Notification Service Implementation**
+   - Create `notification-service.ts` for user notifications
+   - Implement notification types and templates
+   - Add delivery mechanisms (email, in-app, etc.)
+   - Develop notification preferences management
+   - Implement notification analytics
+
+4. **Scheduler Implementation**
+   - Create `scheduler.ts` for scheduled tasks
+   - Implement recurring job scheduling
+   - Add job persistence for reliability
+   - Develop job execution tracking
+   - Implement failure handling and retries
+
+### Phase 1: Regulatory Data Enhancement (Weeks 5-7)
 *Core data foundation - enriching the regulatory database*
 
 1. **Regulatory Database Schema Extension**
@@ -288,6 +531,8 @@ This document outlines the comprehensive implementation plan for enhancing the E
    - Create `webscraper-analyzer.ts` for website data analysis
    - Implement functions to extract business insights from website data
    - Add integration with regulatory requirements
+   - **Leverage existing BsScraper implementation from tradewizard/backend/bs_scraper.py**
+   - **Connect to WebsiteAnalyzerService for LLM-based analysis of scraped data**
 
    ```typescript
    // Example implementation in webscraper-analyzer.ts
@@ -308,22 +553,118 @@ This document outlines the comprehensive implementation plan for enhancing the E
        riskAreas: string[];
      };
    }
+   
+   /**
+    * Analyze website data to extract business insights
+    * This leverages the existing BsScraper implementation and WebsiteAnalyzerService
+    */
+   async function analyzeWebsite(
+     url: string,
+     connectors: Connectors,
+     llm: LLM
+   ): Promise<WebsiteAnalysis> {
+     try {
+       // Step 1: Use BsScraper to extract data from the website
+       // This is done by calling the Python implementation via a child process
+       const scrapedData = await extractWebsiteData(url);
+       
+       // Step 2: Use WebsiteAnalyzerService to analyze the scraped data
+       const websiteAnalysis = await analyzeScrapedData(scrapedData, url, llm);
+       
+       // Step 3: Extract regulatory implications
+       const regulatoryImplications = await extractRegulatoryImplications(
+         websiteAnalysis,
+         connectors,
+         llm
+       );
+       
+       return {
+         businessProfile: websiteAnalysis.businessProfile,
+         regulatoryImplications
+       };
+     } catch (error) {
+       console.error(`Error analyzing website ${url}: ${error.message}`);
+       // Return a minimal analysis with error information
+       return {
+         businessProfile: {
+           products: [],
+           certifications: [],
+           marketFocus: []
+         },
+         regulatoryImplications: {
+           suggestedRequirements: [],
+           potentialCompliance: [],
+           riskAreas: ['Unable to analyze website due to technical issues']
+         }
+       };
+     }
+   }
    ```
 
 2. **Export Readiness Assessment Integration**
    - Enhance `export-readiness-assessment.ts` with regulatory compliance integration
    - Implement certification-to-requirement mapping
    - Create functions to assess regulatory readiness
+   - **Integrate with webscraper analysis to automatically detect certifications**
+   - **Use detected certifications to pre-populate compliance assessment**
 
 3. **HS Code & Product Categorization**
    - Create `hs-mapper.ts` for HS code mapping functionality
    - Implement product category hierarchy and attributes
    - Add LLM integration for intelligent categorization
+   - **Integrate with webscraper analysis to automatically detect products**
+   - **Use detected products to suggest appropriate HS codes**
 
 4. **User Feedback Collection Mechanism**
    - Implement feedback collection for business categorization
    - Add feedback loop for regulatory requirement relevance
    - Create data structures for tracking feedback
+   - **Add feedback mechanism for webscraper accuracy**
+   - **Implement continuous improvement based on user feedback**
+
+5. **Webscraper-MCP Integration Architecture**
+   - **Create a bridge between the Python-based BsScraper and TypeScript MCP**
+   - **Implement a service that calls the Python scraper and processes the results**
+   - **Add caching for scraped data to improve performance**
+   - **Implement error handling and fallback mechanisms for scraper failures**
+   - **Add telemetry for monitoring scraper performance**
+
+   ```typescript
+   // Example implementation of the webscraper bridge
+   class WebscraperBridge {
+     private cache: Map<string, { data: any, timestamp: number }> = new Map();
+     private readonly CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+     
+     async scrapeWebsite(url: string, useCache: boolean = true): Promise<any> {
+       // Check cache if enabled
+       if (useCache) {
+         const cachedData = this.cache.get(url);
+         if (cachedData && (Date.now() - cachedData.timestamp) < this.CACHE_TTL) {
+           console.log(`Using cached data for ${url}`);
+           return cachedData.data;
+         }
+       }
+       
+       try {
+         // Call the Python scraper via child process
+         const scrapedData = await this.callPythonScraper(url);
+         
+         // Update cache
+         this.cache.set(url, { data: scrapedData, timestamp: Date.now() });
+         
+         return scrapedData;
+       } catch (error) {
+         console.error(`Error scraping website ${url}: ${error.message}`);
+         throw new Error(`Failed to scrape website: ${error.message}`);
+       }
+     }
+     
+     private async callPythonScraper(url: string): Promise<any> {
+       // Implementation details for calling the Python scraper
+       // This could use child_process.exec or a more sophisticated approach
+     }
+   }
+   ```
 
 ### Phase 3: Market Intelligence Enhancement (Weeks 9-11)
 *Market context - connecting regulatory data with market intelligence*
@@ -387,7 +728,182 @@ This document outlines the comprehensive implementation plan for enhancing the E
    - Implement analytics for tool usage patterns
    - Add data quality metrics
 
-### Phase 4: Compliance Assessment Tools (Weeks 12-14)
+### Phase 3.5: Memory Subsystem Development (Weeks 11-13)
+*Building agent memory - enabling learning and personalization*
+
+1. **Business Profile Evolution Tracking**
+   - Create `business-profile-tracker.ts` for tracking business changes
+   - Implement versioning for business profiles
+   - Add change detection and analysis
+   - Develop historical view capabilities
+   - Implement trend analysis for business evolution
+
+   ```typescript
+   // Example implementation in business-profile-tracker.ts
+   export class BusinessProfileTracker {
+     private db: Database;
+     private eventSystem: EventSystem;
+     
+     constructor(db: Database, eventSystem: EventSystem) {
+       this.db = db;
+       this.eventSystem = eventSystem;
+       
+       // Register for profile update events
+       this.eventSystem.subscribe('BUSINESS_PROFILE_UPDATE', this.handleProfileUpdate.bind(this));
+     }
+     
+     async handleProfileUpdate(event: Event): Promise<void> {
+       const { businessId, updatedProfile, previousProfile } = event.payload;
+       
+       // Compare profiles to identify changes
+       const changes = this.identifyProfileChanges(previousProfile, updatedProfile);
+       
+       // Record profile snapshot
+       await this.recordProfileSnapshot(businessId, updatedProfile, changes);
+       
+       // Trigger appropriate events based on changes
+       await this.triggerChangeEvents(businessId, changes);
+       
+       // Update derived state based on changes
+       await this.updateDerivedState(businessId, changes);
+     }
+     
+     private identifyProfileChanges(previous: BusinessProfile, current: BusinessProfile): ProfileChanges {
+       // Compare products
+       const productChanges = this.compareProducts(previous.products, current.products);
+       
+       // Compare certifications
+       const certificationChanges = this.compareCertifications(
+         previous.certifications,
+         current.certifications
+       );
+       
+       // Compare other attributes
+       // ...
+       
+       return {
+         productChanges,
+         certificationChanges,
+         // Other changes...
+         timestamp: new Date()
+       };
+     }
+     
+     async getProfileHistory(businessId: string, options: HistoryOptions = {}): Promise<ProfileSnapshot[]> {
+       // Retrieve profile history from database
+       const query: any = { businessId };
+       
+       if (options.since) {
+         query.timestamp = { $gte: options.since };
+       }
+       
+       if (options.until) {
+         query.timestamp = { ...query.timestamp, $lte: options.until };
+       }
+       
+       const snapshots = await this.db.profileHistory
+         .find(query)
+         .sort({ timestamp: -1 })
+         .limit(options.limit || 10)
+         .toArray();
+       
+       return snapshots;
+     }
+     
+     // Additional methods...
+   }
+   ```
+
+2. **Export Strategy Modeling**
+   - Create `export-strategy-memory.ts` for strategy learning
+   - Implement success pattern recognition
+   - Add similarity-based recommendation
+   - Develop outcome tracking and analysis
+   - Implement strategy effectiveness scoring
+
+   ```typescript
+   // Example implementation in export-strategy-memory.ts
+   export class ExportStrategyMemory {
+     private db: Database;
+     private similarityEngine: SimilarityEngine;
+     
+     constructor(db: Database, similarityEngine: SimilarityEngine) {
+       this.db = db;
+       this.similarityEngine = similarityEngine;
+     }
+     
+     async recordExportOutcome(outcome: ExportOutcome): Promise<void> {
+       // Store export outcome with all context
+       await this.db.exportOutcomes.insert({
+         businessId: outcome.businessId,
+         market: outcome.market,
+         products: JSON.stringify(outcome.products),
+         entryStrategy: outcome.entryStrategy,
+         complianceApproach: outcome.complianceApproach,
+         logisticsModel: outcome.logisticsModel,
+         results: JSON.stringify(outcome.results),
+         timestamp: new Date()
+       });
+       
+       // Update success patterns if successful
+       if (outcome.results.successful) {
+         await this.updateSuccessPatterns(outcome);
+       }
+     }
+     
+     async findSimilarSuccessfulStrategies(
+       businessProfile: BusinessProfile,
+       targetMarket: string
+     ): Promise<RecommendedStrategy[]> {
+       // Get all successful strategies for the target market
+       const successfulStrategies = await this.db.exportOutcomes.find({
+         market: targetMarket,
+         'results.successful': true
+       });
+       
+       // Find businesses similar to the current business
+       const similarBusinessStrategies = successfulStrategies.filter(strategy => 
+         this.similarityEngine.calculateBusinessSimilarity(
+           businessProfile,
+           strategy.businessProfile
+         ) > 0.7 // Similarity threshold
+       );
+       
+       // Rank strategies by similarity and success metrics
+       const rankedStrategies = this.rankStrategiesByRelevance(
+         similarBusinessStrategies,
+         businessProfile
+       );
+       
+       // Transform to recommendations
+       return rankedStrategies.map(strategy => ({
+         strategyType: strategy.entryStrategy,
+         confidence: strategy.similarityScore,
+         reasonForRecommendation: `This approach worked well for ${strategy.businessProfile.size} businesses in your industry with similar products`,
+         estimatedTimeline: strategy.results.timeline,
+         keySuccessFactors: strategy.results.successFactors
+       }));
+     }
+     
+     // Additional methods...
+   }
+   ```
+
+3. **Regulatory Pattern Recognition**
+   - Create `regulatory-pattern-memory.ts` for regulatory learning
+   - Implement cross-market pattern detection
+   - Add temporal trend analysis
+   - Develop compliance barrier identification
+   - Implement regulatory harmonization detection
+
+4. **Learning Engine Integration**
+   - Create `learning-engine.ts` for coordinating learning
+   - Implement pattern application to recommendations
+   - Add confidence scoring for learned patterns
+   - Develop continuous improvement mechanisms
+   - Implement feedback incorporation
+
+### Phase 4: Compliance Assessment Tools (Weeks 14-16)
 *Compliance guidance - advanced compliance functionality*
 
 1. **Compliance Assessment Implementation**
@@ -509,72 +1025,122 @@ This document outlines the comprehensive implementation plan for enhancing the E
 
 ## Technical Architecture
 
-The implementation follows this technical architecture to maintain alignment with the MCP's role:
+The implementation follows this technical architecture to maintain alignment with the system's evolution into an autonomous agent:
 
 ### 1. Data Access Layer (Connectors)
 - `regulatory-db.ts`, `trade-map.ts`, `wits.ts`, `comtrade.ts`
 - Focus on retrieving data from various sources
 - Implement caching and error handling
 - Maintain clean separation from business logic
+- **Add proactive data fetching capabilities**
+- **Implement change detection mechanisms**
 
 ### 2. Data Structure Layer (Types)
 - Enhanced regulatory requirement types
 - HS code and product category structures
 - Compliance assessment data structures
 - Dashboard and report data structures
+- **Add business state types**
+- **Implement event and notification types**
 
 ### 3. Tool Layer (Tools)
 - `regulatory.ts`, `market-intelligence.ts`, `export-readiness-assessment.ts`
 - Expose functions for accessing and filtering data
 - Provide structured interfaces for the LLM
 - Maintain domain-specific organization
+- **Add context-aware processing capabilities**
+- **Implement state-based enhancement**
 
-### 4. Integration Layer
+### 4. Agent Core Layer (NEW)
+- `agent-core.ts`, `state-manager.ts`, `event-system.ts`
+- Orchestrate autonomous behaviors
+- Maintain business state across interactions
+- Process events and triggers
+- Coordinate tool usage based on context
+- Enable proactive capabilities
+
+### 5. Memory Subsystem (NEW)
+- `business-profile-tracker.ts`, `export-strategy-memory.ts`
+- Track business evolution over time
+- Learn from export outcomes
+- Recognize patterns across businesses
+- Enhance recommendations with learned insights
+- Enable personalization based on history
+
+### 6. Integration Layer
 - `assessment-integration.ts`, `dashboard-connector.ts`
 - Define clear interfaces for other components
 - Ensure consistent data formats
 - Support bidirectional data flow
+- **Add agent-driven content providers**
+- **Implement proactive insight delivery**
 
-### 5. Data Pipeline Layer
+### 7. Data Pipeline Layer
 - Standardized data flow patterns
 - Transformation and enrichment steps
 - Monitoring and telemetry
 - Error handling and recovery
+- **Add event-driven processing**
+- **Implement autonomous workflows**
 
-### 6. LLM Integration Layer
+### 8. LLM Integration Layer
 - Structured prompts for specific tasks
 - Output parsing and validation
 - Confidence scoring
 - Fallback mechanisms
+- **Add context enhancement from state**
+- **Implement continuous learning feedback**
 
 ## Data Flow Patterns
 
-The MCP implements these standard data flow patterns:
+The system implements these standard data flow patterns:
 
 1. **Direct Data Access Pattern**
-   - MCP retrieves data from connector
+   - System retrieves data from connector
    - Data is passed directly to frontend
    - No LLM processing required
    - Used for simple data retrieval
 
 2. **LLM Enhancement Pattern**
-   - MCP retrieves data from connector
+   - System retrieves data from connector
    - Data is passed to LLM for enhancement
    - Enhanced data is returned to frontend
    - Used for adding context or insights
 
 3. **LLM Generation Pattern**
-   - MCP provides context to LLM
+   - System provides context to LLM
    - LLM generates new data
    - Generated data is validated and structured
    - Used when data is not available in connectors
 
 4. **Hybrid Processing Pattern**
-   - MCP retrieves data from multiple connectors
+   - System retrieves data from multiple connectors
    - Data is combined and pre-processed
    - Combined data is passed to LLM for analysis
    - Results are structured and returned to frontend
    - Used for complex analyses requiring multiple data sources
+
+5. **Autonomous Monitoring Pattern (NEW)**
+   - System proactively checks for changes in data sources
+   - Changes are evaluated for relevance to businesses
+   - Relevant changes trigger autonomous actions
+   - Actions update business state and may generate notifications
+   - Used for proactive monitoring and alerting
+
+6. **State-Enhanced Processing Pattern (NEW)**
+   - User request is received
+   - Business state is retrieved and added to context
+   - Request is processed with enhanced context
+   - Results are personalized based on business state
+   - State is updated based on interaction
+   - Used for personalized, context-aware responses
+
+7. **Learning Application Pattern (NEW)**
+   - System identifies pattern application opportunity
+   - Relevant patterns are retrieved from memory
+   - Patterns are applied to enhance recommendations
+   - Confidence scores are assigned based on pattern strength
+   - Used for applying learned insights to new situations
 
 ## Testing Strategy
 
@@ -586,6 +1152,7 @@ Each phase includes comprehensive testing:
    - Ensure error handling works correctly
    - **Test edge cases and boundary conditions**
    - **Implement property-based testing for complex functions**
+   - **Test autonomous behaviors in isolation**
 
 2. **Integration Tests**
    - **Data Flow Integration Tests**
@@ -594,6 +1161,7 @@ Each phase includes comprehensive testing:
      - Ensure consistent data structures throughout the system
      - Test error propagation across component boundaries
      - Verify data consistency at each integration point
+     - **Test event propagation through the system**
    
    - **Component Integration Tests**
      - Test interactions between adjacent components
@@ -601,6 +1169,7 @@ Each phase includes comprehensive testing:
      - Ensure error propagation works correctly
      - Test component behavior under failure conditions
      - Verify component resilience to invalid inputs
+     - **Test state management across components**
    
    - **End-to-End Integration Tests**
      - Test complete user journeys
@@ -608,6 +1177,7 @@ Each phase includes comprehensive testing:
      - Ensure all components work together correctly
      - Test system recovery from failures
      - Verify data consistency across the entire system
+     - **Test autonomous workflows end-to-end**
 
 3. **Type Compatibility Tests**
    - Validate data structure compatibility
@@ -615,6 +1185,7 @@ Each phase includes comprehensive testing:
    - Ensure consistent data representation
    - Verify schema evolution compatibility
    - Test data transformation correctness
+   - **Test state schema compatibility**
 
 4. **Performance Tests**
    - Ensure efficient operation under load
@@ -622,6 +1193,7 @@ Each phase includes comprehensive testing:
    - Test batch processing capabilities
    - **Measure response times under various conditions**
    - **Test system behavior under resource constraints**
+   - **Test event processing throughput**
 
 5. **Accuracy Tests**
    - Validate regulatory data accuracy
@@ -629,10 +1201,19 @@ Each phase includes comprehensive testing:
    - Ensure compliance assessment correctness
    - **Compare system outputs against known good results**
    - **Implement statistical validation for complex algorithms**
+   - **Test pattern recognition accuracy**
+
+6. **Autonomous Behavior Tests (NEW)**
+   - Test trigger detection accuracy
+   - Validate autonomous action appropriateness
+   - Ensure correct event handling
+   - Test notification generation
+   - Verify state updates from autonomous actions
+   - Test learning application effectiveness
 
 ## Error Handling Strategy
 
-The MCP implements these standard error handling patterns:
+The system implements these standard error handling patterns:
 
 1. **Graceful Degradation Pattern**
    - When a component fails, fall back to simpler alternatives
@@ -669,16 +1250,25 @@ The MCP implements these standard error handling patterns:
    - Add correlation IDs for tracking requests across components
    - Create dashboards for error monitoring
 
+6. **State Recovery Pattern (NEW)**
+   - Persist state changes atomically
+   - Implement state versioning for rollback
+   - Create state consistency checks
+   - Develop state recovery mechanisms
+   - Implement state reconciliation for conflicts
+
 ## Success Metrics
 
 Success for each phase is measured by:
 
-1. **Phase 0: Initial Prototype**
+1. **Phase 0: Initial Prototype & Agent Foundation**
    - Data flow validation successful
    - Response times under 2 seconds
    - Basic regulatory data retrieval working
    - **Error handling correctly manages failure scenarios**
    - **Data validation prevents invalid data from propagating**
+   - **Agent Core successfully maintains basic state**
+   - **State persistence working correctly**
 
 2. **Phase 0.5: Data Validation Framework**
    - **Type validation catches 100% of invalid data structures**
@@ -694,54 +1284,70 @@ Success for each phase is measured by:
    - **Alert system notifies team within 5 minutes of issues**
    - **Zero critical issues reach production environment**
 
-4. **Phase 1: Regulatory Data Enhancement**
+4. **Phase 0.85: Event System & Agent Behavior Implementation**
+   - **Event system successfully processes all event types**
+   - **Autonomous behaviors trigger correctly on events**
+   - **Notifications delivered through appropriate channels**
+   - **Scheduled tasks execute reliably**
+   - **System maintains state consistency during autonomous actions**
+
+5. **Phase 1: Regulatory Data Enhancement**
    - Regulatory data completeness > 90%
    - Data structure validation passing
    - Query performance within targets
    - **Error handling prevents system failures**
    - **Data consistency maintained across all components**
 
-5. **Phase 1.5: Data Structure Standardization**
+6. **Phase 1.5: Data Structure Standardization**
    - **100% of data structures follow standardized formats**
    - **Zero type mismatches between components**
    - **All data transformations preserve semantic meaning**
    - **Frontend-backend contracts fully documented**
    - **Contract tests pass for all component interactions**
 
-6. **Phase 2: Business Analysis & Webscraper Integration**
+7. **Phase 2: Business Analysis & Webscraper Integration**
    - Business categorization accuracy > 85%
    - HS code mapping precision > 90%
    - Webscraper insights relevance > 80%
    - **Data integration maintains consistency across sources**
    - **Error handling manages webscraper failures gracefully**
 
-7. **Phase 3: Market Intelligence Enhancement**
+8. **Phase 3: Market Intelligence Enhancement**
    - Market data retrieval success rate > 95%
    - Regulatory complexity assessment accuracy > 85%
    - Cache hit rate > 70%
    - **Data consistency maintained across market data sources**
    - **System resilience to external API failures**
 
-8. **Phase 4: Compliance Assessment Tools**
-   - Compliance assessment accuracy > 90%
-   - Timeline estimation variance < 20%
-   - Cost estimation variance < 30%
-   - **Error handling prevents assessment failures**
-   - **Data validation ensures assessment quality**
+9. **Phase 3.5: Memory Subsystem Development**
+   - **Business profile tracking captures all relevant changes**
+   - **Export strategy patterns identified with >80% accuracy**
+   - **Regulatory patterns recognized across markets**
+   - **Learning engine successfully applies patterns to recommendations**
+   - **Recommendations improved by >30% with learned patterns**
 
-9. **Phase 5: Integration and Reporting**
-   - Report generation success rate > 98%
-   - Dashboard data accuracy > 95%
-   - Frontend integration working correctly
-   - **Zero type errors in report generation**
-   - **Data consistency maintained throughout reporting pipeline**
+10. **Phase 4: Compliance Assessment Tools**
+    - Compliance assessment accuracy > 90%
+    - Timeline estimation variance < 20%
+    - Cost estimation variance < 30%
+    - **Error handling prevents assessment failures**
+    - **Data validation ensures assessment quality**
 
-10. **Phase 6: SQL and Advanced Features**
+11. **Phase 5: Integration and Reporting**
+    - Report generation success rate > 98%
+    - Dashboard data accuracy > 95%
+    - Frontend integration working correctly
+    - **Zero type errors in report generation**
+    - **Data consistency maintained throughout reporting pipeline**
+    - **Agent-driven content successfully integrated**
+
+12. **Phase 6: SQL and Advanced Features**
     - SQL generation accuracy > 85%
     - Batch processing efficiency improvement > 50%
     - Overall system performance improvement > 30%
     - **Query validation prevents injection attacks**
     - **Error handling manages database failures gracefully**
+    - **Autonomous workflows operating efficiently**
 
 ## Continuous Improvement
 
@@ -751,80 +1357,419 @@ The implementation includes mechanisms for continuous improvement:
    - Gather feedback on data accuracy and relevance
    - Track user satisfaction with recommendations
    - Identify areas for improvement
+   - **Collect feedback on autonomous actions**
+   - **Measure perceived value of proactive features**
 
 2. **Automated Quality Assessment**
    - Monitor data completeness and accuracy
    - Track LLM confidence scores
    - Identify data gaps and inconsistencies
+   - **Evaluate autonomous action appropriateness**
+   - **Measure learning effectiveness**
 
 3. **Performance Monitoring**
    - Track response times and resource usage
    - Identify bottlenecks and optimization opportunities
    - Monitor cache effectiveness
+   - **Measure event processing throughput**
+   - **Track state management performance**
 
 4. **Regular Data Updates**
    - Implement scheduled data refreshes
    - Track data freshness metrics
    - Identify stale or outdated information
+   - **Monitor regulatory change frequency**
+   - **Track market data volatility**
 
-## Technical Debt & TODOs
+5. **Pattern Effectiveness Tracking (NEW)**
+   - Measure pattern recognition accuracy
+   - Track recommendation improvement from patterns
+   - Identify most valuable patterns
+   - Monitor pattern application frequency
+   - Evaluate pattern confidence correlation with outcomes
 
-### Architecture Concerns
+## Frontend Integration & User Experience Considerations
 
-```typescript
-// TODO: Ensure proper separation between data access and business logic
-// Trade-off: Strict separation increases maintainability but may reduce development speed
+The transformation to an autonomous agent requires careful consideration of how users interact with the system and how agent capabilities are presented in the user interface.
 
-// TODO: Implement comprehensive data structure standardization
-// Technical debt: Inconsistent data structures lead to type errors and integration issues
+### 1. Agent Presence & Transparency
 
-// TODO: Create explicit contracts between components
-// Technical debt: Implicit contracts lead to integration failures and subtle bugs
+1. **Agent Visibility**
+   - Create a persistent agent presence in the UI
+   - Implement an agent status indicator showing current activities
+   - Provide an activity log of autonomous actions taken
+   - Design clear attribution for agent-generated content
+   - Implement transparency controls for agent decision-making
+
+2. **Explanation Mechanisms**
+   - Create explanation components for agent recommendations
+   - Implement "Why am I seeing this?" functionality
+   - Add confidence indicators for agent-generated content
+   - Provide access to supporting data and sources
+   - Design progressive disclosure for complex explanations
+
+3. **User Control & Preferences**
+   - Implement agent behavior preference controls
+   - Create notification preference management
+   - Add autonomous action approval settings
+   - Design override mechanisms for agent decisions
+   - Implement feedback collection on agent actions
+
+### 2. Proactive UI Components
+
+1. **Notification Center**
+   - Create a centralized notification hub
+   - Implement priority-based notification display
+   - Add notification grouping by category
+   - Design actionable notification components
+   - Implement notification history and status tracking
+
+2. **Insight Panels**
+   - Create dynamic insight panels for proactive recommendations
+   - Implement contextual insight triggers based on user activity
+   - Add dismissible and savable insights
+   - Design progressive insight paths for exploration
+   - Implement insight effectiveness tracking
+
+3. **Opportunity Spotlights**
+   - Create spotlight components for high-value opportunities
+   - Implement visual differentiation for opportunity types
+   - Add opportunity qualification workflows
+   - Design opportunity comparison tools
+   - Implement opportunity tracking and follow-up
+
+### 3. Continuous Context Awareness
+
+1. **Context Indicators**
+   - Create visual indicators of active context
+   - Implement context breadcrumbs for navigation
+   - Add context switching controls
+   - Design context history for backtracking
+   - Implement context persistence across sessions
+
+2. **Personalized Interfaces**
+   - Create dynamically prioritized UI elements based on user patterns
+   - Implement personalized navigation paths
+   - Add adaptive content density controls
+   - Design role-based interface variations
+   - Implement A/B testing for interface personalization
+
+3. **Progressive Disclosure**
+   - Create layered information architecture
+   - Implement "learn more" pathways for complex topics
+   - Add contextual help triggered by user behavior
+   - Design guided workflows with adaptive complexity
+   - Implement user knowledge modeling
+
+### 4. Integration Patterns
+
+1. **Assessment Flow Integration**
+   - Enhance assessment UI with agent-aware components
+   - Implement state-based assessment continuation
+   - Add contextual recommendations during assessment
+   - Design assessment summary with agent insights
+   - Implement assessment follow-up triggers
+
+2. **Dashboard Integration**
+   - Create agent insight widgets for dashboards
+   - Implement proactive alert components
+   - Add opportunity spotlight sections
+   - Design action recommendation panels
+   - Implement context-aware dashboard configurations
+
+3. **Workflow Integration**
+   - Enhance workflow UI with agent assistance
+   - Implement next-best-action recommendations
+   - Add proactive workflow suggestions
+   - Design workflow optimization insights
+   - Implement workflow tracking and analysis
+
+### 5. Implementation Approach
+
+1. **Component Library Enhancement**
+   - Extend component library with agent-specific components
+   - Implement consistent agent interaction patterns
+   - Add agent state visualization components
+   - Design notification and alert components
+   - Implement explanation and transparency components
+
+2. **Frontend State Management**
+   - Create agent state synchronization
+   - Implement optimistic UI updates for agent actions
+   - Add local caching of agent context
+   - Design state reconciliation for conflicts
+   - Implement offline support for agent functionality
+
+3. **Progressive Enhancement**
+   - Implement core functionality without agent dependencies
+   - Add agent capabilities as progressive enhancements
+   - Create fallback patterns for agent unavailability
+   - Design graceful degradation for limited connectivity
+   - Implement feature flags for agent capabilities
+
+4. **User Testing & Iteration**
+   - Conduct usability testing for agent interactions
+   - Implement A/B testing for agent UI patterns
+   - Add instrumentation for interaction analysis
+   - Design feedback collection mechanisms
+   - Implement rapid iteration cycles for UI refinement
+
+## Security & Privacy Considerations
+
+The autonomous nature of the Export Agent introduces new security and privacy considerations that must be addressed throughout the implementation.
+
+### 1. Data Security
+
+1. **Business Profile Protection**
+   - Implement end-to-end encryption for sensitive business data
+   - Create role-based access controls for profile information
+   - Add audit logging for all profile access and modifications
+   - Design secure storage for historical profile data
+   - Implement data minimization principles
+
+2. **State Persistence Security**
+   - Create encrypted state storage mechanisms
+   - Implement secure state synchronization
+   - Add integrity verification for state data
+   - Design secure backup and recovery procedures
+   - Implement access controls for state information
+
+3. **API Security Enhancement**
+   - Implement enhanced authentication for agent actions
+   - Create fine-grained authorization for autonomous operations
+   - Add rate limiting for agent-initiated requests
+   - Design secure API key management
+   - Implement API request validation and sanitization
+
+### 2. Privacy Controls
+
+1. **Transparency Mechanisms**
+   - Create clear privacy notices for agent capabilities
+   - Implement data usage explanations
+   - Add visibility into data collection purposes
+   - Design privacy preference controls
+   - Implement privacy impact assessments
+
+2. **Data Collection Minimization**
+   - Implement purpose limitation for data collection
+   - Create data retention policies and enforcement
+   - Add anonymization for pattern learning
+   - Design privacy-preserving learning mechanisms
+   - Implement differential privacy techniques where appropriate
+
+3. **User Consent Management**
+   - Create granular consent mechanisms for agent features
+   - Implement consent tracking and versioning
+   - Add consent withdrawal capabilities
+   - Design context-specific consent requests
+   - Implement consent audit trails
+
+### 3. Autonomous Action Safeguards
+
+1. **Action Authorization Framework**
+   - Create tiered authorization levels for autonomous actions
+   - Implement approval workflows for high-impact actions
+   - Add user confirmation for sensitive operations
+   - Design override mechanisms for all autonomous actions
+   - Implement action audit trails
+
+2. **Behavioral Monitoring**
+   - Create agent behavior monitoring systems
+   - Implement anomaly detection for unusual patterns
+   - Add behavioral boundaries and enforcement
+   - Design alerting for boundary violations
+   - Implement continuous behavior validation
+
+3. **Fail-Safe Mechanisms**
+   - Create graceful degradation modes
+   - Implement automatic disabling of problematic features
+   - Add rollback capabilities for autonomous actions
+   - Design containment strategies for malfunctions
+   - Implement emergency shutdown procedures
+
+### 4. Compliance Considerations
+
+1. **Regulatory Compliance**
+   - Implement GDPR compliance mechanisms
+   - Create CCPA/CPRA compliance features
+   - Add compliance with industry-specific regulations
+   - Design compliance documentation generation
+   - Implement regulatory change monitoring
+
+2. **Data Sovereignty**
+   - Create data residency controls
+   - Implement regional data processing restrictions
+   - Add cross-border transfer protections
+   - Design data localization capabilities
+   - Implement geofencing for sensitive operations
+
+3. **Audit Readiness**
+   - Create comprehensive audit logging
+   - Implement tamper-proof activity records
+   - Add audit trail visualization tools
+   - Design compliance reporting automation
+   - Implement evidence collection mechanisms
+
+### 5. Implementation Approach
+
+1. **Security by Design**
+   - Implement threat modeling for agent capabilities
+   - Create security requirements for each feature
+   - Add security testing in the development pipeline
+   - Design security architecture reviews
+   - Implement security validation gates
+
+2. **Privacy by Design**
+   - Create privacy impact assessments for agent features
+   - Implement privacy requirements gathering
+   - Add privacy-enhancing technologies
+   - Design privacy testing procedures
+   - Implement privacy validation gates
+
+3. **Continuous Security Validation**
+   - Create automated security testing
+   - Implement penetration testing for agent interfaces
+   - Add vulnerability scanning for agent components
+   - Design security monitoring for production
+   - Implement security incident response procedures
+
+4. **Documentation and Training**
+   - Create security and privacy documentation
+   - Implement developer security training
+   - Add user education about security features
+   - Design security awareness materials
+   - Implement security knowledge base
+
+## Deployment & Operations Considerations
+
+The autonomous nature of the Export Agent requires special attention to deployment and operational concerns to ensure reliability, scalability, and maintainability.
+
+### 1. Infrastructure Requirements
+
+1. **Compute Resources**
+   - Implement auto-scaling for agent processing
+   - Create resource allocation strategies for peak loads
+   - Add dedicated resources for critical agent functions
+   - Design resource isolation for security boundaries
+   - Implement resource monitoring and optimization
+
+2. **Storage Architecture**
+   - Create tiered storage strategy for agent state
+   - Implement high-performance storage for active state
+   - Add archival storage for historical data
+   - Design backup and recovery mechanisms
+   - Implement data lifecycle management
+
+3. **Networking Requirements**
+   - Create low-latency connections for real-time agent functions
+   - Implement network isolation for sensitive operations
+   - Add bandwidth optimization for data-intensive processes
+   - Design network redundancy for critical paths
+   - Implement traffic management and prioritization
+
+### 2. Deployment Strategy
+
+1. **Containerization**
+   - Create containerized agent components
+   - Implement container orchestration
+   - Add container security hardening
+   - Design container networking for component communication
+   - Implement container monitoring and management
+
+2. **Microservices Architecture**
+   - Create service boundaries aligned with agent capabilities
+   - Implement service discovery mechanisms
+   - Add service mesh for communication management
+   - Design API gateways for external access
+   - Implement circuit breakers and bulkheads
+
+3. **Deployment Automation**
+   - Create CI/CD pipelines for agent components
+   - Implement infrastructure as code
+   - Add automated testing in deployment pipeline
+   - Design blue/green deployment strategy
+   - Implement canary releases for agent features
+
+### 3. Operational Considerations
+
+1. **Monitoring & Observability**
+   - Create comprehensive monitoring for agent behaviors
+   - Implement distributed tracing for agent actions
+   - Add custom metrics for agent effectiveness
+   - Design dashboards for agent operations
+   - Implement alerting for anomalous behavior
+
+2. **Logging Strategy**
+   - Create structured logging for agent activities
+   - Implement centralized log management
+   - Add log correlation across components
+   - Design log retention and archival policies
+   - Implement log analysis and visualization
+
+3. **Incident Management**
+   - Create incident response procedures for agent issues
+   - Implement automated incident detection
+   - Add incident classification for agent-specific problems
+   - Design runbooks for common agent incidents
+   - Implement post-incident analysis and learning
+
+### 4. Scaling Considerations
+
+1. **Horizontal Scaling**
+   - Create stateless components where possible
+   - Implement distributed state management
+   - Add load balancing for agent services
+   - Design shard-based processing for large datasets
+   - Implement cross-region replication
+
+2. **Vertical Scaling**
+   - Create resource optimization for compute-intensive operations
+   - Implement memory management for state-heavy processes
+   - Add performance tuning for critical components
+   - Design resource allocation based on workload patterns
+   - Implement graceful degradation under load
+
+3. **Data Scaling**
+   - Create data partitioning strategies
+   - Implement efficient indexing for large datasets
+   - Add data compression for storage optimization
+   - Design query optimization for large-scale data
+   - Implement data archival and pruning
+
+### 5. Maintenance Strategy
+
+1. **Update Management**
+   - Create versioning strategy for agent components
+   - Implement backward compatibility mechanisms
+   - Add feature flags for gradual rollout
+   - Design dependency management
+   - Implement automated update testing
+
+2. **Database Maintenance**
+   - Create index optimization procedures
+   - Implement database performance monitoring
+   - Add data integrity validation
+   - Design schema evolution strategy
+   - Implement database backup and recovery
+
+3. **System Health**
+   - Create health check endpoints for all components
+   - Implement self-healing mechanisms
+   - Add automated recovery procedures
+   - Design system-wide health dashboards
+   - Implement proactive maintenance scheduling
+
+4. **Documentation & Knowledge Management**
+   - Create operational documentation
+   - Implement runbooks for common procedures
+   - Add knowledge base for troubleshooting
+   - Design architecture documentation
+   - Implement documentation versioning and updates
+
+## Recommended System Architecture
+
 ```
-
-### Error Handling & Resilience
-
-```typescript
-// TODO: Implement comprehensive error handling with fallback mechanisms
-// Trade-off: Robust error handling increases reliability but adds complexity
-
-// TODO: Add graceful degradation for all critical components
-// Technical debt: System failures cascade when components fail without fallbacks
-
-// TODO: Implement circuit breakers for all external dependencies
-// Technical debt: External dependency failures can bring down the entire system
-```
-
-### Data Validation
-
-```typescript
-// TODO: Implement schema validation for all data structures
-// Technical debt: Lack of validation may lead to runtime errors with malformed data
-
-// TODO: Add runtime type checking for all critical functions
-// Technical debt: Type errors can cause subtle bugs and system failures
-
-// TODO: Implement data consistency checks at component boundaries
-// Technical debt: Inconsistent data can propagate through the system
-```
-
-### Integration Testing
-
-```typescript
-// TODO: Implement comprehensive integration tests for all component interactions
-// Technical debt: Integration issues are discovered in production
-
-// TODO: Add data flow validation tests for all critical paths
-// Technical debt: Data inconsistencies can propagate through the system
-
-// TODO: Create end-to-end tests for all user journeys
-// Technical debt: User-facing issues are discovered by users
-```
-
-## Recommended MCP Architecture
-
-```
-export-guru-mcp/
+export-guru-agent/
 ├── src/
 │   ├── connectors/
 │   │   ├── regulatory-db.ts       # Regulatory database connector
@@ -846,16 +1791,40 @@ export-guru-mcp/
 │   │   │   ├── webscraper-analyzer.ts  # Website data analysis
 │   │   │   └── index.ts           # Business analysis exports
 │   │   └── index.ts               # Tool exports
+│   ├── agent/                     # Agent components
+│   │   ├── core.ts                # Agent core orchestration
+│   │   ├── state-manager.ts       # Business state management
+│   │   ├── event-system.ts        # Event publishing and subscription
+│   │   ├── scheduler.ts           # Scheduled task management
+│   │   ├── notification-service.ts # User notification system
+│   │   ├── behaviors/             # Autonomous behaviors
+│   │   │   ├── regulatory-monitor.ts  # Regulatory change monitoring
+│   │   │   ├── certification-monitor.ts  # Certification expiration monitoring
+│   │   │   ├── market-monitor.ts  # Market opportunity detection
+│   │   │   ├── profile-monitor.ts  # Business profile change handling
+│   │   │   └── index.ts           # Behavior exports
+│   │   └── index.ts               # Agent exports
+│   ├── memory/                    # Memory subsystem
+│   │   ├── business-profile-tracker.ts  # Business profile evolution tracking
+│   │   ├── export-strategy-memory.ts  # Export strategy learning
+│   │   ├── regulatory-pattern-memory.ts  # Regulatory pattern learning
+│   │   ├── learning-engine.ts     # Learning coordination
+│   │   ├── similarity-engine.ts   # Similarity calculation
+│   │   └── index.ts               # Memory exports
 │   ├── utils/
 │   │   ├── cache-manager.ts       # Caching utilities
 │   │   ├── data-pipeline.ts       # Data pipeline utilities
 │   │   ├── llm-helpers.ts         # LLM integration utilities
 │   │   ├── monitoring.ts          # Monitoring utilities
-│   │   └── validation.ts          # Data validation utilities
+│   │   ├── validation.ts          # Data validation utilities
+│   │   └── event-queue.ts         # Event processing queue
 │   ├── types/
 │   │   ├── regulatory.ts          # Regulatory data types
 │   │   ├── market.ts              # Market data types
 │   │   ├── business.ts            # Business data types
+│   │   ├── agent.ts               # Agent types
+│   │   ├── events.ts              # Event types
+│   │   ├── state.ts               # State types
 │   │   └── index.ts               # Type exports
 │   ├── integration/
 │   │   ├── assessment-integration.ts  # Assessment flow integration
@@ -869,10 +1838,13 @@ export-guru-mcp/
 │   ├── unit/                      # Unit tests
 │   ├── integration/               # Integration tests
 │   ├── performance/               # Performance tests
-│   └── accuracy/                  # Accuracy tests
+│   ├── accuracy/                  # Accuracy tests
+│   └── autonomous/                # Autonomous behavior tests
 ├── docs/
 │   ├── architecture.md            # Architecture documentation
 │   ├── data-flow.md               # Data flow documentation
+│   ├── agent-behaviors.md         # Agent behavior documentation
+│   ├── memory-subsystem.md        # Memory subsystem documentation
 │   └── api.md                     # API documentation
 └── scripts/
     ├── build.js                   # Build script
@@ -884,13 +1856,23 @@ This architecture properly separates concerns, enables testing in isolation, and
 
 ## Conclusion
 
-This comprehensive implementation plan provides a detailed roadmap for enhancing the Export Guru MCP with advanced regulatory data capabilities and integration with other export intelligence components. By following this phased approach, we can systematically build a powerful middleware layer that understands businesses, accurately matches them to appropriate markets, and provides the data foundation for generating meaningful, data-driven reports to help SMEs confidently pursue export opportunities.
+This comprehensive implementation plan provides a detailed roadmap for transforming the Export Guru MCP into an autonomous Export Agent with advanced regulatory data capabilities and integration with other export intelligence components. By following this phased approach, we can systematically build a powerful system that not only understands businesses and markets but proactively guides SMEs throughout their export journey.
 
 The plan emphasizes:
-- Clear data flow patterns between MCP, LLM, and frontend
+- Clear data flow patterns between system components, LLM, and frontend
 - Detailed LLM integration for intelligent processing
-- Early integration of webscraper analysis for better business understanding
+- Autonomous agent capabilities for proactive monitoring and guidance
+- Comprehensive state management for persistent context
+- Memory subsystem for learning and personalization
+- Event-driven architecture for responsive autonomous behaviors
 - Comprehensive testing to ensure accuracy and reliability
 - Monitoring and continuous improvement mechanisms
 
-With this implementation, the Export Guru MCP will transform TradeWizard's capabilities by creating an intelligent layer that understands businesses, accurately matches them to appropriate markets, and generates meaningful, data-driven reports to help SMEs confidently pursue export opportunities.
+With this implementation, the Export Guru Agent will transform TradeWizard's capabilities by creating an intelligent, autonomous system that:
+1. Maintains persistent understanding of each business's unique characteristics and goals
+2. Proactively monitors for regulatory changes, market opportunities, and business developments
+3. Learns from patterns across businesses to improve recommendations
+4. Delivers personalized, context-aware guidance throughout the export journey
+5. Takes autonomous actions to keep businesses informed and on track
+
+This transformation will significantly enhance the value proposition for SMEs by providing continuous support and guidance, reducing the complexity of export processes, and helping businesses confidently pursue export opportunities with a trusted AI agent as their partner.

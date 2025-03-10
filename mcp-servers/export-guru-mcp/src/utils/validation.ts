@@ -48,60 +48,8 @@ export function createValidator<T>(
 ): Validator<T> {
   return {
     validate: (data: any): ValidationResult => {
-      const errors: ValidationError[] = [];
-      
-      // Check if data is an object
-      if (!data || typeof data !== 'object' || Array.isArray(data)) {
-        return {
-          valid: false,
-          errors: [{
-            path: '',
-            message: `Expected ${options.name} to be an object`
-          }]
-        };
-      }
-      
-      // Check required fields
-      if (options.requiredFields) {
-        for (const field of options.requiredFields) {
-          if (data[field] === undefined) {
-            errors.push({
-              path: field,
-              message: `Required field '${field}' is missing`
-            });
-          }
-        }
-      }
-      
-      // Check extra fields
-      if (!options.allowExtraFields) {
-        for (const field in data) {
-          if (!schema[field]) {
-            errors.push({
-              path: field,
-              message: `Unexpected field '${field}'`,
-              value: data[field]
-            });
-          }
-        }
-      }
-      
-      // Validate each field
-      for (const field in schema) {
-        if (data[field] !== undefined) {
-          const error = schema[field](data[field], field);
-          if (error) {
-            errors.push(error);
-          }
-        }
-      }
-      
-      return {
-        valid: errors.length === 0,
-        errors
-      };
+      return validate(data, schema, options);
     },
-    
     isValid: (data: any): boolean => {
       return validate(data, schema, options).valid;
     }
@@ -120,7 +68,64 @@ export function validate(
     requiredFields?: string[];
   }
 ): ValidationResult {
-  return createValidator(schema, options).validate(data);
+  // Check if data is an object
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return {
+      valid: false,
+      errors: [
+        {
+          path: '',
+          message: `Expected ${options.name} to be an object, got ${data === null ? 'null' : Array.isArray(data) ? 'array' : typeof data}`,
+          value: data
+        }
+      ]
+    };
+  }
+
+  const errors: ValidationError[] = [];
+
+  // Check required fields
+  if (options.requiredFields) {
+    for (const field of options.requiredFields) {
+      if (!(field in data)) {
+        errors.push({
+          path: field,
+          message: `Required field '${field}' is missing`
+        });
+      }
+    }
+  }
+
+  // Validate fields
+  for (const [field, validator] of Object.entries(schema)) {
+    if (field in data) {
+      const error = validator(data[field], field);
+      if (error) {
+        errors.push(error);
+      }
+    }
+  }
+
+  // Check for extra fields
+  if (options.allowExtraFields === false) {
+    const schemaFields = Object.keys(schema);
+    const dataFields = Object.keys(data);
+    
+    for (const field of dataFields) {
+      if (!schemaFields.includes(field)) {
+        errors.push({
+          path: field,
+          message: `Unexpected field '${field}'`,
+          value: data[field]
+        });
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
 }
 
 /**
@@ -380,4 +385,219 @@ export function matchesPattern(pattern: RegExp): FieldValidator {
     
     return null;
   };
+}
+
+/**
+ * Type-specific validation functions
+ */
+
+/**
+ * Validates market data
+ */
+export function validateMarketData(data: unknown): ValidationResult {
+  const schema = {
+    id: isString(),
+    name: isString({ minLength: 1 }),
+    description: isString(),
+    marketSize: isNumber({ min: 0 }),
+    growthRate: isNumber(),
+    strengths: isArray({ itemValidator: isString() }),
+    weaknesses: isArray({ itemValidator: isString() }),
+    opportunities: isArray({ itemValidator: isString() }),
+    threats: isArray({ itemValidator: isString() })
+  };
+
+  return validate(data, schema, {
+    name: 'MarketData',
+    requiredFields: ['id', 'name', 'description', 'marketSize', 'growthRate'],
+    allowExtraFields: true
+  });
+}
+
+/**
+ * Validates regulatory requirement data
+ */
+export function validateRegulatoryRequirement(data: unknown): ValidationResult {
+  const schema = {
+    id: isString(),
+    country: isString({ minLength: 1 }),
+    productCategory: isString({ minLength: 1 }),
+    hsCode: isString(),
+    requirementType: isString(),
+    description: isString({ minLength: 1 }),
+    agency: isString(),
+    documentationRequired: isArray({ itemValidator: isString() }),
+    estimatedTimeline: isString(),
+    estimatedCost: isString(),
+    confidenceLevel: isNumber({ min: 0, max: 1 }),
+    frequency: isOneOf(['once-off', 'ongoing', 'periodic']),
+    validationStatus: isOneOf(['verified', 'unverified', 'outdated']),
+    lastVerifiedDate: isString(),
+    verificationSource: isString()
+  };
+
+  return validate(data, schema, {
+    name: 'RegulatoryRequirement',
+    requiredFields: ['country', 'productCategory', 'requirementType', 'description', 'agency'],
+    allowExtraFields: true
+  });
+}
+
+/**
+ * Validates enhanced regulatory requirement data
+ */
+export function validateEnhancedRegulatoryRequirement(data: unknown): ValidationResult {
+  const basicValidation = validateRegulatoryRequirement(data);
+  
+  if (!basicValidation.valid) {
+    return basicValidation;
+  }
+  
+  const schema = {
+    updateFrequency: isObject({
+      schema: {
+        recommendedSchedule: isString(),
+        sourcesToMonitor: isArray({ itemValidator: isString() }),
+        countrySpecificNotes: isString()
+      },
+      requiredFields: ['recommendedSchedule']
+    }),
+    agency: isObject({
+      schema: {
+        name: isString({ minLength: 1 }),
+        country: isString({ minLength: 1 }),
+        contactEmail: isString(),
+        contactPhone: isString(),
+        website: isString()
+      },
+      requiredFields: ['name', 'country', 'website']
+    })
+  };
+
+  const enhancedValidation = validate(data, schema, {
+    name: 'EnhancedRegulatoryRequirement',
+    allowExtraFields: true
+  });
+
+  if (!enhancedValidation.valid) {
+    return enhancedValidation;
+  }
+
+  return {
+    valid: true,
+    errors: []
+  };
+}
+
+/**
+ * Validates compliance assessment data
+ */
+export function validateComplianceAssessment(data: unknown): ValidationResult {
+  const schema = {
+    overallScore: isNumber({ min: 0, max: 1 }),
+    weightedScore: isNumber({ min: 0, max: 1 }),
+    satisfiedRequirements: isArray({
+      itemValidator: (value, path) => {
+        const result = validateRegulatoryRequirement(value);
+        if (!result.valid) {
+          return {
+            path,
+            message: `Invalid regulatory requirement: ${result.errors.map(e => e.message).join(', ')}`,
+            value
+          };
+        }
+        return null;
+      }
+    }),
+    missingRequirements: isArray({
+      itemValidator: (value, path) => {
+        const result = validateRegulatoryRequirement(value);
+        if (!result.valid) {
+          return {
+            path,
+            message: `Invalid regulatory requirement: ${result.errors.map(e => e.message).join(', ')}`,
+            value
+          };
+        }
+        return null;
+      }
+    }),
+    partiallyCompliantRequirements: isArray({
+      itemValidator: (value, path) => {
+        const result = validateRegulatoryRequirement(value);
+        if (!result.valid) {
+          return {
+            path,
+            message: `Invalid regulatory requirement: ${result.errors.map(e => e.message).join(', ')}`,
+            value
+          };
+        }
+        return null;
+      }
+    })
+  };
+
+  return validate(data, schema, {
+    name: 'ComplianceAssessment',
+    requiredFields: ['overallScore', 'weightedScore', 'satisfiedRequirements', 'missingRequirements'],
+    allowExtraFields: true
+  });
+}
+
+/**
+ * Safe data transformation utilities
+ */
+
+/**
+ * Safely transforms data to the expected format with fallbacks for missing or malformed data
+ */
+export function safeTransform<T>(
+  data: unknown, 
+  transformer: (data: any) => T, 
+  fallback: T
+): T {
+  if (!data) {
+    return fallback;
+  }
+  
+  try {
+    return transformer(data);
+  } catch (error) {
+    console.error('Error transforming data:', error);
+    return fallback;
+  }
+}
+
+/**
+ * Safely parses a string to JSON with fallback
+ */
+export function safeParseJson<T>(json: string, fallback: T): T {
+  try {
+    return JSON.parse(json) as T;
+  } catch (error) {
+    console.error('Error parsing JSON:', error);
+    return fallback;
+  }
+}
+
+/**
+ * Safely accesses a nested property with fallback
+ */
+export function safeGet<T>(obj: any, path: string, fallback: T): T {
+  try {
+    const parts = path.split('.');
+    let current = obj;
+    
+    for (const part of parts) {
+      if (current === null || current === undefined) {
+        return fallback;
+      }
+      current = current[part];
+    }
+    
+    return current === undefined ? fallback : current;
+  } catch (error) {
+    console.error('Error accessing property:', error);
+    return fallback;
+  }
 } 

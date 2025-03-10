@@ -1,5 +1,8 @@
 import { Connectors } from '../connectors';
 import { LLM, Tool, RegulatoryRequirement } from '../types';
+import { validateRegulatoryRequirement } from '../utils/validation';
+import { StandardDataStructures } from '../utils/data-standards';
+import { ApiError } from '../utils/error-handling';
 
 /**
  * Get regulatory requirements for a country and product category
@@ -12,15 +15,28 @@ async function getRegulatoryRequirements(
   llm: LLM
 ): Promise<RegulatoryRequirement[]> {
   try {
+    // Validate inputs
+    if (!country || !productCategory) {
+      console.warn("Missing required parameters for regulatory requirements");
+      return [];
+    }
+    
     // Convert country name to ISO code if needed
-    const countryCode = await getCountryCode(country, llm);
+    const countryCode = await getCountryCode(country, llm)
+      .catch(error => {
+        console.error(`Error getting country code: ${error instanceof Error ? error.message : String(error)}`);
+        return country; // Fallback to original country name
+      });
     
     // Get regulatory requirements from database
     const requirements = await connectors.regulatoryDb.getRequirements(
       countryCode,
       productCategory,
       hsCode
-    );
+    ).catch(error => {
+      console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
+      return []; // Return empty array as fallback
+    });
     
     // If we have requirements, return them
     if (requirements && requirements.length > 0) {
@@ -28,10 +44,63 @@ async function getRegulatoryRequirements(
     }
     
     // If no requirements found, generate them using LLM
-    return generateRegulatoryRequirements(countryCode, productCategory, hsCode, llm);
+    try {
+      const generatedRequirements = await generateRegulatoryRequirements(countryCode, productCategory, hsCode, llm);
+      
+      // Validate generated requirements
+      const validRequirements = generatedRequirements.filter(req => {
+        const validation = validateRegulatoryRequirement(req);
+        if (!validation.valid) {
+          console.warn(`Invalid generated requirement: ${validation.errors.map(e => e.message).join(', ')}`);
+          return false;
+        }
+        return true;
+      });
+      
+      // Save valid requirements to database
+      for (const req of validRequirements) {
+        try {
+          await connectors.regulatoryDb.addRequirement(req);
+        } catch (error) {
+          console.error(`Error saving generated requirement: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+      
+      return validRequirements;
+    } catch (llmError) {
+      console.error(`LLM error: ${llmError instanceof Error ? llmError.message : String(llmError)}`);
+      // Return minimal fallback data
+      return [{
+        country: countryCode,
+        productCategory,
+        requirementType: "Documentation",
+        description: "Basic export documentation required",
+        agency: {
+          name: "Customs Authority",
+          country: countryCode,
+          website: "#"
+        },
+        confidenceLevel: 0.5,
+        frequency: "once-off",
+        validationStatus: "unverified"
+      }];
+    }
   } catch (error) {
     console.error('Error fetching regulatory requirements:', error);
-    return generateRegulatoryRequirements(country, productCategory, hsCode, llm);
+    return [{
+      country,
+      productCategory,
+      requirementType: "Documentation",
+      description: "Basic export documentation required",
+      agency: {
+        name: "Customs Authority",
+        country,
+        website: "#"
+      },
+      confidenceLevel: 0.5,
+      frequency: "once-off",
+      validationStatus: "unverified"
+    }];
   }
 }
 
@@ -49,104 +118,125 @@ async function generateRegulatoryRequirements(
     Generate a comprehensive list of regulatory requirements for exporting ${productCategory} from South Africa to ${country}.
     ${hsCode ? `The HS code for this product is ${hsCode}.` : ''}
     
-    Please include detailed information on:
-    1. Product certification requirements (e.g., HACCP, ISO 22000, Halal/Kosher if applicable)
-    2. Labeling requirements (language, nutrition facts, allergens, country of origin, etc.)
-    3. Safety standards and compliance (food safety regulations, additives restrictions)
-    4. Import permits or licenses required in the destination country
-    5. Customs documentation (certificates of origin, health certificates, etc.)
-    6. Packaging requirements and restrictions
-    7. Tariffs, duties, and taxes applicable
-    8. Special requirements for food and beverage products (shelf-life, storage conditions, etc.)
+    For each requirement, provide the following information:
+    1. Requirement type (e.g., Documentation, Certification, Testing, Labeling, Packaging, Inspection, Registration, Permit, Tariff, Quota, Prohibition, Standard)
+    2. Detailed description of the requirement
+    3. The government agency or authority responsible for this requirement
+    4. Required documentation
+    5. Estimated timeline for compliance
+    6. Estimated cost for compliance
+    7. Frequency (once-off, ongoing, periodic)
     
-    For each requirement, include:
-    - The specific requirement type
-    - A detailed description of what compliance entails
-    - The responsible regulatory agency or authority
-    - A URL to the official source if available
-    
-    Format as JSON with the following structure:
+    Format your response as a JSON array with the following structure:
     [
       {
-        "country": "${country}",
-        "productCategory": "${productCategory}",
-        ${hsCode ? `"hsCode": "${hsCode}",` : ''}
-        "requirementType": "...",
-        "description": "...",
-        "agency": "...",
-        "url": "...",
-        "confidence": 0.9
-      },
-      ...
+        "requirementType": "string",
+        "description": "string",
+        "agency": {
+          "name": "string",
+          "country": "string",
+          "website": "string",
+          "contactEmail": "string (optional)",
+          "contactPhone": "string (optional)"
+        },
+        "documentationRequired": ["string"],
+        "estimatedTimeline": "string",
+        "estimatedCost": "string",
+        "frequency": "once-off|ongoing|periodic"
+      }
     ]
-    
-    Focus on accuracy and completeness. Include both general requirements for all food/beverage exports and specific requirements for ${productCategory}.
   `;
   
-  // Get LLM response
-  const response = await llm.complete({
-    prompt,
-    max_tokens: 1500,
-    temperature: 0.3
-  });
-  
   try {
-    // Parse the JSON response
-    let requirements: any[] = [];
-    
-    // Extract JSON from the response (in case the LLM includes explanatory text)
-    const jsonMatch = response.match(/\[\s*\{.*\}\s*\]/s);
-    if (jsonMatch) {
-      requirements = JSON.parse(jsonMatch[0]);
-    } else {
-      // Try to parse the entire response as JSON
-      requirements = JSON.parse(response);
-    }
-    
-    // Validate and clean up each requirement
-    return requirements.map((req: any) => ({
-      country: country,
-      productCategory: productCategory,
-      hsCode: hsCode,
-      requirementType: req.requirementType || 'General',
-      description: req.description || `Requirement for exporting ${productCategory} to ${country}`,
-      agency: req.agency || 'Regulatory Authority',
-      url: req.url || '',
-      lastUpdated: new Date().toISOString().split('T')[0],
-      confidence: req.confidence || 0.8
-    }));
+    const response = await llm.complete(prompt);
+    return parseRequirementsFromLLM(response, country, productCategory, hsCode);
   } catch (error) {
-    console.error('Error parsing LLM response:', error);
-    
-    // Return minimal requirements with more detailed fallback
-    return [
-      {
-        country,
-        productCategory,
-        hsCode,
-        requirementType: 'General Compliance',
-        description: `Exporting ${productCategory} from South Africa to ${country} requires compliance with both South African export regulations and ${country}'s import regulations. This typically includes business registration, product certification, labeling requirements, and customs documentation.`,
-        agency: 'Multiple Regulatory Authorities',
-        lastUpdated: new Date().toISOString().split('T')[0],
-        confidence: 0.7
-      },
-      {
-        country,
-        productCategory,
-        hsCode,
-        requirementType: 'Export Documentation',
-        description: 'South African exporters must register with SARS Customs to obtain an exporter code (Customs Client Number, CCN) and prepare appropriate export documentation including commercial invoice, packing list, and certificate of origin.',
-        agency: 'South African Revenue Service (SARS)',
-        url: 'https://www.sars.gov.za/customs-and-excise/registration-and-licensing/',
-        lastUpdated: new Date().toISOString().split('T')[0],
-        confidence: 0.8
-      }
-    ];
+    console.error('Error generating regulatory requirements:', error);
+    throw new Error(`Failed to generate regulatory requirements: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 /**
- * Calculate compliance readiness based on user data and requirements
+ * Parse regulatory requirements from LLM response
+ */
+function parseRequirementsFromLLM(
+  llmResponse: string,
+  country: string,
+  productCategory: string,
+  hsCode?: string
+): RegulatoryRequirement[] {
+  try {
+    // Extract JSON array from response
+    const jsonMatch = llmResponse.match(/\[\s*\{.*\}\s*\]/s);
+    if (!jsonMatch) {
+      throw new Error('No JSON array found in LLM response');
+    }
+    
+    const jsonStr = jsonMatch[0];
+    const requirements = JSON.parse(jsonStr);
+    
+    if (!Array.isArray(requirements)) {
+      throw new Error('Parsed result is not an array');
+    }
+    
+    // Transform and validate each requirement
+    return requirements.map(req => {
+      // Ensure agency is properly formatted
+      const agency = typeof req.agency === 'string' 
+        ? { name: req.agency, country, website: '#' }
+        : {
+            name: req.agency?.name || 'Unknown',
+            country: req.agency?.country || country,
+            contactEmail: req.agency?.contactEmail,
+            contactPhone: req.agency?.contactPhone,
+            website: req.agency?.website || '#'
+          };
+      
+      // Create the requirement object with default values for missing fields
+      const requirement: RegulatoryRequirement = {
+        country,
+        productCategory,
+        hsCode,
+        requirementType: req.requirementType || 'Documentation',
+        description: req.description || 'Regulatory requirement',
+        agency,
+        documentationRequired: Array.isArray(req.documentationRequired) ? req.documentationRequired : [],
+        estimatedTimeline: req.estimatedTimeline || 'Varies',
+        estimatedCost: req.estimatedCost || 'Varies',
+        confidenceLevel: 0.7, // LLM-generated data has medium confidence
+        frequency: (req.frequency as StandardDataStructures.FrequencyType) || 'once-off',
+        validationStatus: 'unverified'
+      };
+      
+      return requirement;
+    });
+  } catch (error) {
+    console.error('Error parsing LLM response:', error);
+    
+    // Return a fallback requirement
+    return [{
+      country,
+      productCategory,
+      hsCode,
+      requirementType: 'Documentation',
+      description: 'Basic export documentation required',
+      agency: {
+        name: 'Customs Authority',
+        country,
+        website: '#'
+      },
+      documentationRequired: ['Commercial Invoice', 'Packing List', 'Bill of Lading'],
+      estimatedTimeline: '1-2 weeks',
+      estimatedCost: 'Varies',
+      confidenceLevel: 0.5,
+      frequency: 'once-off',
+      validationStatus: 'unverified'
+    }];
+  }
+}
+
+/**
+ * Calculate compliance readiness for a business
  */
 async function calculateComplianceReadiness(
   country: string,
@@ -170,6 +260,15 @@ async function calculateComplianceReadiness(
       llm
     );
     
+    if (!requirements || requirements.length === 0) {
+      return {
+        score: 1.0, // No requirements means full compliance
+        missingRequirements: [],
+        timeline: 0,
+        estimatedCost: '$0'
+      };
+    }
+    
     // Calculate compliance score
     const score = calculateComplianceScore(requirements, userCertifications);
     
@@ -189,12 +288,12 @@ async function calculateComplianceReadiness(
   } catch (error) {
     console.error('Error calculating compliance readiness:', error);
     
-    // Return default values
+    // Return a fallback response
     return {
       score: 0.5,
       missingRequirements: [],
-      timeline: 90, // 3 months
-      estimatedCost: '$5,000 - $10,000'
+      timeline: 30,
+      estimatedCost: 'Unknown'
     };
   }
 }
@@ -206,533 +305,388 @@ function calculateComplianceScore(
   requirements: RegulatoryRequirement[],
   userCertifications: string[]
 ): number {
-  if (requirements.length === 0) {
-    return 1.0; // No requirements means full compliance
-  }
-  
-  // Count how many requirements are likely covered by user certifications
-  let coveredRequirements = 0;
-  const totalRequirements = requirements.length;
-  
-  // Create a mapping of certification keywords to their full names
-  const certificationKeywords: Record<string, string[]> = {
-    'haccp': ['haccp', 'hazard analysis', 'food safety system'],
-    'iso': ['iso 22000', 'fssc 22000', 'iso 9001', 'quality management'],
-    'halal': ['halal', 'islamic', 'muslim'],
-    'kosher': ['kosher', 'jewish dietary'],
-    'organic': ['organic', 'natural', 'pesticide-free'],
-    'export': ['exporter code', 'customs client number', 'ccn', 'export registration'],
-    'gmp': ['good manufacturing practice', 'gmp'],
-    'brc': ['brc', 'british retail consortium', 'global standard for food safety'],
-    'fssc': ['fssc', 'food safety system certification'],
-    'globalg.a.p': ['globalg.a.p', 'good agricultural practice'],
-    'sabs': ['sabs', 'south african bureau of standards'],
-    'nrcs': ['nrcs', 'national regulator for compulsory specifications'],
-    'fda': ['fda registration', 'food facility registration'],
-    'business': ['cipc', 'company registration', 'business license'],
-    'tax': ['sars', 'tax clearance', 'vat registration']
-  };
-  
-  // Process each requirement
-  for (const req of requirements) {
-    // Check if any certification directly covers this requirement
-    let isCovered = userCertifications.some(cert => {
-      const certLower = cert.toLowerCase();
+  try {
+    if (!requirements || requirements.length === 0) {
+      return 1.0; // No requirements means full compliance
+    }
+    
+    // Normalize certifications for comparison
+    const normalizedCertifications = userCertifications.map(cert => 
+      cert.toLowerCase().trim()
+    );
+    
+    // Count requirements that are satisfied by user certifications
+    let satisfiedCount = 0;
+    
+    for (const req of requirements) {
+      // Check if this requirement is satisfied by any certification
+      const reqDescription = req.description.toLowerCase();
+      const reqType = req.requirementType.toLowerCase();
       
-      // Direct match in requirement type or description
-      if (req.description.toLowerCase().includes(certLower) || 
-          (req.requirementType && req.requirementType.toLowerCase().includes(certLower))) {
-        return true;
-      }
-      
-      // Check for keyword matches
-      for (const [keyword, phrases] of Object.entries(certificationKeywords)) {
-        if (certLower.includes(keyword) || phrases.some(phrase => certLower.includes(phrase))) {
-          // This certification matches a keyword, now check if the requirement relates to this keyword
-          return phrases.some(phrase => 
-            req.description.toLowerCase().includes(phrase) || 
-            (req.requirementType && req.requirementType.toLowerCase().includes(phrase))
+      // Check if any certification matches this requirement
+      const isSatisfied = normalizedCertifications.some(cert => {
+        // Direct match with certification name
+        if (reqDescription.includes(cert)) {
+          return true;
+        }
+        
+        // Match with requirement type (if certification mentions the type)
+        if (cert.includes(reqType)) {
+          return true;
+        }
+        
+        // Check documentation required
+        if (req.documentationRequired) {
+          return req.documentationRequired.some(doc => 
+            doc.toLowerCase().includes(cert) || cert.includes(doc.toLowerCase())
           );
         }
-      }
+        
+        return false;
+      });
       
-      return false;
-    });
-    
-    // Special case handling for common certifications
-    if (!isCovered) {
-      // If user has FSSC 22000, they likely comply with HACCP requirements
-      if (userCertifications.some(cert => cert.toLowerCase().includes('fssc 22000') || cert.toLowerCase().includes('iso 22000')) &&
-          (req.description.toLowerCase().includes('haccp') || 
-           (req.requirementType && req.requirementType.toLowerCase().includes('haccp')))) {
-        isCovered = true;
+      if (isSatisfied) {
+        satisfiedCount++;
       }
+    }
+    
+    // Calculate weighted score based on requirement confidence
+    let weightedScore = 0;
+    let totalWeight = 0;
+    
+    for (const req of requirements) {
+      const weight = req.confidenceLevel || 0.5;
+      totalWeight += weight;
       
-      // If user has export registration, they likely comply with basic export documentation
-      if (userCertifications.some(cert => cert.toLowerCase().includes('export registration') || cert.toLowerCase().includes('exporter code')) &&
-          (req.description.toLowerCase().includes('export documentation') || 
-           (req.requirementType && req.requirementType.toLowerCase().includes('export documentation')))) {
-        isCovered = true;
+      // Check if this requirement is satisfied
+      const reqDescription = req.description.toLowerCase();
+      const reqType = req.requirementType.toLowerCase();
+      
+      const isSatisfied = normalizedCertifications.some(cert => {
+        if (reqDescription.includes(cert) || cert.includes(reqType)) {
+          return true;
+        }
+        
+        if (req.documentationRequired) {
+          return req.documentationRequired.some(doc => 
+            doc.toLowerCase().includes(cert) || cert.includes(doc.toLowerCase())
+          );
+        }
+        
+        return false;
+      });
+      
+      if (isSatisfied) {
+        weightedScore += weight;
       }
     }
     
-    if (isCovered) {
-      coveredRequirements++;
-    }
-  }
-  
-  // Calculate weighted score
-  // Give more weight to high-confidence requirements
-  let weightedScore = 0;
-  let totalWeight = 0;
-  
-  for (const req of requirements) {
-    const weight = req.confidence || 0.5;
-    totalWeight += weight;
+    // Calculate final score
+    const score = totalWeight > 0 ? weightedScore / totalWeight : 0;
     
-    const isCovered = userCertifications.some(cert => {
-      const certLower = cert.toLowerCase();
-      return req.description.toLowerCase().includes(certLower) || 
-             (req.requirementType && req.requirementType.toLowerCase().includes(certLower));
-    });
-    
-    if (isCovered) {
-      weightedScore += weight;
-    }
+    // Ensure score is between 0 and 1
+    return Math.max(0, Math.min(1, score));
+  } catch (error) {
+    console.error('Error calculating compliance score:', error);
+    return 0.5; // Return a middle score as fallback
   }
-  
-  // Return the simple ratio if there are no weights
-  if (totalWeight === 0) {
-    return coveredRequirements / totalRequirements;
-  }
-  
-  // Return weighted score
-  return weightedScore / totalWeight;
 }
 
 /**
- * Identify missing requirements
+ * Identify missing requirements based on user certifications
  */
 function identifyMissingRequirements(
   requirements: RegulatoryRequirement[],
   userCertifications: string[]
 ): RegulatoryRequirement[] {
-  // Create a mapping of certification keywords to their full names
-  const certificationKeywords: Record<string, string[]> = {
-    'haccp': ['haccp', 'hazard analysis', 'food safety system'],
-    'iso': ['iso 22000', 'fssc 22000', 'iso 9001', 'quality management'],
-    'halal': ['halal', 'islamic', 'muslim'],
-    'kosher': ['kosher', 'jewish dietary'],
-    'organic': ['organic', 'natural', 'pesticide-free'],
-    'export': ['exporter code', 'customs client number', 'ccn', 'export registration'],
-    'gmp': ['good manufacturing practice', 'gmp'],
-    'brc': ['brc', 'british retail consortium', 'global standard for food safety'],
-    'fssc': ['fssc', 'food safety system certification'],
-    'globalg.a.p': ['globalg.a.p', 'good agricultural practice'],
-    'sabs': ['sabs', 'south african bureau of standards'],
-    'nrcs': ['nrcs', 'national regulator for compulsory specifications'],
-    'fda': ['fda registration', 'food facility registration'],
-    'business': ['cipc', 'company registration', 'business license'],
-    'tax': ['sars', 'tax clearance', 'vat registration']
-  };
-  
-  return requirements.filter(req => {
-    // Check if any certification covers this requirement
-    const isCovered = userCertifications.some(cert => {
-      const certLower = cert.toLowerCase();
+  try {
+    if (!requirements || requirements.length === 0) {
+      return [];
+    }
+    
+    // Normalize certifications for comparison
+    const normalizedCertifications = userCertifications.map(cert => 
+      cert.toLowerCase().trim()
+    );
+    
+    // Filter requirements that are not satisfied by user certifications
+    return requirements.filter(req => {
+      // Check if this requirement is satisfied by any certification
+      const reqDescription = req.description.toLowerCase();
+      const reqType = req.requirementType.toLowerCase();
       
-      // Direct match in requirement type or description
-      if (req.description.toLowerCase().includes(certLower) || 
-          (req.requirementType && req.requirementType.toLowerCase().includes(certLower))) {
-        return true;
-      }
-      
-      // Check for keyword matches
-      for (const [keyword, phrases] of Object.entries(certificationKeywords)) {
-        if (certLower.includes(keyword) || phrases.some(phrase => certLower.includes(phrase))) {
-          // This certification matches a keyword, now check if the requirement relates to this keyword
-          return phrases.some(phrase => 
-            req.description.toLowerCase().includes(phrase) || 
-            (req.requirementType && req.requirementType.toLowerCase().includes(phrase))
+      // Check if any certification matches this requirement
+      const isSatisfied = normalizedCertifications.some(cert => {
+        // Direct match with certification name
+        if (reqDescription.includes(cert)) {
+          return true;
+        }
+        
+        // Match with requirement type (if certification mentions the type)
+        if (cert.includes(reqType)) {
+          return true;
+        }
+        
+        // Check documentation required
+        if (req.documentationRequired) {
+          return req.documentationRequired.some(doc => 
+            doc.toLowerCase().includes(cert) || cert.includes(doc.toLowerCase())
           );
+        }
+        
+        return false;
+      });
+      
+      // Return true for requirements that are NOT satisfied
+      return !isSatisfied;
+    });
+  } catch (error) {
+    console.error('Error identifying missing requirements:', error);
+    return requirements; // Return all requirements as fallback
+  }
+}
+
+/**
+ * Estimate compliance timeline based on missing requirements
+ */
+function estimateComplianceTimeline(missingRequirements: RegulatoryRequirement[]): number {
+  try {
+    if (!missingRequirements || missingRequirements.length === 0) {
+      return 0;
+    }
+    
+    // Map of requirement types to estimated days
+    const timelineEstimates: Record<string, number> = {
+      'Documentation': 7,
+      'Certification': 60,
+      'Testing': 30,
+      'Labeling': 14,
+      'Packaging': 14,
+      'Inspection': 14,
+      'Registration': 45,
+      'Permit': 30,
+      'Tariff': 1,
+      'Quota': 1,
+      'Prohibition': 0,
+      'Standard': 30,
+      'Other': 30
+    };
+    
+    // Calculate timeline based on the longest requirement
+    let maxTimeline = 0;
+    
+    // Also consider parallel processing for similar requirements
+    const typeTimelines: Record<string, number> = {};
+    
+    for (const req of missingRequirements) {
+      const reqType = req.requirementType;
+      const baseTimeline = timelineEstimates[reqType] || 30;
+      
+      // Parse the estimated timeline if available
+      let reqTimeline = baseTimeline;
+      if (req.estimatedTimeline) {
+        const timeMatch = req.estimatedTimeline.match(/(\d+)(?:\s*-\s*(\d+))?\s*(day|week|month)/i);
+        if (timeMatch) {
+          const minTime = parseInt(timeMatch[1], 10);
+          const maxTime = timeMatch[2] ? parseInt(timeMatch[2], 10) : minTime;
+          const unit = timeMatch[3].toLowerCase();
+          
+          // Convert to days
+          const multiplier = unit.startsWith('day') ? 1 : unit.startsWith('week') ? 7 : 30;
+          reqTimeline = Math.ceil((minTime + maxTime) / 2) * multiplier;
         }
       }
       
-      // Special case handling for common certifications
-      // If user has FSSC 22000, they likely comply with HACCP requirements
-      if ((certLower.includes('fssc 22000') || certLower.includes('iso 22000')) &&
-          (req.description.toLowerCase().includes('haccp') || 
-           (req.requirementType && req.requirementType.toLowerCase().includes('haccp')))) {
-        return true;
-      }
+      // Update type timeline (for parallel processing)
+      typeTimelines[reqType] = Math.max(typeTimelines[reqType] || 0, reqTimeline);
       
-      // If user has export registration, they likely comply with basic export documentation
-      if ((certLower.includes('export registration') || certLower.includes('exporter code')) &&
-          (req.description.toLowerCase().includes('export documentation') || 
-           (req.requirementType && req.requirementType.toLowerCase().includes('export documentation')))) {
-        return true;
-      }
-      
-      return false;
-    });
-    
-    return !isCovered;
-  });
-}
-
-/**
- * Estimate compliance timeline in days
- */
-function estimateComplianceTimeline(missingRequirements: RegulatoryRequirement[]): number {
-  if (missingRequirements.length === 0) {
-    return 0; // No missing requirements means no time needed
-  }
-  
-  // Define timeline estimates for different requirement types (in days)
-  const timelineEstimates: Record<string, number> = {
-    // Business registration and licensing
-    'Business Registration': 30,
-    'Tax Registration': 21,
-    'Liquor License': 90,
-    'Food Safety Certification': 45,
-    
-    // Certifications
-    'Food Safety System': 120, // HACCP implementation
-    'Quality Certification': 180, // ISO 22000
-    'Halal Certification': 60,
-    'Kosher Certification': 60,
-    'Organic Certification': 180,
-    
-    // Export prerequisites
-    'Export Registration': 14,
-    'Export Permit': 21,
-    'Phytosanitary Certificate': 14,
-    'Veterinary Health Certificate': 14,
-    
-    // UK specific
-    'UK Importer Registration': 30,
-    'UK Responsible Address': 14,
-    'Shelf-life Marking': 30,
-    'Food Information Regulations': 45,
-    'Alcohol Labeling': 30,
-    'Sugar Tax Compliance': 14,
-    'Tariff Preference': 21,
-    'IPAFFS Pre-notification': 7,
-    'Packaging EPR': 30,
-    
-    // USA specific
-    'FDA Facility Registration': 30,
-    'TTB Label Approval': 60,
-    'Low-Acid Canned Food Registration': 45,
-    'Nutrition Facts Panel': 30,
-    'Allergen Labeling': 21,
-    'Juice HACCP': 90,
-    'AGOA Tariff Preference': 21,
-    'USDA Organic Certification': 180,
-    'FDA Prior Notice': 7,
-    'Foreign Supplier Verification': 45,
-    
-    // UAE specific
-    'Product Registration': 60,
-    'Arabic Labeling': 30,
-    'Shelf-life Standards': 21,
-    'Emirates Quality Mark': 90,
-    'Excise Tax': 14,
-    'Import Duty': 7,
-    'Health Certificate': 14,
-    'Certificate of Origin': 7,
-    'Local Distribution': 60
-  };
-  
-  // Default timeline for unknown requirement types
-  const defaultTimeline = 30;
-  
-  // Calculate total timeline
-  let totalTimeline = 0;
-  
-  // Track requirement types to avoid double-counting similar requirements
-  const processedTypes = new Set<string>();
-  
-  for (const req of missingRequirements) {
-    // Skip if we've already processed this type of requirement
-    if (processedTypes.has(req.requirementType)) {
-      continue;
+      // Update max timeline
+      maxTimeline = Math.max(maxTimeline, reqTimeline);
     }
     
-    // Add to processed types
-    processedTypes.add(req.requirementType);
+    // Calculate total timeline considering parallel processing
+    // Use the max of:
+    // 1. The longest single requirement
+    // 2. Sum of the longest requirement of each type (assuming some parallelization)
+    const parallelTimeline = Object.values(typeTimelines).reduce((sum, time) => sum + time, 0);
+    const adjustedParallelTimeline = Math.ceil(parallelTimeline * 0.7); // Adjust for some overlap
     
-    // Get timeline estimate for this requirement type
-    const estimate = timelineEstimates[req.requirementType] || defaultTimeline;
-    
-    // Add to total timeline
-    totalTimeline += estimate;
+    return Math.max(maxTimeline, adjustedParallelTimeline);
+  } catch (error) {
+    console.error('Error estimating compliance timeline:', error);
+    return 30; // Return a default timeline as fallback
   }
-  
-  // Apply parallel processing factor - many requirements can be pursued simultaneously
-  // The more requirements, the more parallel processing can happen
-  const parallelFactor = Math.min(0.7, 0.3 + (processedTypes.size * 0.05));
-  
-  // Apply the parallel processing factor
-  const adjustedTimeline = Math.round(totalTimeline * (1 - parallelFactor));
-  
-  // Ensure minimum timeline
-  return Math.max(30, adjustedTimeline);
 }
 
 /**
- * Estimate compliance cost
+ * Estimate compliance cost based on missing requirements
  */
 function estimateComplianceCost(missingRequirements: RegulatoryRequirement[]): string {
-  if (missingRequirements.length === 0) {
-    return '$0'; // No missing requirements means no cost
-  }
-  
-  // Define cost estimates for different requirement types (in USD)
-  const costEstimates: Record<string, number> = {
-    // Business registration and licensing
-    'Business Registration': 500,
-    'Tax Registration': 300,
-    'Liquor License': 5000,
-    'Food Safety Certification': 1500,
-    
-    // Certifications
-    'Food Safety System': 15000, // HACCP implementation
-    'Quality Certification': 25000, // ISO 22000
-    'Halal Certification': 3000,
-    'Kosher Certification': 3000,
-    'Organic Certification': 10000,
-    
-    // Export prerequisites
-    'Export Registration': 500,
-    'Export Permit': 300,
-    'Phytosanitary Certificate': 200,
-    'Veterinary Health Certificate': 200,
-    
-    // UK specific
-    'UK Importer Registration': 1000,
-    'UK Responsible Address': 500,
-    'Shelf-life Marking': 2000,
-    'Food Information Regulations': 3000,
-    'Alcohol Labeling': 2000,
-    'Sugar Tax Compliance': 1000,
-    'Tariff Preference': 500,
-    'IPAFFS Pre-notification': 200,
-    'Packaging EPR': 2000,
-    
-    // USA specific
-    'FDA Facility Registration': 1500,
-    'TTB Label Approval': 3000,
-    'Low-Acid Canned Food Registration': 2500,
-    'Nutrition Facts Panel': 2000,
-    'Allergen Labeling': 1500,
-    'Juice HACCP': 8000,
-    'AGOA Tariff Preference': 500,
-    'USDA Organic Certification': 12000,
-    'FDA Prior Notice': 200,
-    'Foreign Supplier Verification': 3000,
-    
-    // UAE specific
-    'Product Registration': 3000,
-    'Arabic Labeling': 2000,
-    'Shelf-life Standards': 1500,
-    'Emirates Quality Mark': 5000,
-    'Excise Tax': 1000,
-    'Import Duty': 500,
-    'Health Certificate': 300,
-    'Certificate of Origin': 200,
-    'Local Distribution': 5000
-  };
-  
-  // Default cost for unknown requirement types
-  const defaultCost = 2000;
-  
-  // Calculate total cost
-  let totalCost = 0;
-  
-  // Track requirement types to avoid double-counting similar requirements
-  const processedTypes = new Set<string>();
-  
-  for (const req of missingRequirements) {
-    // Skip if we've already processed this type of requirement
-    if (processedTypes.has(req.requirementType)) {
-      continue;
+  try {
+    if (!missingRequirements || missingRequirements.length === 0) {
+      return '$0';
     }
     
-    // Add to processed types
-    processedTypes.add(req.requirementType);
+    // Map of requirement types to estimated costs (in USD)
+    const costEstimates: Record<string, number> = {
+      'Documentation': 200,
+      'Certification': 5000,
+      'Testing': 2000,
+      'Labeling': 1000,
+      'Packaging': 1000,
+      'Inspection': 1500,
+      'Registration': 3000,
+      'Permit': 1000,
+      'Tariff': 0, // Tariffs are calculated separately
+      'Quota': 0,
+      'Prohibition': 0,
+      'Standard': 2000,
+      'Other': 1000
+    };
     
-    // Get cost estimate for this requirement type
-    const estimate = costEstimates[req.requirementType] || defaultCost;
+    // Calculate total cost
+    let totalCost = 0;
     
-    // Add to total cost
-    totalCost += estimate;
-  }
-  
-  // Apply economies of scale - the more requirements, the more efficient the process
-  // This reflects that some costs can be shared across multiple requirements
-  const scaleFactor = Math.max(0.7, 1 - (processedTypes.size * 0.03));
-  
-  // Apply the scale factor
-  const adjustedCost = Math.round(totalCost * scaleFactor);
-  
-  // Add base cost for consulting and administrative overhead
-  const baseCost = 3000;
-  const finalCost = baseCost + adjustedCost;
-  
-  // Format as a range with 20% variance
-  const lowerBound = Math.round(finalCost * 0.9);
-  const upperBound = Math.round(finalCost * 1.3);
-  
-  // Format the cost range
-  if (finalCost >= 1000000) {
-    return `$${(lowerBound / 1000000).toFixed(1)} - $${(upperBound / 1000000).toFixed(1)} million`;
-  } else if (finalCost >= 1000) {
-    return `$${(lowerBound / 1000).toFixed(1)} - $${(upperBound / 1000).toFixed(1)} thousand`;
-  } else {
-    return `$${lowerBound.toFixed(0)} - $${upperBound.toFixed(0)}`;
+    for (const req of missingRequirements) {
+      const reqType = req.requirementType;
+      const baseCost = costEstimates[reqType] || 1000;
+      
+      // Parse the estimated cost if available
+      let reqCost = baseCost;
+      if (req.estimatedCost) {
+        const costMatch = req.estimatedCost.match(/[\$€£]?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:-\s*[\$€£]?\s*(\d+(?:,\d+)*(?:\.\d+)?))?/);
+        if (costMatch) {
+          const minCost = parseFloat(costMatch[1].replace(/,/g, ''));
+          const maxCost = costMatch[2] ? parseFloat(costMatch[2].replace(/,/g, '')) : minCost;
+          reqCost = Math.ceil((minCost + maxCost) / 2);
+        }
+      }
+      
+      totalCost += reqCost;
+    }
+    
+    // Format the cost
+    if (totalCost === 0) {
+      return '$0';
+    } else if (totalCost < 1000) {
+      return `$${totalCost}`;
+    } else if (totalCost < 10000) {
+      return `$${Math.round(totalCost / 100) * 100}`;
+    } else {
+      return `$${Math.round(totalCost / 1000)}k`;
+    }
+  } catch (error) {
+    console.error('Error estimating compliance cost:', error);
+    return 'Varies'; // Return a default cost as fallback
   }
 }
 
 /**
- * Convert country name to ISO code if needed
+ * Get country code from country name
  */
 async function getCountryCode(country: string, llm: LLM): Promise<string> {
-  // If already looks like a country code (3 letters, all caps)
-  if (/^[A-Z]{3}$/.test(country)) {
+  // Check if the input is already a country code
+  if (/^[A-Z]{2,3}$/.test(country)) {
     return country;
   }
   
-  // Simple mapping for common countries
-  const countryMap: Record<string, string> = {
-    'south africa': 'ZAF',
-    'uk': 'GBR',
-    'united kingdom': 'GBR',
-    'great britain': 'GBR',
-    'usa': 'USA',
-    'united states': 'USA',
-    'united states of america': 'USA',
-    'uae': 'ARE',
-    'united arab emirates': 'ARE',
-    'china': 'CHN',
-    'japan': 'JPN',
-    'australia': 'AUS',
-    'india': 'IND',
-    'germany': 'DEU',
-    'france': 'FRA',
-    'italy': 'ITA',
-    'spain': 'ESP',
-    'netherlands': 'NLD',
-    'brazil': 'BRA',
-    'canada': 'CAN'
-  };
-  
-  const normalizedCountry = country.toLowerCase().trim();
-  
-  if (countryMap[normalizedCountry]) {
-    return countryMap[normalizedCountry];
+  try {
+    // Use LLM to convert country name to ISO code
+    const prompt = `
+      Convert the following country name to its ISO 3166-1 alpha-2 code (2 letters).
+      Country: ${country}
+      
+      Respond with only the 2-letter country code.
+    `;
+    
+    const response = await llm.complete(prompt);
+    
+    // Extract the country code from the response
+    const countryCode = response.trim().match(/^[A-Z]{2}$/)?.[0];
+    
+    if (countryCode) {
+      return countryCode;
+    }
+    
+    // If no valid country code found, return the original country name
+    return country;
+  } catch (error) {
+    console.error('Error getting country code:', error);
+    return country; // Return the original country name as fallback
   }
-  
-  // For other countries, return the original input
-  // In a production system, we would use a more comprehensive lookup
-  return country.toUpperCase();
 }
 
+/**
+ * Register regulatory tools
+ */
 export function registerRegulatoryTools(connectors: Connectors, llm: LLM): Tool[] {
   return [
     {
-      name: 'getRegulatoryRequirements',
-      description: 'Get regulatory requirements for exporting a product to a specific country',
-      parameters: {
-        type: 'object',
-        properties: {
-          country: {
-            type: 'string',
-            description: 'The destination country for export'
-          },
-          productCategory: {
-            type: 'string',
-            description: 'The category of product being exported'
-          },
-          hsCode: {
-            type: 'string',
-            description: 'The Harmonized System (HS) code for the product'
-          }
+      name: 'get_regulatory_requirements',
+      description: 'Get regulatory requirements for exporting a product to a country',
+      parameters: [
+        {
+          name: 'country',
+          description: 'The destination country',
+          type: 'string',
+          required: true
         },
-        required: ['country', 'productCategory']
-      },
-      handler: async (params) => getRegulatoryRequirements(
-        params.country,
-        params.productCategory,
-        params.hsCode,
-        connectors,
-        llm
-      )
-    },
-    {
-      name: 'calculateComplianceReadiness',
-      description: 'Calculate compliance readiness score based on user certifications',
-      parameters: {
-        type: 'object',
-        properties: {
-          country: {
-            type: 'string',
-            description: 'The destination country for export'
-          },
-          productCategory: {
-            type: 'string',
-            description: 'The category of product being exported'
-          },
-          userCertifications: {
-            type: 'array',
-            items: {
-              type: 'string'
-            },
-            description: 'List of certifications the user already has'
-          }
+        {
+          name: 'product_category',
+          description: 'The product category',
+          type: 'string',
+          required: true
         },
-        required: ['country', 'productCategory', 'userCertifications']
-      },
-      handler: async (params) => calculateComplianceReadiness(
-        params.country,
-        params.productCategory,
-        params.userCertifications,
-        connectors,
-        llm
-      )
-    },
-    {
-      name: 'getUpdateFrequencyInfo',
-      description: 'Get information about how frequently regulatory requirements are updated',
-      parameters: {
-        type: 'object',
-        properties: {},
-        required: []
-      },
-      handler: async () => {
-        return {
-          message: "This functionality is no longer available in the updated database connector."
-        };
+        {
+          name: 'hs_code',
+          description: 'The HS code for the product (optional)',
+          type: 'string',
+          required: false
+        }
+      ],
+      handler: async (params) => {
+        const { country, product_category, hs_code } = params;
+        return await getRegulatoryRequirements(
+          country,
+          product_category,
+          hs_code,
+          connectors,
+          llm
+        );
       }
     },
     {
-      name: 'checkRegulatoryUpdateStatus',
-      description: 'Check if regulatory requirements need to be updated',
-      parameters: {
-        type: 'object',
-        properties: {
-          country: {
-            type: 'string',
-            description: 'Country code to check update status for'
-          }
+      name: 'calculate_compliance_readiness',
+      description: 'Calculate compliance readiness for a business',
+      parameters: [
+        {
+          name: 'country',
+          description: 'The destination country',
+          type: 'string',
+          required: true
         },
-        required: []
-      },
+        {
+          name: 'product_category',
+          description: 'The product category',
+          type: 'string',
+          required: true
+        },
+        {
+          name: 'certifications',
+          description: 'List of certifications the business has',
+          type: 'array',
+          required: true
+        }
+      ],
       handler: async (params) => {
-        return {
-          message: "This functionality is no longer available in the updated database connector.",
-          country: params.country
-        };
+        const { country, product_category, certifications } = params;
+        return await calculateComplianceReadiness(
+          country,
+          product_category,
+          certifications,
+          connectors,
+          llm
+        );
       }
     }
   ];
