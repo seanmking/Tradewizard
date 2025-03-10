@@ -32,6 +32,12 @@ except ImportError:
         from .website_analyzer import WebsiteAnalyzerService
         from .market_intelligence import MarketIntelligenceService
 
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 class AssessmentFlowService:
     """
     Service for handling the assessment flow logic.
@@ -200,21 +206,49 @@ class AssessmentFlowService:
             }
         }
     
-    def get_initial_question(self) -> Dict[str, Any]:
+    def format_question(self, template, user_data):
         """
-        Get the initial question to start the assessment flow.
-        
-        Returns:
-            Dictionary with step_id and question text
+        Properly format a question template with user data.
+        Ensures clean separation between template and user data.
         """
-        initial_step = self.assessment_flow.get("initial")
-        if not initial_step:
-            raise ValueError("Initial step not found in assessment flow")
+        logger.debug(f"Question template: {template}")
+        logger.debug(f"User data: {user_data}")
         
-        return {
-            "step_id": "initial",
-            "question": initial_step.get("prompt", "Welcome to the export assessment. Could you tell me about your business?")
+        # Extract user data safely
+        user_name = user_data.get('name', 'there')
+        company_name = user_data.get('company', 'your company')
+        industry = user_data.get('industry', 'your industry')
+        
+        # Format the template with proper placeholders
+        formatted_question = template.format(
+            user_name=user_name,
+            company_name=company_name,
+            industry=industry
+        )
+        
+        logger.debug(f"Formatted question: {formatted_question}")
+        return formatted_question
+    
+    def get_initial_question(self, user_data):
+        """
+        Get the initial assessment question.
+        """
+        template = "While I'm reviewing your information, {user_name}, has {company_name} participated in any direct exports, and if so can you give some context to your export activities to date?"
+        return self.format_question(template, user_data)
+    
+    def get_follow_up_question(self, question_number, user_data):
+        """
+        Get a follow-up question based on the question number.
+        """
+        templates = {
+            1: "I'd love to hear why {company_name} is looking to export now? What's driving this decision?",
+            2: "What products or services is {company_name} looking to export?",
+            3: "Which markets are you most interested in exploring for {company_name}?",
+            # Add more templates as needed
         }
+        
+        template = templates.get(question_number, "Can you tell me more about your export plans?")
+        return self.format_question(template, user_data)
     
     def extract_info_from_response(self, step_id: str, response: str) -> Dict[str, Any]:
         """

@@ -4,6 +4,8 @@ import { StateManager } from './state-manager';
 import { NotificationService } from './notification-service';
 import { MockEmailService, EmailNotificationSender } from './notification-senders/email-sender';
 import { BusinessState } from '../types/state';
+import { MCPClient } from './mcp-client';
+import { MarketRecommendationBehavior } from './behaviors/market-recommendation-behavior';
 
 /**
  * Agent request interface.
@@ -42,14 +44,26 @@ export class AgentCore {
   private stateManager: StateManager;
   private notificationService: NotificationService;
   private emailSender: EmailNotificationSender;
+  private mcpClient: MCPClient;
+  private marketRecommendationBehavior: MarketRecommendationBehavior;
   private initialized: boolean = false;
   
   constructor(db: Database) {
     this.db = db;
     this.eventSystem = new EventSystem(db);
     this.stateManager = new StateManager(db);
-    this.notificationService = new NotificationService(db);
+    this.notificationService = new NotificationService(db, this.eventSystem);
     this.emailSender = new EmailNotificationSender(new MockEmailService());
+    
+    // Initialize MCP client
+    this.mcpClient = new MCPClient();
+    
+    // Initialize behaviors that use MCP
+    this.marketRecommendationBehavior = new MarketRecommendationBehavior(
+      this.mcpClient,
+      this.stateManager,
+      this.notificationService
+    );
   }
   
   /**
@@ -119,18 +133,21 @@ export class AgentCore {
       const businessId = event.businessId;
       const assessmentResults = event.payload.results;
       
+      // Get current business state
+      const businessState = await this.stateManager.getBusinessState(businessId);
+      
+      // Create a new completed step
+      const newCompletedStep = {
+        type: 'ASSESSMENT',
+        completedAt: new Date(),
+        score: assessmentResults?.overallScore || 0
+      };
+      
       // Update the business state with assessment results
       await this.stateManager.updateBusinessState(businessId, {
         exportJourney: {
-          // Using a more generic approach since assessmentResults is not in the ExportJourney interface
-          completedSteps: [
-            {
-              type: 'ASSESSMENT',
-              completedAt: new Date(),
-              score: assessmentResults?.overallScore || 0
-            }
-          ],
-          lastAssessmentDate: new Date().toISOString()
+          ...businessState.exportJourney,
+          completedSteps: [...businessState.exportJourney.completedSteps, newCompletedStep]
         }
       });
       
@@ -164,14 +181,16 @@ export class AgentCore {
       const businessId = event.businessId;
       const opportunity = event.payload;
       
-      // Update the business state with the new opportunity
+      // Get current business state
       const businessState = await this.stateManager.getBusinessState(businessId);
       
       // Using the opportunities field from ExportJourney
       const currentOpportunities = businessState.exportJourney.opportunities || [];
       
+      // Update the business state with the new opportunity
       await this.stateManager.updateBusinessState(businessId, {
         exportJourney: {
+          ...businessState.exportJourney,
           opportunities: [...currentOpportunities, opportunity]
         }
       });
@@ -209,14 +228,6 @@ export class AgentCore {
         await this.initialize();
       }
       
-      // Record the interaction
-      await this.stateManager.recordInteraction(
-        request.businessId,
-        request.type,
-        request,
-        true
-      );
-      
       // Process the request based on type
       switch (request.type) {
         case 'GET_BUSINESS_STATE':
@@ -240,16 +251,8 @@ export class AgentCore {
             error: `Unknown request type: ${request.type}`
           };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error handling request: ${error.message}`);
-      
-      // Record the failed interaction
-      await this.stateManager.recordInteraction(
-        request.businessId,
-        request.type,
-        request,
-        false
-      );
       
       return {
         success: false,
@@ -318,35 +321,56 @@ export class AgentCore {
    * Handles a request to get recommendations.
    */
   private async handleGetRecommendations(request: AgentRequest): Promise<AgentResponse> {
-    const businessState = await this.stateManager.getBusinessState(request.businessId);
-    
-    // In a real implementation, this would use the LLM to generate recommendations
-    // based on the business state, but for now we'll return mock recommendations
-    const mockRecommendations = [
-      {
-        type: 'MARKET',
-        title: 'Consider expanding to Canada',
-        description: 'Based on your product category and business size, Canada represents a low-risk opportunity with similar regulations to your home market.',
-        confidence: 0.85
-      },
-      {
-        type: 'CERTIFICATION',
-        title: 'Obtain ISO 9001 certification',
-        description: 'This certification would improve your credibility in international markets and is often required by distributors in European countries.',
-        confidence: 0.78
-      },
-      {
-        type: 'LOGISTICS',
-        title: 'Explore fulfillment partnerships',
-        description: 'Given your current shipping volumes, partnering with a fulfillment provider could reduce costs by 15-20%.',
-        confidence: 0.72
+    try {
+      // Get the recommendation type from the request
+      const recommendationType = request.data?.type || 'MARKET';
+      
+      // Handle different recommendation types
+      switch (recommendationType) {
+        case 'MARKET':
+          // Use the MarketRecommendationBehavior to get market recommendations
+          const marketRecommendations = await this.marketRecommendationBehavior.generateMarketRecommendations(request.businessId);
+          
+          return {
+            success: true,
+            data: marketRecommendations
+          };
+          
+        case 'CERTIFICATION':
+          // In a real implementation, this would use a CertificationRecommendationBehavior
+          // For now, return mock certification recommendations
+          return {
+            success: true,
+            data: [
+              {
+                type: 'CERTIFICATION',
+                title: 'Obtain ISO 9001 certification',
+                description: 'This certification would improve your credibility in international markets and is often required by distributors in European countries.',
+                confidence: 0.78
+              },
+              {
+                type: 'CERTIFICATION',
+                title: 'Consider Fair Trade certification',
+                description: 'This would appeal to ethical consumers and open doors to specialty retailers focused on sustainable products.',
+                confidence: 0.72
+              }
+            ]
+          };
+          
+        default:
+          return {
+            success: false,
+            error: `Unknown recommendation type: ${recommendationType}`
+          };
       }
-    ];
-    
-    return {
-      success: true,
-      data: { recommendations: mockRecommendations }
-    };
+    } catch (error: any) {
+      console.error(`Error getting recommendations: ${error.message}`);
+      
+      return {
+        success: false,
+        error: `Error getting recommendations: ${error.message}`
+      };
+    }
   }
   
   /**

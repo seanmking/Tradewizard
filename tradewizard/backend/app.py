@@ -8,6 +8,7 @@ import sys
 import importlib
 from datetime import datetime
 import traceback
+import requests
 
 # Add the project root to the path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -39,6 +40,8 @@ try:
     # Method 1: Try direct module import
     from tradewizard.backend.services.assessment_flow import AssessmentFlowService
     from tradewizard.backend.api.user import user_bp
+    # Import the AI Agent blueprint
+    from tradewizard.backend.api.aiagent import aiagent_bp
     print("Successfully imported with package prefix")
 except ImportError as e:
     print(f"Import with package prefix failed: {e}")
@@ -46,35 +49,20 @@ except ImportError as e:
         # Method 2: Try relative imports
         from services.assessment_flow import AssessmentFlowService
         from api.user import user_bp
+        # Import the AI Agent blueprint
+        from api.aiagent import aiagent_bp
         print("Successfully imported with direct imports")
     except ImportError as e:
-        print(f"Direct imports failed: {e}")
+        print(f"Direct imports also failed: {e}")
+        # Method 3: Try absolute imports with sys.path
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'services')))
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'api')))
         
-        # Method 3: Manual import
-        print("Attempting manual module import...")
-        
-        # Manually add the backend directory to the path
-        backend_dir = current_dir
-        sys.path.insert(0, backend_dir)
-        
-        # Import the modules manually
-        spec = importlib.util.find_spec('services.assessment_flow', [backend_dir])
-        if not spec:
-            raise ImportError(f"Could not find services.assessment_flow in {backend_dir}")
-        
-        assessment_flow = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(assessment_flow)
-        AssessmentFlowService = assessment_flow.AssessmentFlowService
-        
-        spec = importlib.util.find_spec('api.user', [backend_dir])
-        if not spec:
-            raise ImportError(f"Could not find api.user in {backend_dir}")
-        
-        user_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(user_module)
-        user_bp = user_module.user_bp
-        
-        print("Successfully imported with manual import")
+        from assessment_flow import AssessmentFlowService
+        from user import user_bp
+        # Import the AI Agent blueprint
+        from aiagent import aiagent_bp
+        print("Successfully imported with absolute imports")
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -92,6 +80,8 @@ market_intelligence_service = MarketIntelligenceService()
 
 # Register blueprints
 app.register_blueprint(user_bp, url_prefix='/api/user')
+# Register the AI Agent blueprint
+app.register_blueprint(aiagent_bp, url_prefix='/api/aiagent')
 
 # Import analysis modules directly from export_intelligence
 from export_intelligence.analysis import market_analysis, regulatory, timeline, resources
@@ -175,26 +165,37 @@ if not hasattr(market_analysis, 'identify_market_trends'):
 
 @app.route('/api/assessment/initial-question', methods=['GET'])
 def get_initial_question():
-    """Get the initial question for the assessment flow"""
+    """Get the initial question for the assessment flow."""
     try:
-        print("Fetching initial question...")
-        initial_question = assessment_flow_service.get_initial_question()
-        print(f"Initial question retrieved: {initial_question}")
-        response = jsonify(initial_question)
-        # Add explicit CORS headers to ensure browser compatibility
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        return response
-    except Exception as e:
-        logger.error(f"Error getting initial question: {str(e)}")
-        logger.error(traceback.format_exc())
-        error_response = jsonify({
-            "error": str(e),
-            "message": "Failed to get initial question"
+        # Get user data from query parameters or session
+        user_data = {
+            'name': request.args.get('name', 'there'),
+            'company': request.args.get('company', 'your company'),
+            'industry': request.args.get('industry', 'your industry')
+        }
+        
+        # Log the request
+        app.logger.debug(f"Getting initial question with user data: {user_data}")
+        
+        # Get the assessment service
+        assessment_service = get_assessment_service()
+        
+        # Get the initial question with user data
+        question = assessment_service.get_initial_question(user_data)
+        
+        # Return the question
+        return jsonify({
+            "success": True,
+            "step_id": "initial",
+            "question": question
         })
-        error_response.headers.add('Access-Control-Allow-Origin', '*')
-        return error_response, 500
+    except Exception as e:
+        app.logger.error(f"Error getting initial question: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 @app.route('/api/assessment/process-response', methods=['POST', 'OPTIONS'])
 def process_response():
@@ -514,60 +515,125 @@ def export_readiness_report_endpoint():
 @app.route('/api/market/options', methods=['POST', 'OPTIONS'])
 def market_options_endpoint():
     """
-    Get market options based on product categories.
-    
-    Request JSON:
-    {
-        "product_categories": List of product categories,
-        "use_mock_data": Optional boolean to use mock data,
-        "user_data": Optional user data containing company information
-    }
-    
-    Returns:
-    JSON with market options
+    Get market options for the user.
+    Filters markets based on user selection.
     """
-    # Handle OPTIONS request for CORS preflight
     if request.method == 'OPTIONS':
-        response = jsonify({'status': 'ok'})
+        # Handle preflight request
+        response = jsonify({})
         response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
         return response
         
     try:
-        data = request.json
-        if not data:
-            return jsonify({"error": "No data provided"}), 400
+        # Get the request data
+        data = request.json or {}
         
-        product_categories = data.get('product_categories', [])
-        use_mock_data = data.get('use_mock_data', True)
-        user_data = data.get('user_data', {})
+        # Get the selected markets from the request
+        selected_markets = data.get('selectedMarkets', [])
         
-        if not product_categories:
-            return jsonify({"error": "No product categories provided"}), 400
+        # Log the request
+        app.logger.debug(f"Getting market options with selected markets: {selected_markets}")
         
-        # Get market options from service
-        market_options = market_intelligence_service.get_market_options(
-            product_categories=product_categories,
-            use_mock_data=use_mock_data,
-            user_data=user_data
+        # Prepare the parameters for the MCP server
+        params = {
+            'selectedMarkets': selected_markets
+        }
+        
+        # Only include industry if it's provided in the request
+        if 'industry' in data:
+            params['industry'] = data['industry']
+            app.logger.debug(f"Including industry in request: {data['industry']}")
+        
+        # Forward the request to the MCP server through the proxy
+        response = requests.post(
+            'http://localhost:3000/api/mcp/tools',
+            json={
+                'tool': 'getMarketOptions',
+                'params': params
+            },
+            headers={'Content-Type': 'application/json'}
         )
         
-        # Add explicit CORS headers
-        response = jsonify({
-            "market_options": market_options
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-    
+        # Check if the response is successful
+        if not response.ok:
+            app.logger.error(f"MCP server returned error: {response.status_code} - {response.text}")
+            return jsonify({
+                "success": False,
+                "error": f"MCP server returned error: {response.status_code}"
+            }), response.status_code
+        
+        # Get the markets from the response
+        markets_data = response.json()
+        
+        # If no selected markets are provided, filter to only include USA, UK, and UAE
+        if not selected_markets:
+            default_markets = ['USA', 'UK', 'UAE']
+            if 'markets' in markets_data:
+                markets_data['markets'] = [
+                    market for market in markets_data['markets'] 
+                    if market['id'] in default_markets
+                ]
+        
+        # Return the markets
+        return jsonify(markets_data)
     except Exception as e:
-        logger.error(f"Error getting market options: {str(e)}")
-        logger.error(traceback.format_exc())
-        error_response = jsonify({
-            "error": f"Failed to get market options: {str(e)}"
-        })
-        error_response.headers.add('Access-Control-Allow-Origin', '*')
-        return error_response, 500
+        app.logger.error(f"Error getting market options: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/proxy/mcp/tools', methods=['POST'])
+def proxy_mcp_tools():
+    """
+    Proxy endpoint for MCP tools requests.
+    This allows the frontend to make requests to the MCP server through the backend,
+    avoiding CORS issues and providing a single point of entry.
+    """
+    try:
+        # Log the request
+        app.logger.debug(f"Proxying MCP tools request: {request.json}")
+        
+        # Get the request data
+        data = request.json
+        
+        # Only add industry information if not present and if we have business context
+        # This allows the frontend to explicitly set the industry when it knows it
+        if 'params' in data and 'industry' not in data['params'] and 'businessId' in data['params']:
+            # In a real implementation, we would look up the business profile
+            # and determine the industry based on that
+            # For now, we'll just log that we're not setting a default industry
+            app.logger.info(f"No industry specified for business {data['params']['businessId']}. " 
+                           f"The AI Agent should determine the appropriate industry.")
+        
+        # Forward the request to the MCP server
+        mcp_url = 'http://localhost:3001/api/mcp/tools'
+        response = requests.post(
+            mcp_url,
+            json=data,
+            headers={'Content-Type': 'application/json'}
+        )
+        
+        # Check if the response is successful
+        if not response.ok:
+            app.logger.error(f"MCP server returned error: {response.status_code} - {response.text}")
+            return jsonify({
+                "success": False,
+                "error": f"MCP server returned error: {response.status_code}"
+            }), response.status_code
+        
+        # Return the response from the MCP server
+        return jsonify(response.json()), response.status_code
+    except Exception as e:
+        app.logger.error(f"Error proxying to MCP server: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": f"Failed to communicate with MCP server: {str(e)}"
+        }), 500
 
 if __name__ == '__main__':
     print("Starting Flask app on port 5002...")

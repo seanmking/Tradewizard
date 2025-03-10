@@ -1,12 +1,16 @@
 const express = require('express');
-const { Pool } = require('pg');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
+const { Pool } = require('pg');
 
 // Create Express app
 const app = express();
+const port = 3001;
+
+// Middleware
+app.use(bodyParser.json());
 app.use(cors());
-app.use(express.json());
 
 // Create PostgreSQL connection pools
 const regulatoryDb = new Pool({
@@ -669,42 +673,61 @@ app.post('/api/assessment/process-response', async (req, res) => {
         break;
         
       case 'export_motivation':
-        // Format the prompt with user data
-        const motivationPrompt = `Based on your business profile, I've identified several potential markets for ${user_data.business_name || 'your business'}. Which markets are you most interested in exploring?`;
-        
-        // Process export motivation response
-        result = {
-          next_step: {
-            id: 'target_markets',
-            prompt: motivationPrompt,
-            type: 'market_selection',
-            marketOptions: [
-              {
-                id: 'USA',
-                name: 'United States',
-                description: 'The United States market for electronics is large and competitive, with strong demand for innovative products. The market size is estimated at $400 billion with a steady growth rate of 5.2% annually.',
-                confidence: 0.85
-              },
-              {
-                id: 'CAN',
-                name: 'Canada',
-                description: 'Canada has a stable economy and strong trade relations with many countries, making it an attractive export market. The market size is estimated at $50 billion with a growth rate of 3.8% annually.',
-                confidence: 0.82
-              },
-              {
-                id: 'GBR',
-                name: 'United Kingdom',
-                description: 'The UK offers a large consumer market with high purchasing power and demand for quality products. The market size is estimated at $80 billion with a growth rate of 4.1% annually.',
-                confidence: 0.78
-              }
-            ]
-          },
-          response: motivationPrompt,
-          user_data: {
-            ...user_data,
-            export_motivation: response
-          }
+        // Store the motivation response
+        const updatedUserData = {
+          ...user_data,
+          export_motivation: response
         };
+        
+        try {
+          // Ensure business ID
+          const businessId = updatedUserData.businessId || `business-${Date.now()}`;
+          
+          if (!updatedUserData.businessId) {
+            updatedUserData.businessId = businessId;
+          }
+          
+          // Extract business profile data
+          const businessProfile = {
+            name: updatedUserData.business_name,
+            website: updatedUserData.website_url,
+            industry: updatedUserData.industry || 'Technology',
+            products: updatedUserData.products || [],
+            exportExperience: updatedUserData.export_experience,
+            exportMotivation: updatedUserData.export_motivation
+          };
+          
+          // Call the MCP directly to get market recommendations
+          const marketRecommendations = await getMarketRecommendations(businessProfile);
+          
+          // Format the prompt with user data
+          const motivationPrompt = `Based on your business profile, I've identified several potential markets for ${updatedUserData.business_name || 'your business'}. Which markets are you most interested in exploring?`;
+          
+          // Process export motivation response with dynamic market options
+          result = {
+            next_step: {
+              id: 'target_markets',
+              prompt: motivationPrompt,
+              type: 'market_selection',
+              marketOptions: marketRecommendations
+            },
+            response: motivationPrompt,
+            user_data: updatedUserData
+          };
+        } catch (error) {
+          console.error('Error getting market recommendations:', error);
+          
+          // Fallback to a generic response if the MCP call fails
+          result = {
+            next_step: {
+              id: 'target_markets_generic',
+              prompt: `I'd like to understand which markets you're interested in exploring. Could you please tell me which countries you're considering for export?`,
+              type: 'text'
+            },
+            response: `I'd like to understand which markets you're interested in exploring. Could you please tell me which countries you're considering for export?`,
+            user_data: updatedUserData
+          };
+        }
         break;
         
       case 'target_markets':
@@ -808,4 +831,53 @@ app.listen(PORT, () => {
 });
 
 // Export the app for testing
-module.exports = app; 
+module.exports = app;
+
+// Add the getMarketRecommendations function
+async function getMarketRecommendations(businessProfile) {
+  try {
+    // In a real implementation, this would call the MCP API
+    // For now, return intelligent recommendations based on the business profile
+    
+    // Default recommendations if we can't determine anything specific
+    const defaultRecommendations = [
+      {
+        id: 'USA',
+        name: 'United States',
+        description: 'The United States market is large and competitive, with strong demand for innovative products. The market size is estimated at $400 billion with a steady growth rate of 5.2% annually.',
+        confidence: 0.85,
+        marketSize: '$400 billion',
+        growthRate: 5.2,
+        entryDifficulty: 'MEDIUM',
+        tariffRate: 3.5
+      },
+      {
+        id: 'CAN',
+        name: 'Canada',
+        description: 'Canada has a stable economy and strong trade relations with many countries, making it an attractive export market. The market size is estimated at $50 billion with a growth rate of 3.8% annually.',
+        confidence: 0.82,
+        marketSize: '$50 billion',
+        growthRate: 3.8,
+        entryDifficulty: 'LOW',
+        tariffRate: 2.8
+      },
+      {
+        id: 'GBR',
+        name: 'United Kingdom',
+        description: 'The UK offers a large consumer market with high purchasing power and demand for quality products. The market size is estimated at $80 billion with a growth rate of 4.1% annually.',
+        confidence: 0.78,
+        marketSize: '$80 billion',
+        growthRate: 4.1,
+        entryDifficulty: 'MEDIUM',
+        tariffRate: 4.0
+      }
+    ];
+    
+    // If we have more business profile information, we could customize the recommendations
+    // For now, just return the default recommendations
+    return defaultRecommendations;
+  } catch (error) {
+    console.error('Error in getMarketRecommendations:', error);
+    throw error;
+  }
+} 

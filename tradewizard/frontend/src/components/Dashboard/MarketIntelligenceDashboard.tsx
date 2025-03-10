@@ -3,6 +3,7 @@ import './MarketIntelligenceDashboard.css';
 import { CircularProgress } from '@mui/material';
 import { Alert } from '@mui/material';
 import { withCache } from '../../utils/cache';
+import { API_CONFIG } from '../../config';
 
 // ErrorBoundary component to catch errors in the dashboard
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, errorMessage: string}> {
@@ -96,6 +97,8 @@ interface UserData {
   motivation?: string;
   selected_markets?: string;
   product_categories?: string;
+  business_id?: string;
+  industry?: string;
   [key: string]: any;
 }
 
@@ -421,17 +424,26 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
   const fetchMarketIntelligenceWithCache = withCache(
     async (market: string, productCategories: string[]) => {
       try {
-        const response = await fetch('http://localhost:3001/api/mcp/tools', {
+        // Prepare the request parameters
+        const params: any = {
+          market,
+          productCategories,
+          businessId: userData.business_id || 'unknown'
+        };
+        
+        // Only add industry if it's available in userData
+        if (userData.industry) {
+          params.industry = userData.industry;
+        }
+        
+        const response = await fetch(`${API_CONFIG.BACKEND_URL}/api/proxy/mcp/tools`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             tool: 'getMarketIntelligence',
-            params: {
-              market,
-              productCategories
-            }
+            params
           }),
         });
         

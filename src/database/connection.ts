@@ -15,6 +15,9 @@ export class Database {
   public exportOutcomes: Collection;
   public exportPatterns: Collection;
   public marketSelections: Collection;
+  public certificationNotifications: Collection;
+  public timelines: Collection;
+  public marketReports: Collection;
   
   constructor() {
     // Initialize collections
@@ -28,6 +31,9 @@ export class Database {
     this.exportOutcomes = new Collection('exportOutcomes');
     this.exportPatterns = new Collection('exportPatterns');
     this.marketSelections = new Collection('marketSelections');
+    this.certificationNotifications = new Collection('certificationNotifications');
+    this.timelines = new Collection('timelines');
+    this.marketReports = new Collection('marketReports');
   }
   
   async connect(connectionString?: string): Promise<void> {

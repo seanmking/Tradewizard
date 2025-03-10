@@ -18,131 +18,35 @@ IMPORTANCE_LEVELS = ['critical', 'high', 'medium', 'low']
 
 def load_regulatory_data():
     """
-    Load regulatory data from data files.
+    Load regulatory data from the MCP server.
     
     Returns:
         Dictionary of regulatory data by market and industry
     """
     try:
-        # In a real implementation, this would load from a database
-        # For now, return a static structure
+        from ..core.mcp_client import MCPClient
         
-        # Structure: market -> industry -> document list
-        return {
-            'United Kingdom': {
-                'Food Products': [
-                    {
-                        'id': 'uk-food-1',
-                        'name': 'UK Food Safety Certificate',
-                        'description': 'Certification for food safety standards compliance',
-                        'importance': 'critical',
-                        'estimatedCost': 2500,
-                        'estimatedTimeInWeeks': 8,
-                        'details': 'Required for all food products. Certifies compliance with UK food safety regulations.'
-                    },
-                    {
-                        'id': 'uk-food-2',
-                        'name': 'Food Labeling Compliance',
-                        'description': 'Documentation of compliance with UK food labeling requirements',
-                        'importance': 'critical',
-                        'estimatedCost': 1200,
-                        'estimatedTimeInWeeks': 4,
-                        'details': 'Required for all food products. Ensures all packaging meets UK labeling standards.'
-                    },
-                    {
-                        'id': 'uk-food-3',
-                        'name': 'Health Certificate',
-                        'description': 'Certificate for food product health standards',
-                        'importance': 'high',
-                        'estimatedCost': 800,
-                        'estimatedTimeInWeeks': 3,
-                        'details': 'Required for processed food products. Certifies product is safe for consumption.'
-                    },
-                    {
-                        'id': 'uk-food-4',
-                        'name': 'Organic Certification',
-                        'description': 'Certification for organic food products',
-                        'importance': 'medium',
-                        'estimatedCost': 3000,
-                        'estimatedTimeInWeeks': 12,
-                        'details': 'Optional. Required only if marketing products as organic.'
-                    }
-                ]
-            },
-            'United States': {
-                'Food Products': [
-                    {
-                        'id': 'us-food-1',
-                        'name': 'FDA Registration',
-                        'description': 'Registration with the US Food and Drug Administration',
-                        'importance': 'critical',
-                        'estimatedCost': 1500,
-                        'estimatedTimeInWeeks': 6,
-                        'details': 'Required for all food facilities. Must be renewed every two years.'
-                    },
-                    {
-                        'id': 'us-food-2',
-                        'name': 'Food Facility Inspection',
-                        'description': 'Inspection of food production facilities',
-                        'importance': 'critical',
-                        'estimatedCost': 2000,
-                        'estimatedTimeInWeeks': 8,
-                        'details': 'Required for all food production facilities exporting to the US.'
-                    },
-                    {
-                        'id': 'us-food-3',
-                        'name': 'Nutrition Facts Compliance',
-                        'description': 'Documentation of compliance with US nutrition labeling',
-                        'importance': 'high',
-                        'estimatedCost': 1000,
-                        'estimatedTimeInWeeks': 4,
-                        'details': 'Required for all packaged food products. Must follow FDA format.'
-                    },
-                    {
-                        'id': 'us-food-4',
-                        'name': 'Food Safety Plan',
-                        'description': 'Documented food safety plan under FSMA',
-                        'importance': 'high',
-                        'estimatedCost': 3500,
-                        'estimatedTimeInWeeks': 10,
-                        'details': 'Required under the Food Safety Modernization Act for all food facilities.'
-                    }
-                ]
-            },
-            'United Arab Emirates': {
-                'Food Products': [
-                    {
-                        'id': 'uae-food-1',
-                        'name': 'Halal Certification',
-                        'description': 'Certification for compliance with Halal requirements',
-                        'importance': 'critical',
-                        'estimatedCost': 2000,
-                        'estimatedTimeInWeeks': 8,
-                        'details': 'Required for all food products containing animal products or derivatives.'
-                    },
-                    {
-                        'id': 'uae-food-2',
-                        'name': 'Food Import License',
-                        'description': 'License for importing food products into UAE',
-                        'importance': 'critical',
-                        'estimatedCost': 1200,
-                        'estimatedTimeInWeeks': 6,
-                        'details': 'Required for all imported food products. Must be obtained by local importer.'
-                    },
-                    {
-                        'id': 'uae-food-3',
-                        'name': 'Arabic Labeling Compliance',
-                        'description': 'Documentation of compliance with Arabic labeling requirements',
-                        'importance': 'high',
-                        'estimatedCost': 800,
-                        'estimatedTimeInWeeks': 4,
-                        'details': 'Required for all food products. All information must be in Arabic and English.'
-                    }
-                ]
-            }
-        }
+        # Initialize MCP client
+        mcp_client = MCPClient()
+        
+        # Get regulatory data for all supported markets and industries
+        regulatory_data = {}
+        
+        # Get data for each major market
+        markets = ['United Kingdom', 'United States', 'European Union', 'United Arab Emirates']
+        industries = ['Food Products', 'Prepared Meals']
+        
+        for market in markets:
+            regulatory_data[market] = {}
+            for industry in industries:
+                requirements = mcp_client.get_regulatory_requirements(market, industry)
+                if requirements.get('success'):
+                    regulatory_data[market][industry] = requirements['data']
+        
+        return regulatory_data
     except Exception as e:
-        logger.error(f"Error loading regulatory data: {str(e)}")
+        logger.error(f"Error loading regulatory data from MCP: {e}")
+        # Return minimal structure
         return {}
 
 def analyze_regulatory_requirements(industry, markets):

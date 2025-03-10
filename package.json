@@ -1,0 +1,31 @@
+{
+  "name": "tradewizard-ai-agent",
+  "version": "1.0.0",
+  "description": "TradeWizard AI Agent - Streamlined Implementation",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/examples/run-streamlined-example.js",
+    "dev": "ts-node src/examples/run-streamlined-example.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "export",
+    "trade",
+    "international"
+  ],
+  "author": "TradeWizard Team",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "ts-node": "^10.9.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 
