@@ -10,6 +10,8 @@ import { registerReportTools } from './report';
 import { createAnalyzeTariffsTool, createEvaluateMarketAccessTool } from './analyze-tariffs';
 import { registerBusinessAnalysisTools } from './business-analysis';
 import { registerComplianceCostTools } from './compliance-cost';
+import { registerAssessmentIntegrationTools } from './assessment-integration';
+import { registerBusinessProfileTrackerTools } from './business-profile-tracker';
 
 /**
  * Register all tools
@@ -23,9 +25,11 @@ export function registerTools(connectors: Connectors, llm: LLM): Tool[] {
     ...registerExportReadinessTools(connectors, llm),
     ...registerSqlTools(connectors, llm),
     ...registerReportTools(connectors, llm),
-    createAnalyzeTariffsTool(connectors),
-    createEvaluateMarketAccessTool(connectors),
     ...registerBusinessAnalysisTools(connectors, llm),
-    ...registerComplianceCostTools(connectors, llm)
+    ...registerComplianceCostTools(connectors, llm),
+    ...registerAssessmentIntegrationTools(connectors, llm),
+    ...registerBusinessProfileTrackerTools(connectors, llm),
+    createAnalyzeTariffsTool(connectors),
+    createEvaluateMarketAccessTool(connectors)
   ];
 }

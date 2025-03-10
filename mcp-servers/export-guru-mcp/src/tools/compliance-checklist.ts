@@ -9,6 +9,108 @@ import { Connectors } from '../connectors';
 import { LLM, Tool, RegulatoryRequirement } from '../types';
 import { ApiError } from '../utils/error-handling';
 
+// Market-specific constants for UAE, UK, and USA
+const TARGET_MARKETS = {
+  UAE: {
+    name: 'United Arab Emirates',
+    code: 'UAE',
+    regulatoryBodies: [
+      'Emirates Authority for Standardization and Metrology (ESMA)',
+      'Dubai Municipality',
+      'Abu Dhabi Quality and Conformity Council'
+    ],
+    estimatedBaseDays: 90, // Base days for compliance
+    complexityFactors: {
+      food: 1.5,
+      medical: 2.0,
+      electronics: 1.3,
+      textiles: 1.0,
+      chemicals: 1.8,
+      default: 1.2
+    }
+  },
+  UK: {
+    name: 'United Kingdom',
+    code: 'UK',
+    regulatoryBodies: [
+      'Office for Product Safety and Standards',
+      'Food Standards Agency',
+      'Medicines and Healthcare products Regulatory Agency'
+    ],
+    estimatedBaseDays: 60,
+    complexityFactors: {
+      food: 1.3,
+      medical: 1.8,
+      electronics: 1.2,
+      textiles: 0.9,
+      chemicals: 1.6,
+      default: 1.1
+    }
+  },
+  USA: {
+    name: 'United States of America',
+    code: 'USA',
+    regulatoryBodies: [
+      'Food and Drug Administration (FDA)',
+      'Consumer Product Safety Commission (CPSC)',
+      'Federal Communications Commission (FCC)',
+      'Environmental Protection Agency (EPA)'
+    ],
+    estimatedBaseDays: 75,
+    complexityFactors: {
+      food: 1.4,
+      medical: 2.2,
+      electronics: 1.3,
+      textiles: 1.0,
+      chemicals: 1.7,
+      default: 1.2
+    }
+  }
+};
+
+// Product category mapping to standardize categories
+const PRODUCT_CATEGORY_MAPPING: Record<string, string> = {
+  // Food and beverages
+  'food': 'food',
+  'beverage': 'food',
+  'agricultural': 'food',
+  'produce': 'food',
+  'fruit': 'food',
+  'vegetable': 'food',
+  'meat': 'food',
+  'dairy': 'food',
+  'processed food': 'food',
+  
+  // Medical and healthcare
+  'medical': 'medical',
+  'healthcare': 'medical',
+  'pharmaceutical': 'medical',
+  'medicine': 'medical',
+  'medical device': 'medical',
+  'medical equipment': 'medical',
+  
+  // Electronics
+  'electronic': 'electronics',
+  'electrical': 'electronics',
+  'computer': 'electronics',
+  'electronic device': 'electronics',
+  'appliance': 'electronics',
+  
+  // Textiles
+  'textile': 'textiles',
+  'clothing': 'textiles',
+  'apparel': 'textiles',
+  'fabric': 'textiles',
+  'garment': 'textiles',
+  
+  // Chemicals
+  'chemical': 'chemicals',
+  'cosmetic': 'chemicals',
+  'cleaning': 'chemicals',
+  'paint': 'chemicals',
+  'solvent': 'chemicals'
+};
+
 /**
  * Checklist item interface
  */
@@ -22,6 +124,7 @@ export interface ChecklistItem {
   estimatedCost: string;
   resources: string[];
   actions: string[];
+  marketSpecific: boolean; // Indicates if this is a market-specific requirement
 }
 
 /**
@@ -39,6 +142,19 @@ export interface ComplianceChecklist {
   overallProgress: number;
   estimatedCompletionTime: string;
   totalEstimatedCost: string;
+  milestones: ComplianceMilestone[]; // Added milestones for timeline tracking
+}
+
+/**
+ * Compliance milestone interface for tracking timeline
+ */
+export interface ComplianceMilestone {
+  id: string;
+  name: string;
+  description: string;
+  estimatedCompletionDate: string;
+  dependsOn: string[]; // IDs of checklist items that must be completed before this milestone
+  status: 'not-started' | 'in-progress' | 'completed';
 }
 
 /**
@@ -74,6 +190,56 @@ export interface ActionPlan {
 }
 
 /**
+ * Maps a product category to a standardized category for complexity calculation
+ */
+function mapToStandardCategory(productCategory: string): string {
+  const lowerCategory = productCategory.toLowerCase();
+  
+  for (const [key, value] of Object.entries(PRODUCT_CATEGORY_MAPPING)) {
+    if (lowerCategory.includes(key)) {
+      return value;
+    }
+  }
+  
+  return 'default';
+}
+
+/**
+ * Gets market-specific complexity factor for timeline estimation
+ */
+function getComplexityFactor(country: string, productCategory: string): number {
+  const standardCategory = mapToStandardCategory(productCategory);
+  
+  if (country === 'UAE' || country === 'United Arab Emirates') {
+    return TARGET_MARKETS.UAE.complexityFactors[standardCategory as keyof typeof TARGET_MARKETS.UAE.complexityFactors] || 
+           TARGET_MARKETS.UAE.complexityFactors.default;
+  } else if (country === 'UK' || country === 'United Kingdom') {
+    return TARGET_MARKETS.UK.complexityFactors[standardCategory as keyof typeof TARGET_MARKETS.UK.complexityFactors] || 
+           TARGET_MARKETS.UK.complexityFactors.default;
+  } else if (country === 'USA' || country === 'United States' || country === 'United States of America') {
+    return TARGET_MARKETS.USA.complexityFactors[standardCategory as keyof typeof TARGET_MARKETS.USA.complexityFactors] || 
+           TARGET_MARKETS.USA.complexityFactors.default;
+  }
+  
+  return 1.2; // Default complexity factor
+}
+
+/**
+ * Gets base timeline estimation for a country
+ */
+function getBaseTimelineEstimation(country: string): number {
+  if (country === 'UAE' || country === 'United Arab Emirates') {
+    return TARGET_MARKETS.UAE.estimatedBaseDays;
+  } else if (country === 'UK' || country === 'United Kingdom') {
+    return TARGET_MARKETS.UK.estimatedBaseDays;
+  } else if (country === 'USA' || country === 'United States' || country === 'United States of America') {
+    return TARGET_MARKETS.USA.estimatedBaseDays;
+  }
+  
+  return 75; // Default base days
+}
+
+/**
  * Generate a compliance checklist
  */
 async function generateComplianceChecklist(
@@ -90,109 +256,81 @@ async function generateComplianceChecklist(
   llm: LLM
 ): Promise<ComplianceChecklist> {
   try {
+    // Create an empty checklist
+    const checklist = createEmptyChecklist(country, productCategory, hsCode, businessProfile.name);
+    
     // Get regulatory requirements
-    const requirements = await connectors.regulatoryDb.getRequirements(
-      country,
-      productCategory,
-      hsCode
-    ).catch(error => {
-      console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
-      return []; // Return empty array as fallback
-    });
+    const requirements = await connectors.regulatoryDb.getRequirements(country, productCategory, hsCode);
     
     if (!requirements || requirements.length === 0) {
-      return createEmptyChecklist(country, productCategory, hsCode, businessProfile.name);
+      throw new ApiError('No regulatory requirements found', 404);
     }
     
     // Categorize requirements by type
     const categorizedRequirements = categorizeRequirementsByType(requirements);
     
-    // Generate checklist items
-    const items: ChecklistItem[] = [];
-    let totalCost = 0;
-    let maxTimeline = 0;
-    
     // Process each category of requirements
     for (const [category, reqs] of Object.entries(categorizedRequirements)) {
       for (const req of reqs) {
-        // Generate actions for this requirement
+        // Generate actions for the requirement
         const actions = await generateActionsForRequirement(req, country, llm);
+        
+        // Get priority for the requirement
+        const priority = getPriorityForRequirement(req);
+        
+        // Get resources for the requirement
+        const resources = getResourcesForRequirement(req);
         
         // Parse timeline and cost
         const timeline = parseTimeline(req.estimatedTimeline);
         const cost = parseCost(req.estimatedCost);
         
-        // Update totals
-        totalCost += cost.value;
-        maxTimeline = Math.max(maxTimeline, timeline.days);
+        // Apply complexity factor based on product category and country
+        const complexityFactor = getComplexityFactor(country, productCategory);
+        const adjustedDays = Math.round(timeline.days * complexityFactor);
+        const adjustedTimeline = formatTimelineEstimate(adjustedDays);
         
         // Create checklist item
-        items.push({
-          id: `req-${req.id || Math.random().toString(36).substring(2, 10)}`,
+        const item: ChecklistItem = {
+          id: `req-${checklist.items.length + 1}`,
           requirement: req.requirementType,
           description: req.description,
           status: 'not-started',
-          priority: getPriorityForRequirement(req),
-          timeline: timeline.display,
+          priority,
+          timeline: adjustedTimeline,
           estimatedCost: cost.display,
-          resources: getResourcesForRequirement(req),
-          actions
-        });
+          resources,
+          actions,
+          marketSpecific: false // Default to false since it's not in the RegulatoryRequirement interface
+        };
+        
+        checklist.items.push(item);
       }
     }
     
-    // Calculate overall progress (all items start as not-started)
-    const overallProgress = 0;
+    // Calculate overall progress
+    checklist.overallProgress = 0; // All items start as not-started
     
-    // Format estimated completion time
-    const estimatedCompletionTime = formatTimelineEstimate(maxTimeline);
+    // Calculate total estimated cost
+    const totalCost = checklist.items.reduce((sum, item) => {
+      const cost = parseCost(item.estimatedCost);
+      return sum + cost.value;
+    }, 0);
+    checklist.totalEstimatedCost = formatCostEstimate(totalCost);
     
-    // Format total cost
-    const totalEstimatedCost = formatCostEstimate(totalCost);
+    // Calculate estimated completion time
+    const complexityFactor = getComplexityFactor(country, productCategory);
+    const baseTimeline = getBaseTimelineEstimation(country);
+    const estimatedDays = Math.round(baseTimeline * complexityFactor);
+    checklist.estimatedCompletionTime = formatTimelineEstimate(estimatedDays);
     
-    // Create the checklist
-    return {
-      id: `checklist-${Math.random().toString(36).substring(2, 10)}`,
-      country,
-      productCategory,
-      hsCode,
-      businessName: businessProfile.name,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      items,
-      overallProgress,
-      estimatedCompletionTime,
-      totalEstimatedCost
-    };
+    // Generate milestones
+    checklist.milestones = generateComplianceMilestones(checklist, country, productCategory);
+    
+    return checklist;
   } catch (error) {
-    console.error('Error generating compliance checklist:', error instanceof Error ? error.message : String(error));
-    
-    // Return a minimal checklist with error information
-    return {
-      id: `checklist-${Math.random().toString(36).substring(2, 10)}`,
-      country,
-      productCategory,
-      hsCode,
-      businessName: businessProfile.name,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      items: [
-        {
-          id: 'error-1',
-          requirement: 'Error',
-          description: 'An error occurred while generating the compliance checklist.',
-          status: 'not-started',
-          priority: 'high',
-          timeline: 'Unknown',
-          estimatedCost: 'Unknown',
-          resources: ['Contact support for assistance'],
-          actions: ['Try again later', 'Contact support if the problem persists']
-        }
-      ],
-      overallProgress: 0,
-      estimatedCompletionTime: 'Unknown',
-      totalEstimatedCost: 'Unknown'
-    };
+    console.error('Error generating compliance checklist:', error);
+    throw error;
   }
 }
 
@@ -228,12 +366,14 @@ function createEmptyChecklist(
           'Prepare packing list',
           'Obtain certificate of origin',
           'Prepare bill of lading or airway bill'
-        ]
+        ],
+        marketSpecific: false
       }
     ],
     overallProgress: 0,
     estimatedCompletionTime: '2 weeks',
-    totalEstimatedCost: '$500'
+    totalEstimatedCost: '$500',
+    milestones: []
   };
 }
 
@@ -765,4 +905,69 @@ export function registerComplianceChecklistTools(connectors: Connectors, llm: LL
       }
     }
   ];
+}
+
+/**
+ * Generate compliance milestones based on checklist items
+ */
+function generateComplianceMilestones(
+  checklist: ComplianceChecklist,
+  country: string,
+  productCategory: string
+): ComplianceMilestone[] {
+  const highPriorityItems = checklist.items.filter(item => item.priority === 'high');
+  const mediumPriorityItems = checklist.items.filter(item => item.priority === 'medium');
+  const lowPriorityItems = checklist.items.filter(item => item.priority === 'low');
+  
+  const milestones: ComplianceMilestone[] = [];
+  const now = new Date();
+  let currentDate = new Date(now);
+  
+  // Initial documentation milestone
+  milestones.push({
+    id: `milestone-1`,
+    name: 'Initial Documentation Preparation',
+    description: 'Prepare all necessary documentation for export compliance',
+    estimatedCompletionDate: new Date(currentDate.setDate(currentDate.getDate() + 14)).toISOString(),
+    dependsOn: [],
+    status: 'not-started'
+  });
+  
+  // Product testing and certification milestone
+  currentDate = new Date(now);
+  const testingDays = Math.round(30 * getComplexityFactor(country, productCategory));
+  milestones.push({
+    id: `milestone-2`,
+    name: 'Product Testing and Certification',
+    description: 'Complete required product testing and obtain necessary certifications',
+    estimatedCompletionDate: new Date(currentDate.setDate(currentDate.getDate() + testingDays)).toISOString(),
+    dependsOn: highPriorityItems.map(item => item.id),
+    status: 'not-started'
+  });
+  
+  // Regulatory approval milestone
+  currentDate = new Date(now);
+  const approvalDays = Math.round(45 * getComplexityFactor(country, productCategory));
+  milestones.push({
+    id: `milestone-3`,
+    name: 'Regulatory Approval',
+    description: 'Obtain regulatory approval from relevant authorities',
+    estimatedCompletionDate: new Date(currentDate.setDate(currentDate.getDate() + approvalDays)).toISOString(),
+    dependsOn: [...highPriorityItems.map(item => item.id), ...mediumPriorityItems.map(item => item.id).slice(0, 3)],
+    status: 'not-started'
+  });
+  
+  // Market entry readiness milestone
+  currentDate = new Date(now);
+  const readinessDays = Math.round(getBaseTimelineEstimation(country) * getComplexityFactor(country, productCategory));
+  milestones.push({
+    id: `milestone-4`,
+    name: 'Market Entry Readiness',
+    description: 'Complete all compliance requirements for market entry',
+    estimatedCompletionDate: new Date(currentDate.setDate(currentDate.getDate() + readinessDays)).toISOString(),
+    dependsOn: checklist.items.map(item => item.id),
+    status: 'not-started'
+  });
+  
+  return milestones;
 } 
