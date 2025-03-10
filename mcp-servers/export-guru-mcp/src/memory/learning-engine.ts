@@ -3,6 +3,7 @@ import { ExportStrategyMemory } from './export-strategy-memory';
 import { RegulatoryPatternMemory } from './regulatory-pattern-memory';
 import { BusinessProfileTracker } from './business-profile-tracker';
 import { SimilarityEngine } from './similarity-engine';
+import { Pool } from 'pg';
 
 /**
  * Confidence level for pattern application
@@ -164,7 +165,8 @@ export class LearningEngine {
   }
   
   /**
-   * Process feedback on pattern applications to improve future recommendations
+   * Process feedback on a pattern application and adjust pattern confidence accordingly
+   * This implements a feedback loop that allows the system to learn from user feedback
    */
   async processFeedback(
     businessId: string,
@@ -175,42 +177,130 @@ export class LearningEngine {
     try {
       // Get the pattern application
       const patternApplication = await this.getPatternApplication(patternApplicationId);
-      
       if (!patternApplication) {
-        console.warn(`Pattern application ${patternApplicationId} not found`);
+        console.error(`Pattern application ${patternApplicationId} not found`);
         return;
       }
+
+      // Get the pattern from the appropriate memory system
+      let pattern: any = null;
+      let memorySystem: any = null;
+
+      if (patternApplication.source === PatternSource.EXPORT_STRATEGY) {
+        memorySystem = this.exportStrategyMemory;
+        const patterns = await this.exportStrategyMemory.findPatternById(patternApplication.patternId);
+        pattern = patterns.length > 0 ? patterns[0] : null;
+      } else if (patternApplication.source === PatternSource.REGULATORY) {
+        memorySystem = this.regulatoryPatternMemory;
+        const patterns = await this.regulatoryPatternMemory.findPatternById(patternApplication.patternId);
+        pattern = patterns.length > 0 ? patterns[0] : null;
+      }
+
+      if (!pattern) {
+        console.error(`Pattern ${patternApplication.patternId} not found`);
+        return;
+      }
+
+      // Adjust the pattern confidence based on feedback
+      const adjustedConfidence = this.adjustPatternConfidence(
+        pattern.confidence,
+        pattern.applicationCount,
+        isHelpful,
+        patternApplication.confidence
+      );
+
+      // Update the pattern with the new confidence
+      pattern.confidence = adjustedConfidence;
       
-      // Update pattern confidence based on feedback
-      switch (patternApplication.source) {
-        case PatternSource.EXPORT_STRATEGY:
-          await this.exportStrategyMemory.updatePatternConfidence(
-            patternApplication.patternId,
-            isHelpful,
-            feedbackDetails
-          );
-          break;
-        case PatternSource.REGULATORY:
-          await this.regulatoryPatternMemory.updatePatternConfidence(
-            patternApplication.patternId,
-            isHelpful,
-            feedbackDetails
-          );
-          break;
-        case PatternSource.BUSINESS_PROFILE:
-          // Handle business profile pattern feedback
-          break;
-        case PatternSource.COMBINED:
-          // Handle combined pattern feedback
-          // This might require updating multiple pattern sources
-          break;
+      // Increment application count
+      pattern.applicationCount += 1;
+      
+      // Update success rate if applicable
+      if (pattern.successRate !== undefined) {
+        const totalSuccesses = pattern.successRate * pattern.applicationCount;
+        const newTotalSuccesses = isHelpful ? totalSuccesses + 1 : totalSuccesses;
+        pattern.successRate = newTotalSuccesses / pattern.applicationCount;
       }
       
-      // Record feedback for analysis
+      // Add feedback to pattern metadata
+      if (!pattern.metadata) {
+        pattern.metadata = {};
+      }
+      
+      if (!pattern.metadata.feedback) {
+        pattern.metadata.feedback = [];
+      }
+      
+      pattern.metadata.feedback.push({
+        businessId,
+        patternApplicationId,
+        isHelpful,
+        feedbackDetails,
+        timestamp: new Date()
+      });
+
+      // Update the pattern in the memory system
+      await memorySystem.updatePattern(pattern);
+
+      // Record the feedback
       await this.recordFeedback(businessId, patternApplicationId, isHelpful, feedbackDetails);
+      
+      console.log(`Updated pattern ${pattern.id} confidence to ${adjustedConfidence} based on feedback`);
     } catch (error) {
-      console.error(`Error processing feedback: ${error.message}`);
+      console.error(`Error processing feedback: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
+    }
+  }
+  
+  /**
+   * Adjust pattern confidence based on feedback
+   * This implements a Bayesian-inspired confidence adjustment
+   */
+  private adjustPatternConfidence(
+    currentConfidence: number,
+    applicationCount: number,
+    isHelpful: boolean,
+    applicationConfidence: number
+  ): number {
+    // Weight of the feedback depends on the application count
+    // More applications means each individual feedback has less impact
+    const feedbackWeight = Math.max(0.05, Math.min(0.3, 1 / (applicationCount + 1)));
+    
+    // The confidence adjustment is weighted by the application confidence
+    // Higher confidence applications have more impact on the pattern confidence
+    const confidenceImpact = applicationConfidence * feedbackWeight;
+    
+    // Adjust confidence up or down based on feedback
+    let adjustedConfidence = currentConfidence;
+    
+    if (isHelpful) {
+      // Positive feedback increases confidence, but with diminishing returns as confidence approaches 1
+      const room_for_improvement = 1 - currentConfidence;
+      adjustedConfidence += confidenceImpact * room_for_improvement;
+    } else {
+      // Negative feedback decreases confidence more significantly
+      // The higher the current confidence, the more it should be reduced
+      adjustedConfidence -= confidenceImpact * 1.5 * currentConfidence;
+    }
+    
+    // Ensure confidence stays within valid range
+    return Math.max(0.1, Math.min(0.99, adjustedConfidence));
+  }
+  
+  /**
+   * Find a pattern by ID in the appropriate memory system
+   */
+  async findPatternById(patternId: string, source: PatternSource): Promise<any | null> {
+    try {
+      if (source === PatternSource.EXPORT_STRATEGY) {
+        return await this.exportStrategyMemory.findPatternById(patternId);
+      } else if (source === PatternSource.REGULATORY) {
+        return await this.regulatoryPatternMemory.findPatternById(patternId);
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error finding pattern by ID: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
     }
   }
   
@@ -348,5 +438,446 @@ export class LearningEngine {
     } catch (error) {
       console.error(`Error recording feedback: ${error.message}`);
     }
+  }
+  
+  /**
+   * Get the similarity engine
+   */
+  getSimilarityEngine(): SimilarityEngine {
+    return this.similarityEngine;
+  }
+  
+  /**
+   * Consolidate similar patterns to prevent fragmentation
+   * This helps maintain a cleaner pattern database by merging patterns that are very similar
+   */
+  async consolidatePatterns(): Promise<void> {
+    try {
+      // Consolidate export strategy patterns
+      await this.consolidateExportStrategyPatterns();
+      
+      // Consolidate regulatory patterns
+      await this.consolidateRegulatoryPatterns();
+      
+      console.log('Pattern consolidation completed');
+    } catch (error) {
+      console.error(`Error consolidating patterns: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  /**
+   * Consolidate similar export strategy patterns
+   */
+  private async consolidateExportStrategyPatterns(): Promise<void> {
+    try {
+      // Get all export strategy patterns
+      const patterns = await this.exportStrategyMemory.getAllPatterns();
+      
+      // Group patterns by market and entry strategy
+      const patternGroups: Record<string, any[]> = {};
+      
+      for (const pattern of patterns) {
+        // Skip patterns with high confidence and application count
+        if (pattern.confidence > 0.8 && pattern.applicationCount > 10) {
+          continue; // These are well-established patterns, don't consolidate
+        }
+        
+        // Create a key based on markets and strategy
+        const markets = pattern.applicableMarkets.sort().join(',');
+        const key = `${markets}|${pattern.entryStrategy}`;
+        
+        if (!patternGroups[key]) {
+          patternGroups[key] = [];
+        }
+        
+        patternGroups[key].push(pattern);
+      }
+      
+      // For each group with multiple patterns, check similarity and consolidate if needed
+      for (const [key, groupPatterns] of Object.entries(patternGroups)) {
+        if (groupPatterns.length < 2) {
+          continue; // Need at least 2 patterns to consolidate
+        }
+        
+        // Sort by application count (descending)
+        groupPatterns.sort((a, b) => b.applicationCount - a.applicationCount);
+        
+        // Use the pattern with highest application count as primary
+        const primaryPattern = groupPatterns[0];
+        const patternsToMerge = [];
+        
+        // Check similarity with other patterns in the group
+        for (let i = 1; i < groupPatterns.length; i++) {
+          const secondaryPattern = groupPatterns[i];
+          
+          // Calculate similarity between patterns
+          const similarity = this.calculatePatternSimilarity(primaryPattern, secondaryPattern);
+          
+          // If similarity is high, mark for merging
+          if (similarity > 0.85) {
+            patternsToMerge.push(secondaryPattern);
+          }
+        }
+        
+        // If we have patterns to merge, consolidate them
+        if (patternsToMerge.length > 0) {
+          await this.mergeExportStrategyPatterns(primaryPattern, patternsToMerge);
+        }
+      }
+    } catch (error) {
+      console.error(`Error consolidating export strategy patterns: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  /**
+   * Merge multiple export strategy patterns into a primary pattern
+   */
+  private async mergeExportStrategyPatterns(primaryPattern: any, patternsToMerge: any[]): Promise<void> {
+    try {
+      // Calculate total application count
+      const totalApplicationCount = primaryPattern.applicationCount + 
+        patternsToMerge.reduce((sum, p) => sum + p.applicationCount, 0);
+      
+      // Calculate weighted success rate
+      const weightedSuccessRate = (primaryPattern.successRate * primaryPattern.applicationCount +
+        patternsToMerge.reduce((sum, p) => sum + (p.successRate * p.applicationCount), 0)) / totalApplicationCount;
+      
+      // Merge common challenges
+      const allChallenges = [
+        ...primaryPattern.commonChallenges,
+        ...patternsToMerge.flatMap(p => p.commonChallenges)
+      ];
+      const commonChallenges = this.getTopFrequentItems(allChallenges, 5);
+      
+      // Merge critical success factors
+      const allSuccessFactors = [
+        ...primaryPattern.criticalSuccessFactors,
+        ...patternsToMerge.flatMap(p => p.criticalSuccessFactors)
+      ];
+      const criticalSuccessFactors = this.getTopFrequentItems(allSuccessFactors, 5);
+      
+      // Merge relevant certifications
+      const allCertifications = [
+        ...primaryPattern.relevantCertifications,
+        ...patternsToMerge.flatMap(p => p.relevantCertifications)
+      ];
+      const relevantCertifications = this.getTopFrequentItems(allCertifications, 5);
+      
+      // Update primary pattern
+      const updatedPattern = {
+        ...primaryPattern,
+        applicationCount: totalApplicationCount,
+        successRate: weightedSuccessRate,
+        confidence: this.calculateConfidence(weightedSuccessRate, totalApplicationCount),
+        commonChallenges,
+        criticalSuccessFactors,
+        relevantCertifications,
+        lastUpdated: new Date(),
+        metadata: {
+          ...primaryPattern.metadata,
+          mergedPatternIds: patternsToMerge.map(p => p.id),
+          mergedAt: new Date()
+        }
+      };
+      
+      // Update the primary pattern
+      await this.exportStrategyMemory.updatePattern(updatedPattern);
+      
+      // Archive the merged patterns
+      for (const pattern of patternsToMerge) {
+        await this.exportStrategyMemory.archivePattern(pattern.id, primaryPattern.id);
+      }
+      
+      console.log(`Merged ${patternsToMerge.length} export strategy patterns into ${primaryPattern.id}`);
+    } catch (error) {
+      console.error(`Error merging export strategy patterns: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  /**
+   * Consolidate similar regulatory patterns
+   */
+  private async consolidateRegulatoryPatterns(): Promise<void> {
+    try {
+      // Get all regulatory patterns
+      const patterns = await this.regulatoryPatternMemory.getAllPatterns();
+      
+      // Group patterns by type and domain
+      const patternGroups: Record<string, any[]> = {};
+      
+      for (const pattern of patterns) {
+        // Skip patterns with high confidence and application count
+        if (pattern.confidence > 0.8 && pattern.applicationCount > 10) {
+          continue; // These are well-established patterns, don't consolidate
+        }
+        
+        // Create a key based on type and domain
+        const key = `${pattern.type}|${pattern.regulatoryDomain}`;
+        
+        if (!patternGroups[key]) {
+          patternGroups[key] = [];
+        }
+        
+        patternGroups[key].push(pattern);
+      }
+      
+      // For each group with multiple patterns, check similarity and consolidate if needed
+      for (const [key, groupPatterns] of Object.entries(patternGroups)) {
+        if (groupPatterns.length < 2) {
+          continue; // Need at least 2 patterns to consolidate
+        }
+        
+        // Sort by application count (descending)
+        groupPatterns.sort((a, b) => b.applicationCount - a.applicationCount);
+        
+        // Use the pattern with highest application count as primary
+        const primaryPattern = groupPatterns[0];
+        const patternsToMerge = [];
+        
+        // Check similarity with other patterns in the group
+        for (let i = 1; i < groupPatterns.length; i++) {
+          const secondaryPattern = groupPatterns[i];
+          
+          // Calculate similarity between patterns
+          const similarity = this.calculatePatternSimilarity(primaryPattern, secondaryPattern);
+          
+          // If similarity is high, mark for merging
+          if (similarity > 0.85) {
+            patternsToMerge.push(secondaryPattern);
+          }
+        }
+        
+        // If we have patterns to merge, consolidate them
+        if (patternsToMerge.length > 0) {
+          await this.mergeRegulatoryPatterns(primaryPattern, patternsToMerge);
+        }
+      }
+    } catch (error) {
+      console.error(`Error consolidating regulatory patterns: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  /**
+   * Merge multiple regulatory patterns into a primary pattern
+   */
+  private async mergeRegulatoryPatterns(primaryPattern: any, patternsToMerge: any[]): Promise<void> {
+    try {
+      // Calculate total application count
+      const totalApplicationCount = primaryPattern.applicationCount + 
+        patternsToMerge.reduce((sum, p) => sum + p.applicationCount, 0);
+      
+      // Calculate weighted success rate
+      const weightedSuccessRate = (primaryPattern.successRate * primaryPattern.applicationCount +
+        patternsToMerge.reduce((sum, p) => sum + (p.successRate * p.applicationCount), 0)) / totalApplicationCount;
+      
+      // Merge applicable markets
+      const allMarkets = [
+        ...primaryPattern.applicableMarkets,
+        ...patternsToMerge.flatMap(p => p.applicableMarkets)
+      ];
+      const applicableMarkets = [...new Set(allMarkets)];
+      
+      // Merge product categories
+      const allCategories = [
+        ...primaryPattern.productCategories,
+        ...patternsToMerge.flatMap(p => p.productCategories)
+      ];
+      const productCategories = [...new Set(allCategories)];
+      
+      // Update primary pattern
+      const updatedPattern = {
+        ...primaryPattern,
+        applicationCount: totalApplicationCount,
+        successRate: weightedSuccessRate,
+        confidence: this.calculateConfidence(weightedSuccessRate, totalApplicationCount),
+        applicableMarkets,
+        productCategories,
+        lastUpdated: new Date(),
+        metadata: {
+          ...primaryPattern.metadata,
+          mergedPatternIds: patternsToMerge.map(p => p.id),
+          mergedAt: new Date()
+        }
+      };
+      
+      // Update the primary pattern
+      await this.regulatoryPatternMemory.updatePattern(updatedPattern);
+      
+      // Archive the merged patterns
+      for (const pattern of patternsToMerge) {
+        await this.regulatoryPatternMemory.archivePattern(pattern.id, primaryPattern.id);
+      }
+      
+      console.log(`Merged ${patternsToMerge.length} regulatory patterns into ${primaryPattern.id}`);
+    } catch (error) {
+      console.error(`Error merging regulatory patterns: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  /**
+   * Calculate similarity between two patterns
+   */
+  private calculatePatternSimilarity(pattern1: any, pattern2: any): number {
+    // For export strategy patterns
+    if (pattern1.entryStrategy && pattern2.entryStrategy) {
+      return this.calculateExportStrategyPatternSimilarity(pattern1, pattern2);
+    }
+    
+    // For regulatory patterns
+    if (pattern1.regulatoryDomain && pattern2.regulatoryDomain) {
+      return this.calculateRegulatoryPatternSimilarity(pattern1, pattern2);
+    }
+    
+    // Default similarity calculation
+    return 0.5;
+  }
+  
+  /**
+   * Calculate similarity between two export strategy patterns
+   */
+  private calculateExportStrategyPatternSimilarity(pattern1: any, pattern2: any): number {
+    let score = 0;
+    let totalWeight = 0;
+    
+    // Compare entry strategy (high weight)
+    const entryStrategyWeight = 3;
+    const entryStrategyMatch = pattern1.entryStrategy === pattern2.entryStrategy ? 1 : 0;
+    score += entryStrategyMatch * entryStrategyWeight;
+    totalWeight += entryStrategyWeight;
+    
+    // Compare compliance approach (medium weight)
+    const complianceWeight = 2;
+    const complianceMatch = pattern1.complianceApproach === pattern2.complianceApproach ? 1 : 0;
+    score += complianceMatch * complianceWeight;
+    totalWeight += complianceWeight;
+    
+    // Compare logistics model (medium weight)
+    const logisticsWeight = 2;
+    const logisticsMatch = pattern1.logisticsModel === pattern2.logisticsModel ? 1 : 0;
+    score += logisticsMatch * logisticsWeight;
+    totalWeight += logisticsWeight;
+    
+    // Compare applicable markets (medium weight)
+    const marketsWeight = 2;
+    const marketSimilarity = this.calculateSetSimilarity(
+      pattern1.applicableMarkets,
+      pattern2.applicableMarkets
+    );
+    score += marketSimilarity * marketsWeight;
+    totalWeight += marketsWeight;
+    
+    // Compare product categories (medium weight)
+    const categoriesWeight = 2;
+    const categorySimilarity = this.calculateSetSimilarity(
+      pattern1.productCategories,
+      pattern2.productCategories
+    );
+    score += categorySimilarity * categoriesWeight;
+    totalWeight += categoriesWeight;
+    
+    // Calculate normalized score
+    return totalWeight > 0 ? score / totalWeight : 0;
+  }
+  
+  /**
+   * Calculate similarity between two regulatory patterns
+   */
+  private calculateRegulatoryPatternSimilarity(pattern1: any, pattern2: any): number {
+    let score = 0;
+    let totalWeight = 0;
+    
+    // Compare type (high weight)
+    const typeWeight = 3;
+    const typeMatch = pattern1.type === pattern2.type ? 1 : 0;
+    score += typeMatch * typeWeight;
+    totalWeight += typeWeight;
+    
+    // Compare regulatory domain (high weight)
+    const domainWeight = 3;
+    const domainMatch = pattern1.regulatoryDomain === pattern2.regulatoryDomain ? 1 : 0;
+    score += domainMatch * domainWeight;
+    totalWeight += domainWeight;
+    
+    // Compare applicable markets (medium weight)
+    const marketsWeight = 2;
+    const marketSimilarity = this.calculateSetSimilarity(
+      pattern1.applicableMarkets,
+      pattern2.applicableMarkets
+    );
+    score += marketSimilarity * marketsWeight;
+    totalWeight += marketsWeight;
+    
+    // Compare product categories (medium weight)
+    const categoriesWeight = 2;
+    const categorySimilarity = this.calculateSetSimilarity(
+      pattern1.productCategories,
+      pattern2.productCategories
+    );
+    score += categorySimilarity * categoriesWeight;
+    totalWeight += categoriesWeight;
+    
+    // Calculate normalized score
+    return totalWeight > 0 ? score / totalWeight : 0;
+  }
+  
+  /**
+   * Calculate similarity between two sets
+   */
+  private calculateSetSimilarity(set1: string[], set2: string[]): number {
+    if (!set1 || !set2 || set1.length === 0 || set2.length === 0) {
+      return 0;
+    }
+    
+    // Calculate Jaccard similarity: intersection size / union size
+    const set1Set = new Set(set1);
+    const set2Set = new Set(set2);
+    
+    // Calculate intersection
+    const intersection = new Set([...set1Set].filter(x => set2Set.has(x)));
+    
+    // Calculate union
+    const union = new Set([...set1Set, ...set2Set]);
+    
+    return intersection.size / union.size;
+  }
+  
+  /**
+   * Get top N most frequent items from an array
+   */
+  private getTopFrequentItems(items: string[], n: number): string[] {
+    const frequency: Record<string, number> = {};
+    
+    // Count frequency of each item
+    for (const item of items) {
+      if (!item) continue;
+      frequency[item] = (frequency[item] || 0) + 1;
+    }
+    
+    // Sort by frequency (descending)
+    const sortedItems = Object.entries(frequency)
+      .sort((a, b) => b[1] - a[1])
+      .map(([item]) => item);
+    
+    // Return top N items
+    return sortedItems.slice(0, n);
+  }
+  
+  /**
+   * Calculate confidence based on success rate and application count
+   */
+  private calculateConfidence(successRate: number, applicationCount: number): number {
+    // Base confidence from success rate
+    let confidence = successRate;
+    
+    // Adjust based on application count (more applications = more confidence)
+    if (applicationCount < 5) {
+      confidence *= 0.7; // Low application count reduces confidence
+    } else if (applicationCount < 10) {
+      confidence *= 0.85; // Medium application count slightly reduces confidence
+    } else if (applicationCount > 20) {
+      confidence = Math.min(0.95, confidence * 1.1); // High application count increases confidence
+    }
+    
+    return confidence;
   }
 } 

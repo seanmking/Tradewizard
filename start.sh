@@ -206,6 +206,13 @@ function start_postgresql() {
         "$CREATEDB" trade_db
         echo_success "Created trade_db database"
     fi
+    
+    # Check memory_db (for the memory subsystem)
+    if ! "$PSQL" -lqt | cut -d \| -f 1 | grep -qw memory_db; then
+        echo_info "Creating memory_db database for the memory subsystem..."
+        "$CREATEDB" memory_db
+        echo_success "Created memory_db database"
+    fi
 }
 
 # Check if running on Windows and adjust commands accordingly
@@ -231,6 +238,11 @@ start_postgresql
 # Start the export-guru-mcp server
 echo_info "Starting export-guru-mcp server..."
 cd mcp-servers/export-guru-mcp
+
+# Set environment variables for memory subsystem
+export MEMORY_DB_URL="postgresql://seanking@localhost:5432/memory_db"
+
+# Start the server
 node src/simple-server.js &
 MCP_SERVER_PID=$!
 
@@ -248,94 +260,97 @@ echo_success "Export-guru-mcp server started successfully (PID: $MCP_SERVER_PID)
 # Return to the root directory
 cd ../..
 
-# Start the mock server
-echo_info "Starting mock server..."
-cd tradewizard
-PORT=3002 node mock-server.js &
-MOCK_SERVER_PID=$!
+# Start the mock server (no longer needed as we're using the MCP server)
+# echo_info "Starting mock server..."
+# cd tradewizard
+# PORT=3002 node mock-server.js &
+# MOCK_SERVER_PID=$!
+# 
+# # Wait a bit for the mock server to start
+# sleep 2
+# 
+# # Check if the mock server is running
+# if ! kill -0 $MOCK_SERVER_PID 2>/dev/null; then
+#     echo_error "Mock server failed to start."
+#     exit 1
+# fi
+# 
+# echo_success "Mock server started successfully (PID: $MOCK_SERVER_PID)"
+# 
+# # Return to the root directory
+# cd ..
 
-# Wait a bit for the mock server to start
-sleep 2
-
-# Check if the mock server is running
-if ! kill -0 $MOCK_SERVER_PID 2>/dev/null; then
-    echo_error "Mock server failed to start."
-    exit 1
-fi
-
-echo_success "Mock server started successfully (PID: $MOCK_SERVER_PID)"
-
-# Return to the root directory
-cd ..
-
-# Check if backend dependencies are installed
-echo_info "Checking backend dependencies..."
-if ! command -v $PYTHON_CMD &> /dev/null; then
-    echo_error "Python not found. Please install Python 3.8 or later."
-    exit 1
-fi
-
-# Go to backend directory and set up Python environment
-cd tradewizard/backend
-
-# Check for virtual environment and create if it doesn't exist
-if [ ! -d "venv" ]; then
-    echo_info "Creating Python virtual environment..."
-    $PYTHON_CMD -m venv venv
-    
-    if [ $? -ne 0 ]; then
-        echo_error "Failed to create virtual environment. Please install venv package."
-        exit 1
-    fi
-fi
-
-# Activate virtual environment
-echo_info "Activating virtual environment..."
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    source venv/Scripts/activate
-else
-    source venv/bin/activate
-fi
-
-# Install backend dependencies
-echo_info "Installing backend dependencies..."
-pip install -r requirements.txt
-
-if [ $? -ne 0 ]; then
-    echo_error "Failed to install backend dependencies."
-    exit 1
-fi
-
-# Create user_data directory for scraped data
-echo_info "Creating user_data directory for scraped data..."
-mkdir -p user_data
-
-# Start backend server in the background
-echo_info "Starting backend server..."
-$PYTHON_CMD app.py &
-BACKEND_PID=$!
-
-# Wait a bit for the backend to start
-sleep 2
-
-# Check if the backend is running
-if ! kill -0 $BACKEND_PID 2>/dev/null; then
-    echo_error "Backend failed to start."
-    exit 1
-fi
-
-echo_success "Backend server started successfully (PID: $BACKEND_PID)"
+# Check if backend dependencies are installed (no longer needed as we're using the MCP server)
+# echo_info "Checking backend dependencies..."
+# if ! command -v $PYTHON_CMD &> /dev/null; then
+#     echo_error "Python not found. Please install Python 3.8 or later."
+#     exit 1
+# fi
+# 
+# # Go to backend directory and set up Python environment
+# cd tradewizard/backend
+# 
+# # Check for virtual environment and create if it doesn't exist
+# if [ ! -d "venv" ]; then
+#     echo_info "Creating Python virtual environment..."
+#     $PYTHON_CMD -m venv venv
+#     
+#     if [ $? -ne 0 ]; then
+#         echo_error "Failed to create virtual environment. Please install venv package."
+#         exit 1
+#     fi
+# fi
+# 
+# # Activate virtual environment
+# echo_info "Activating virtual environment..."
+# if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+#     source venv/Scripts/activate
+# else
+#     source venv/bin/activate
+# fi
+# 
+# # Install backend dependencies
+# echo_info "Installing backend dependencies..."
+# pip install -r requirements.txt
+# 
+# if [ $? -ne 0 ]; then
+#     echo_error "Failed to install backend dependencies."
+#     exit 1
+# fi
+# 
+# # Create user_data directory for scraped data
+# echo_info "Creating user_data directory for scraped data..."
+# mkdir -p user_data
+# 
+# # Start backend server in the background
+# echo_info "Starting backend server..."
+# $PYTHON_CMD app.py &
+# BACKEND_PID=$!
+# 
+# # Wait a bit for the backend to start
+# sleep 2
+# 
+# # Check if the backend is running
+# if ! kill -0 $BACKEND_PID 2>/dev/null; then
+#     echo_error "Backend failed to start."
+#     exit 1
+# fi
+# 
+# echo_success "Backend server started successfully (PID: $BACKEND_PID)"
+# 
+# # Switch to frontend directory
+# cd ../frontend
 
 # Switch to frontend directory
-cd ../frontend
+cd tradewizard/frontend
 
 # Check if Node.js is installed
 echo_info "Checking frontend dependencies..."
 if ! command -v $FRONTEND_CMD &> /dev/null; then
     echo_error "Node.js not found. Please install Node.js 14 or later."
     
-    # Kill backend server before exiting
-    kill $BACKEND_PID
+    # Kill MCP server before exiting
+    kill $MCP_SERVER_PID
     exit 1
 fi
 
@@ -347,8 +362,8 @@ if [ ! -d "node_modules" ]; then
     if [ $? -ne 0 ]; then
         echo_error "Failed to install frontend dependencies."
         
-        # Kill backend server before exiting
-        kill $BACKEND_PID
+        # Kill MCP server before exiting
+        kill $MCP_SERVER_PID
         exit 1
     fi
 fi
@@ -365,23 +380,27 @@ sleep 5
 echo_info "Seeding the database..."
 cd ../../mcp-servers/export-guru-mcp
 npm run seed
+
+# Initialize memory subsystem tables
+echo_info "Initializing memory subsystem..."
+export MEMORY_DB_URL="postgresql://seanking@localhost:5432/memory_db"
+npm run init-memory
+
 cd ../../tradewizard/frontend
 
 echo_success "Frontend server started successfully (PID: $FRONTEND_PID)"
 echo_success "TradeWizard is now running!"
 echo_info "Services are available at:"
-echo_info "Backend: http://localhost:5002"
 echo_info "Frontend: http://localhost:3000"
 echo_info "Export-guru-mcp Server: http://localhost:3001"
-echo_info "Mock Server: http://localhost:3002"
 echo_info "Press Ctrl+C to stop all servers"
 
 # Function to handle cleanup on exit
 function cleanup_on_exit() {
     echo_info "Shutting down..."
     
-    # Kill the backend, frontend, mock server, and export-guru-mcp server
-    kill $BACKEND_PID $FRONTEND_PID $MOCK_SERVER_PID $MCP_SERVER_PID 2>/dev/null
+    # Kill the frontend and MCP server
+    kill $FRONTEND_PID $MCP_SERVER_PID 2>/dev/null
     
     # Cleanup any remaining processes on the ports
     cleanup_processes

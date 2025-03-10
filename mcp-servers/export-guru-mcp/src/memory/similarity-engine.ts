@@ -1,436 +1,431 @@
 import { BusinessProfile } from '../types';
 
 /**
- * Similarity calculation method
- */
-export enum SimilarityMethod {
-  JACCARD = 'JACCARD',
-  COSINE = 'COSINE',
-  WEIGHTED = 'WEIGHTED'
-}
-
-/**
- * Similarity calculation options
- */
-export interface SimilarityOptions {
-  method?: SimilarityMethod;
-  weights?: Record<string, number>;
-  threshold?: number;
-  includeFields?: string[];
-  excludeFields?: string[];
-}
-
-/**
- * Similarity result with detailed breakdown
+ * Similarity calculation result
  */
 export interface SimilarityResult {
-  score: number;
-  breakdown: Record<string, number>;
-  method: SimilarityMethod;
-  threshold: number;
-  isMatch: boolean;
+  score: number; // 0-1 score where 1 is perfect match
+  isMatch: boolean; // Whether the score exceeds the match threshold
+  matchDetails?: {
+    // Detailed matching information for each dimension
+    [key: string]: {
+      score: number;
+      weight: number;
+      contribution: number;
+    };
+  };
 }
 
 /**
- * SimilarityEngine calculates similarity between business profiles and other entities
- * to enable pattern matching and recommendation enhancement
+ * Similarity configuration
+ */
+export interface SimilarityConfig {
+  thresholds: {
+    // Default thresholds for different entity types
+    businessProfile: number;
+    exportPattern: number;
+    regulatoryPattern: number;
+  };
+  weights: {
+    // Default weights for different dimensions
+    products: number;
+    targetMarkets: number;
+    certifications: number;
+    size: number;
+    growthStage: number;
+    industry: number;
+    exportExperience: number;
+    [key: string]: number;
+  };
+}
+
+/**
+ * SimilarityEngine provides methods for calculating similarity between various entities
  */
 export class SimilarityEngine {
-  private defaultOptions: SimilarityOptions = {
-    method: SimilarityMethod.WEIGHTED,
-    weights: {
-      products: 0.4,
-      targetMarkets: 0.3,
-      certifications: 0.2,
-      size: 0.1
-    },
-    threshold: 0.7
-  };
+  private config: SimilarityConfig;
   
+  constructor(customConfig?: Partial<SimilarityConfig>) {
+    // Default configuration
+    const defaultConfig: SimilarityConfig = {
+      thresholds: {
+        businessProfile: 0.65,
+        exportPattern: 0.6,
+        regulatoryPattern: 0.55
+      },
+      weights: {
+        products: 3.0, // Highest weight
+        targetMarkets: 2.0,
+        certifications: 1.5,
+        size: 1.0,
+        growthStage: 1.0,
+        industry: 2.0,
+        exportExperience: 1.5
+      }
+    };
+    
+    // Merge default with custom config
+    this.config = {
+      thresholds: { ...defaultConfig.thresholds, ...customConfig?.thresholds },
+      weights: { ...defaultConfig.weights, ...customConfig?.weights }
+    };
+  }
+
   /**
    * Calculate similarity between two business profiles
    */
   calculateBusinessSimilarity(
     profile1: BusinessProfile,
-    profile2: BusinessProfile,
-    options: SimilarityOptions = {}
+    profile2: BusinessProfile
   ): SimilarityResult {
-    // Merge options with defaults
-    const mergedOptions = { ...this.defaultOptions, ...options };
+    const matchDetails: SimilarityResult['matchDetails'] = {};
+    let totalScore = 0;
+    let totalWeight = 0;
     
-    // Select similarity method
-    switch (mergedOptions.method) {
-      case SimilarityMethod.JACCARD:
-        return this.calculateJaccardSimilarity(profile1, profile2, mergedOptions);
-      case SimilarityMethod.COSINE:
-        return this.calculateCosineSimilarity(profile1, profile2, mergedOptions);
-      case SimilarityMethod.WEIGHTED:
-      default:
-        return this.calculateWeightedSimilarity(profile1, profile2, mergedOptions);
+    // Compare products
+    const productMatch = this.compareProducts(
+      profile1.products || [],
+      profile2.products || []
+    );
+    matchDetails.products = {
+      score: productMatch,
+      weight: this.config.weights.products,
+      contribution: productMatch * this.config.weights.products
+    };
+    totalScore += matchDetails.products.contribution;
+    totalWeight += this.config.weights.products;
+    
+    // Compare target markets
+    const marketMatch = this.compareStringArrays(
+      profile1.targetMarkets || [],
+      profile2.targetMarkets || []
+    );
+    matchDetails.targetMarkets = {
+      score: marketMatch,
+      weight: this.config.weights.targetMarkets,
+      contribution: marketMatch * this.config.weights.targetMarkets
+    };
+    totalScore += matchDetails.targetMarkets.contribution;
+    totalWeight += this.config.weights.targetMarkets;
+    
+    // Compare certifications - extract names if they're objects
+    const certs1 = this.extractCertificationNames(profile1.certifications || []);
+    const certs2 = this.extractCertificationNames(profile2.certifications || []);
+    
+    const certMatch = this.compareStringArrays(certs1, certs2);
+    matchDetails.certifications = {
+      score: certMatch,
+      weight: this.config.weights.certifications,
+      contribution: certMatch * this.config.weights.certifications
+    };
+    totalScore += matchDetails.certifications.contribution;
+    totalWeight += this.config.weights.certifications;
+    
+    // Compare size
+    if (typeof profile1.size === 'number' && typeof profile2.size === 'number') {
+      const sizeMatch = this.compareNumericValues(profile1.size, profile2.size);
+      matchDetails.size = {
+        score: sizeMatch,
+        weight: this.config.weights.size,
+        contribution: sizeMatch * this.config.weights.size
+      };
+      totalScore += matchDetails.size.contribution;
+      totalWeight += this.config.weights.size;
     }
+    
+    // Compare industry (if exists in the profiles)
+    if ('industry' in profile1 && 'industry' in profile2 && 
+        typeof profile1.industry === 'string' && typeof profile2.industry === 'string') {
+      const industryMatch = this.compareStrings(profile1.industry, profile2.industry);
+      matchDetails.industry = {
+        score: industryMatch,
+        weight: this.config.weights.industry,
+        contribution: industryMatch * this.config.weights.industry
+      };
+      totalScore += matchDetails.industry.contribution;
+      totalWeight += this.config.weights.industry;
+    }
+    
+    // Calculate normalized score
+    const normalizedScore = totalWeight > 0 ? totalScore / totalWeight : 0;
+    
+    // Determine if this is a match
+    const isMatch = normalizedScore >= this.config.thresholds.businessProfile;
+    
+    return {
+      score: normalizedScore,
+      isMatch,
+      matchDetails
+    };
   }
   
   /**
    * Calculate similarity between a business profile and a pattern
    */
   calculatePatternSimilarity(
-    profile: BusinessProfile,
-    pattern: any,
-    options: SimilarityOptions = {}
+    businessProfile: BusinessProfile,
+    pattern: any
   ): SimilarityResult {
-    // Merge options with defaults
-    const mergedOptions = { ...this.defaultOptions, ...options };
-    
-    // Extract pattern criteria for comparison
-    const patternCriteria = this.extractPatternCriteria(pattern);
-    
-    // Calculate similarity based on pattern criteria
-    return this.calculateWeightedSimilarity(profile, patternCriteria, mergedOptions);
-  }
-  
-  /**
-   * Calculate weighted similarity between two objects
-   */
-  private calculateWeightedSimilarity(
-    obj1: any,
-    obj2: any,
-    options: SimilarityOptions
-  ): SimilarityResult {
-    const weights = options.weights || {};
-    const breakdown: Record<string, number> = {};
+    const matchDetails: SimilarityResult['matchDetails'] = {};
+    let totalScore = 0;
     let totalWeight = 0;
-    let weightedSum = 0;
     
-    // Calculate similarity for each field with a weight
-    for (const field in weights) {
-      // Skip if field should be excluded
-      if (options.excludeFields && options.excludeFields.includes(field)) {
-        continue;
-      }
-      
-      // Skip if includeFields is specified and field is not included
-      if (options.includeFields && !options.includeFields.includes(field)) {
-        continue;
-      }
-      
-      const weight = weights[field];
-      totalWeight += weight;
-      
-      // Calculate field similarity
-      const fieldSimilarity = this.calculateFieldSimilarity(obj1[field], obj2[field]);
-      breakdown[field] = fieldSimilarity;
-      
-      // Add to weighted sum
-      weightedSum += fieldSimilarity * weight;
-    }
-    
-    // Calculate final score
-    const score = totalWeight > 0 ? weightedSum / totalWeight : 0;
-    
-    return {
-      score,
-      breakdown,
-      method: SimilarityMethod.WEIGHTED,
-      threshold: options.threshold || 0.7,
-      isMatch: score >= (options.threshold || 0.7)
+    // Compare products to pattern product categories
+    const productMatch = this.compareProductsToCategories(
+      businessProfile.products || [],
+      pattern.productCategories || []
+    );
+    matchDetails.products = {
+      score: productMatch,
+      weight: this.config.weights.products,
+      contribution: productMatch * this.config.weights.products
     };
-  }
-  
-  /**
-   * Calculate Jaccard similarity between two objects
-   */
-  private calculateJaccardSimilarity(
-    obj1: any,
-    obj2: any,
-    options: SimilarityOptions
-  ): SimilarityResult {
-    const breakdown: Record<string, number> = {};
-    let totalFields = 0;
-    let totalSimilarity = 0;
+    totalScore += matchDetails.products.contribution;
+    totalWeight += this.config.weights.products;
     
-    // Get all fields from both objects
-    const allFields = new Set([
-      ...Object.keys(obj1),
-      ...Object.keys(obj2)
-    ]);
-    
-    // Calculate similarity for each field
-    for (const field of allFields) {
-      // Skip if field should be excluded
-      if (options.excludeFields && options.excludeFields.includes(field)) {
-        continue;
-      }
-      
-      // Skip if includeFields is specified and field is not included
-      if (options.includeFields && !options.includeFields.includes(field)) {
-        continue;
-      }
-      
-      // Calculate field similarity using Jaccard index for arrays
-      const fieldSimilarity = this.calculateJaccardIndex(obj1[field], obj2[field]);
-      breakdown[field] = fieldSimilarity;
-      
-      totalSimilarity += fieldSimilarity;
-      totalFields++;
-    }
-    
-    // Calculate final score
-    const score = totalFields > 0 ? totalSimilarity / totalFields : 0;
-    
-    return {
-      score,
-      breakdown,
-      method: SimilarityMethod.JACCARD,
-      threshold: options.threshold || 0.7,
-      isMatch: score >= (options.threshold || 0.7)
+    // Compare target markets to applicable markets
+    const marketMatch = this.compareStringArrays(
+      businessProfile.targetMarkets || [],
+      pattern.applicableMarkets || []
+    );
+    matchDetails.markets = {
+      score: marketMatch,
+      weight: this.config.weights.targetMarkets,
+      contribution: marketMatch * this.config.weights.targetMarkets
     };
-  }
-  
-  /**
-   * Calculate Cosine similarity between two objects
-   */
-  private calculateCosineSimilarity(
-    obj1: any,
-    obj2: any,
-    options: SimilarityOptions
-  ): SimilarityResult {
-    // This is a simplified implementation
-    // A real implementation would convert objects to vectors and calculate cosine similarity
+    totalScore += matchDetails.markets.contribution;
+    totalWeight += this.config.weights.targetMarkets;
     
-    const breakdown: Record<string, number> = {};
-    let dotProduct = 0;
-    let magnitude1 = 0;
-    let magnitude2 = 0;
-    
-    // Get all fields from both objects
-    const allFields = new Set([
-      ...Object.keys(obj1),
-      ...Object.keys(obj2)
-    ]);
-    
-    // Calculate dot product and magnitudes
-    for (const field of allFields) {
-      // Skip if field should be excluded
-      if (options.excludeFields && options.excludeFields.includes(field)) {
-        continue;
-      }
-      
-      // Skip if includeFields is specified and field is not included
-      if (options.includeFields && !options.includeFields.includes(field)) {
-        continue;
-      }
-      
-      // Get field values
-      const value1 = this.getFieldVector(obj1[field]);
-      const value2 = this.getFieldVector(obj2[field]);
-      
-      // Calculate field similarity
-      const fieldSimilarity = this.calculateFieldSimilarity(obj1[field], obj2[field]);
-      breakdown[field] = fieldSimilarity;
-      
-      // Update dot product and magnitudes
-      dotProduct += value1 * value2;
-      magnitude1 += value1 * value1;
-      magnitude2 += value2 * value2;
-    }
-    
-    // Calculate final score
-    const score = (magnitude1 > 0 && magnitude2 > 0)
-      ? dotProduct / (Math.sqrt(magnitude1) * Math.sqrt(magnitude2))
-      : 0;
-    
-    return {
-      score,
-      breakdown,
-      method: SimilarityMethod.COSINE,
-      threshold: options.threshold || 0.7,
-      isMatch: score >= (options.threshold || 0.7)
-    };
-  }
-  
-  /**
-   * Calculate similarity between two field values
-   */
-  private calculateFieldSimilarity(value1: any, value2: any): number {
-    // Handle undefined or null values
-    if (value1 === undefined || value1 === null || value2 === undefined || value2 === null) {
-      return 0;
-    }
-    
-    // Handle arrays
-    if (Array.isArray(value1) && Array.isArray(value2)) {
-      return this.calculateJaccardIndex(value1, value2);
-    }
-    
-    // Handle objects
-    if (typeof value1 === 'object' && typeof value2 === 'object') {
-      // Recursively calculate similarity for nested objects
-      const nestedSimilarity = this.calculateWeightedSimilarity(
-        value1,
-        value2,
-        { method: SimilarityMethod.WEIGHTED }
+    // Compare business size to size range if applicable
+    if (typeof businessProfile.size === 'number' && pattern.businessSizeRange) {
+      const sizeMatch = this.compareSizeToRange(
+        businessProfile.size,
+        pattern.businessSizeRange
       );
-      return nestedSimilarity.score;
+      matchDetails.size = {
+        score: sizeMatch,
+        weight: this.config.weights.size,
+        contribution: sizeMatch * this.config.weights.size
+      };
+      totalScore += matchDetails.size.contribution;
+      totalWeight += this.config.weights.size;
     }
     
-    // Handle strings
-    if (typeof value1 === 'string' && typeof value2 === 'string') {
-      return this.calculateStringSimilarity(value1, value2);
+    // Compare certifications if applicable
+    if (businessProfile.certifications && pattern.relevantCertifications) {
+      const certifications = this.extractCertificationNames(businessProfile.certifications);
+      const certMatch = this.compareStringArrays(
+        certifications,
+        pattern.relevantCertifications
+      );
+      matchDetails.certifications = {
+        score: certMatch,
+        weight: this.config.weights.certifications,
+        contribution: certMatch * this.config.weights.certifications
+      };
+      totalScore += matchDetails.certifications.contribution;
+      totalWeight += this.config.weights.certifications;
     }
     
-    // Handle numbers
-    if (typeof value1 === 'number' && typeof value2 === 'number') {
-      // Normalize the difference between 0 and 1
-      const max = Math.max(Math.abs(value1), Math.abs(value2));
-      if (max === 0) return 1; // Both values are 0
-      return 1 - Math.abs(value1 - value2) / max;
+    // Calculate normalized score
+    const normalizedScore = totalWeight > 0 ? totalScore / totalWeight : 0;
+    
+    // Determine threshold based on pattern type
+    let threshold = this.config.thresholds.exportPattern;
+    if (pattern.type && pattern.type.startsWith('REGULATORY')) {
+      threshold = this.config.thresholds.regulatoryPattern;
     }
     
-    // Handle booleans
-    if (typeof value1 === 'boolean' && typeof value2 === 'boolean') {
-      return value1 === value2 ? 1 : 0;
-    }
+    // Determine if this is a match
+    const isMatch = normalizedScore >= threshold;
     
-    // Default: not comparable
-    return 0;
+    return {
+      score: normalizedScore,
+      isMatch,
+      matchDetails
+    };
   }
   
   /**
-   * Calculate Jaccard index for two arrays
+   * Extract certification names from certification objects or strings
    */
-  private calculateJaccardIndex(array1: any[], array2: any[]): number {
-    if (!Array.isArray(array1) || !Array.isArray(array2)) {
-      return 0;
-    }
+  private extractCertificationNames(certifications: any[]): string[] {
+    return certifications.map(cert => {
+      if (typeof cert === 'string') {
+        return cert;
+      } else if (typeof cert === 'object' && cert !== null) {
+        return cert.name || '';
+      }
+      return '';
+    }).filter(name => name !== '');
+  }
+  
+  /**
+   * Compare products from two business profiles
+   * This handles the complex comparison of product objects
+   */
+  private compareProducts(products1: any[], products2: any[]): number {
+    if (!products1.length || !products2.length) return 0;
     
-    if (array1.length === 0 && array2.length === 0) {
-      return 1; // Both arrays are empty
-    }
+    // Extract categories for comparison
+    const categories1 = products1.map(p => 
+      typeof p === 'string' ? p : (p.category || p.name || '')
+    );
     
-    // Convert arrays to sets of strings for comparison
-    const set1 = new Set(array1.map(item => JSON.stringify(item)));
-    const set2 = new Set(array2.map(item => JSON.stringify(item)));
+    const categories2 = products2.map(p => 
+      typeof p === 'string' ? p : (p.category || p.name || '')
+    );
     
-    // Calculate intersection size
-    let intersectionSize = 0;
-    for (const item of set1) {
-      if (set2.has(item)) {
-        intersectionSize++;
+    // Compare the category arrays
+    return this.compareStringArrays(categories1, categories2);
+  }
+  
+  /**
+   * Compare products to category strings
+   * Handles the case where products are objects but categories are strings
+   */
+  private compareProductsToCategories(products: any[], categories: string[]): number {
+    if (!products.length || !categories.length) return 0;
+    
+    // Extract categories from products
+    const productCategories = products.map(p => 
+      typeof p === 'string' ? p : (p.category || p.name || '')
+    );
+    
+    // Compare arrays with semantic similarity
+    return this.compareStringArrays(productCategories, categories);
+  }
+  
+  /**
+   * Compare two string arrays using Jaccard similarity with semantic matching
+   */
+  private compareStringArrays(array1: string[], array2: string[]): number {
+    if (!array1.length || !array2.length) return 0;
+    
+    // Count exact and semantic matches
+    let exactMatches = 0;
+    let semanticMatches = 0;
+    
+    for (const item1 of array1) {
+      // Check for exact match
+      if (array2.some(item2 => this.normalizeString(item1) === this.normalizeString(item2))) {
+        exactMatches++;
+      } 
+      // Check for semantic match (if not exact match)
+      else if (array2.some(item2 => this.calculateSemanticSimilarity(item1, item2) > 0.8)) {
+        semanticMatches++;
       }
     }
     
-    // Calculate union size
-    const unionSize = set1.size + set2.size - intersectionSize;
-    
-    // Calculate Jaccard index
-    return unionSize > 0 ? intersectionSize / unionSize : 0;
+    // Calculate Jaccard similarity with weighted semantic matches
+    const effectiveMatches = exactMatches + (semanticMatches * 0.7);
+    return effectiveMatches / (array1.length + array2.length - effectiveMatches);
   }
   
   /**
-   * Calculate similarity between two strings
+   * Compare a size value to a size range
    */
-  private calculateStringSimilarity(str1: string, str2: string): number {
-    // Simple case: exact match
-    if (str1 === str2) {
+  private compareSizeToRange(
+    size: number,
+    range: { min?: number; max?: number }
+  ): number {
+    // If size is in range, perfect score
+    if ((range.min === undefined || size >= range.min) && 
+        (range.max === undefined || size <= range.max)) {
       return 1;
     }
     
-    // Convert to lowercase for case-insensitive comparison
-    const s1 = str1.toLowerCase();
-    const s2 = str2.toLowerCase();
-    
-    // Check if one string contains the other
-    if (s1.includes(s2)) {
-      return s2.length / s1.length;
-    }
-    if (s2.includes(s1)) {
-      return s1.length / s2.length;
+    // Calculate distance from range
+    let distance = 0;
+    if (range.min !== undefined && size < range.min) {
+      distance = range.min - size;
+    } else if (range.max !== undefined && size > range.max) {
+      distance = size - range.max;
     }
     
-    // Calculate Levenshtein distance
-    const distance = this.levenshteinDistance(s1, s2);
-    const maxLength = Math.max(s1.length, s2.length);
+    // Convert distance to similarity score (inverse relationship)
+    const rangeWidth = (range.max !== undefined && range.min !== undefined) 
+      ? (range.max - range.min)
+      : 100; // Default width if not specified
     
-    // Convert distance to similarity score
-    return maxLength > 0 ? 1 - distance / maxLength : 0;
+    const normalizedDistance = distance / rangeWidth;
+    
+    // Use a sigmoid-like function to map distance to 0-1 range
+    return 1 / (1 + 3 * normalizedDistance);
   }
   
   /**
-   * Calculate Levenshtein distance between two strings
+   * Compare two numeric values
    */
-  private levenshteinDistance(str1: string, str2: string): number {
-    const m = str1.length;
-    const n = str2.length;
+  private compareNumericValues(value1: number, value2: number): number {
+    if (value1 === value2) return 1;
     
-    // Create distance matrix
-    const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+    // Calculate relative difference
+    const maxValue = Math.max(Math.abs(value1), Math.abs(value2));
+    if (maxValue === 0) return 1; // Both values are 0
     
-    // Initialize first row and column
-    for (let i = 0; i <= m; i++) {
-      dp[i][0] = i;
-    }
-    for (let j = 0; j <= n; j++) {
-      dp[0][j] = j;
-    }
+    const absoluteDifference = Math.abs(value1 - value2);
+    const relativeDifference = absoluteDifference / maxValue;
     
-    // Fill the matrix
-    for (let i = 1; i <= m; i++) {
-      for (let j = 1; j <= n; j++) {
-        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-        dp[i][j] = Math.min(
-          dp[i - 1][j] + 1,      // Deletion
-          dp[i][j - 1] + 1,      // Insertion
-          dp[i - 1][j - 1] + cost // Substitution
-        );
+    // Convert to similarity score (1 is perfect match, 0 is completely different)
+    return 1 - Math.min(relativeDifference, 1);
+  }
+  
+  /**
+   * Compare two strings with basic semantic similarity
+   */
+  private compareStrings(str1: string, str2: string): number {
+    // Normalize strings
+    const normalizedStr1 = this.normalizeString(str1);
+    const normalizedStr2 = this.normalizeString(str2);
+    
+    // If strings are identical after normalization, perfect match
+    if (normalizedStr1 === normalizedStr2) return 1;
+    
+    // Calculate semantic similarity
+    return this.calculateSemanticSimilarity(normalizedStr1, normalizedStr2);
+  }
+  
+  /**
+   * Calculate semantic similarity between two strings
+   * This is a simplified implementation that could be enhanced with word embeddings
+   */
+  private calculateSemanticSimilarity(str1: string, str2: string): number {
+    // Normalize strings
+    const normalizedStr1 = this.normalizeString(str1);
+    const normalizedStr2 = this.normalizeString(str2);
+    
+    // If strings are identical after normalization, perfect match
+    if (normalizedStr1 === normalizedStr2) return 1;
+    
+    // Word-level comparison (Jaccard similarity of words)
+    const words1 = normalizedStr1.split(/\s+/);
+    const words2 = normalizedStr2.split(/\s+/);
+    
+    let matches = 0;
+    for (const word1 of words1) {
+      if (words2.includes(word1)) {
+        matches++;
       }
     }
     
-    // Return the distance
-    return dp[m][n];
+    const union = words1.length + words2.length - matches;
+    if (union === 0) return 0;
+    
+    // Calculate Jaccard similarity of words
+    return matches / union;
   }
   
   /**
-   * Convert a field value to a vector representation for cosine similarity
+   * Normalize a string for comparison
    */
-  private getFieldVector(value: any): number {
-    if (value === undefined || value === null) {
-      return 0;
-    }
+  private normalizeString(str: string): string {
+    if (!str) return '';
     
-    if (Array.isArray(value)) {
-      return value.length;
-    }
-    
-    if (typeof value === 'object') {
-      return Object.keys(value).length;
-    }
-    
-    if (typeof value === 'string') {
-      return value.length;
-    }
-    
-    if (typeof value === 'number') {
-      return value;
-    }
-    
-    if (typeof value === 'boolean') {
-      return value ? 1 : 0;
-    }
-    
-    return 0;
-  }
-  
-  /**
-   * Extract pattern criteria from a pattern for comparison
-   */
-  private extractPatternCriteria(pattern: any): any {
-    // Implementation depends on pattern structure
-    // This is a placeholder for the actual implementation
-    return {
-      products: pattern.productCategories || [],
-      targetMarkets: pattern.applicableMarkets || [],
-      certifications: pattern.relevantCertifications || [],
-      size: pattern.businessSizeRange || {}
-    };
+    return str
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Remove punctuation
+      .replace(/\s+/g, ' ')    // Normalize whitespace
+      .trim();
   }
 } 

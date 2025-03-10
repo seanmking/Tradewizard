@@ -11,7 +11,7 @@ import { handleApiError } from '../utils/error-handler';
 // Export a centralized API configuration
 export const API_ENDPOINTS = {
   // Backend API
-  BACKEND_BASE: process.env.REACT_APP_API_URL || 'http://localhost:5002',
+  BACKEND_BASE: process.env.REACT_APP_API_URL || 'http://localhost:3001',
   
   // Analysis API endpoints
   MARKET_POTENTIAL: '/api/market/potential',

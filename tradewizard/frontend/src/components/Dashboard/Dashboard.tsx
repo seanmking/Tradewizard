@@ -467,9 +467,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3, delay = 1000) => {
     let retries = 0;
     
+    // Ensure we're using the full URL for the MCP server
+    const fullUrl = url.startsWith('http') ? url : `http://localhost:3001${url}`;
+    
     while (retries < maxRetries) {
       try {
-        const response = await fetch(url, options);
+        const response = await fetch(fullUrl, options);
         
         if (response.ok) {
           return await response.json();

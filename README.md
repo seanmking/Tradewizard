@@ -1,147 +1,107 @@
-# TradeWizard Export Assessment
+# TradeWizard AI Agent
 
-TradeWizard is a conversational platform designed to help South African businesses assess their readiness for exporting products to international markets. It provides personalized guidance and actionable insights to help businesses navigate the complexities of international trade.
+TradeWizard is an AI-powered export partner for SMEs, designed to provide proactive guidance and support throughout the export journey. This repository contains the implementation of the AI Agent layer, which is responsible for maintaining context, processing events, and generating personalized recommendations.
 
-## Key Features
+## Architecture
 
-- Conversational assessment interface with natural language processing
-- Intelligent extraction of business information
-- Stage-based assessment flow covering key export readiness areas
-- Progress tracking and reporting
-- Personalized guidance and recommendations
+The AI Agent layer is built with a modular architecture, consisting of several key components:
 
-## Project Structure
+### Core Components
 
-The project is organized into backend and frontend components:
+- **Agent Core**: The central component that coordinates all subsystems and handles requests.
+- **Event System**: Enables event-driven architecture, allowing the agent to respond to changes in the environment.
+- **State Manager**: Maintains persistent business context across interactions.
+- **Notification Service**: Manages communication with users through various channels.
 
+### Notification Senders
+
+- **Email Sender**: Sends email notifications to users.
+- **SMS Sender**: Sends SMS notifications to users.
+- **In-App Sender**: Delivers notifications to the user's in-app notification center.
+
+### Database
+
+The AI Agent uses a database to store business states, events, notifications, and other data. The implementation includes:
+
+- **Database Connection**: A mock database implementation for demonstration purposes.
+- **Database Setup**: Sets up the necessary indexes for optimal performance.
+
+## State Management
+
+The AI Agent maintains a comprehensive state for each business, including:
+
+- **Business Profile**: Basic information about the business, such as name, industry, and products.
+- **Export Journey**: Information about the business's export journey, including target markets and completed steps.
+- **User Preferences**: User preferences for notifications and agent autonomy.
+- **Business Metrics**: Metrics related to export readiness and compliance.
+- **History**: Record of interactions, significant events, and state changes.
+- **Temporal Triggers**: Time-based triggers for certifications, regulatory deadlines, and market events.
+
+## Event System
+
+The Event System enables the agent to respond to changes in the environment and trigger appropriate behaviors. Events are categorized into:
+
+- **Business Events**: Events related to business profile updates, assessment completion, etc.
+- **Regulatory Events**: Events related to regulatory changes, certification expiration, etc.
+- **Market Events**: Events related to market opportunities, tariff changes, etc.
+- **Agent Events**: Events related to agent insights, autonomous actions, etc.
+- **Notification Events**: Events related to notification creation, reading, and actions.
+
+## Notification System
+
+The Notification System manages communication with users through various channels:
+
+- **In-App Notifications**: Delivered to the user's in-app notification center.
+- **Email Notifications**: Sent to the user's email address.
+- **SMS Notifications**: Sent to the user's phone number.
+
+Notifications can have different priorities and can include actions that the user can take.
+
+## Usage
+
+To use the AI Agent, you need to:
+
+1. Initialize the database
+2. Initialize the agent
+3. Send requests to the agent
+
+Example:
+
+```typescript
+// Initialize the database
+const db = new Database();
+await db.connect();
+
+// Initialize the agent
+const agent = new Agent(db);
+await agent.initialize();
+
+// Send a request to the agent
+const response = await agent.handleRequest({
+  businessId: 'business-123',
+  type: 'GET_RECOMMENDATIONS',
+  data: {}
+});
+
+console.log(response.data.recommendations);
 ```
-TradeWizard/
-├── archive/                  # Previous implementation (for reference)
-│   └── old_version/
-├── tradewizard/                      # Current implementation
-│   ├── backend/              # Python Flask API
-│   │   ├── app.py            # Main Flask application
-│   │   ├── requirements.txt  # Python dependencies
-│   │   ├── services/         # Core services
-│   │   └── mock_data/        # Mock data for testing
-│   └── frontend/             # React frontend
-│       └── src/              # React source code
-└── start.sh                  # Start script
-```
 
-## Getting Started
+See `src/examples/agent-usage.ts` for a complete example.
+
+## Development
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- Node.js 14 or higher
-- npm or yarn
+- Node.js 14+
+- TypeScript 4.5+
 
-### Running the Application
+### Setup
 
-The easiest way to run the application is using the start script:
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Build the project: `npm run build`
+4. Run the example: `npm run example`
 
-```bash
-# Make the script executable (Unix-like systems)
-chmod +x start.sh
+## License
 
-# Run the application
-./start.sh
-```
-
-This script will:
-1. Set up the Python virtual environment
-2. Install backend dependencies
-3. Start the Flask backend server
-4. Install frontend dependencies (if needed)
-5. Start the React development server
-
-### Manual Setup
-
-If you prefer to set up the application manually:
-
-#### Backend Setup
-
-```bash
-# Navigate to the backend directory
-cd tradewizard/backend
-
-# Create a virtual environment
-python -m venv venv
-
-# Activate the virtual environment
-# Windows
-venv\Scripts\activate
-# Unix/MacOS
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the backend
-python app.py
-```
-
-#### Frontend Setup
-
-```bash
-# Navigate to the frontend directory
-cd tradewizard/frontend
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm start
-```
-
-## API Endpoints
-
-The backend provides the following API endpoints:
-
-- `POST /api/chat/start` - Start a new chat session
-- `POST /api/chat/message` - Send a message in a chat session
-- `GET /api/chat/history/{chat_id}` - Get the history of a chat session
-- `GET /api/health` - Health check endpoint 
-
-## Development and Showcase Workflows
-
-TradeWizard uses Git branches to maintain a stable showcase version alongside ongoing development.
-
-### Showcase Version (for investor presentations)
-
-We maintain a dedicated `showcase` branch for investor presentations that is always in a stable, demo-ready state.
-
-To quickly switch to the showcase version:
-
-```bash
-# Switch to showcase mode and build the application
-./showcase.sh
-```
-
-This will:
-1. Switch to the `showcase` branch
-2. Build the frontend application
-3. Prepare the system for demonstration
-
-### Development Workflow
-
-Development work happens on the `main` branch. To switch back to development mode:
-
-```bash
-# Switch to development mode
-./development.sh
-```
-
-### Managing the Showcase Version
-
-When you have a stable version ready for demonstrations:
-
-1. Test thoroughly on the `main` branch
-2. Run: `git checkout showcase`
-3. Run: `git merge main`
-4. Test the merged version
-5. Commit: `git commit -am "Update showcase with latest stable features"`
-6. Return to development: `git checkout main`
-
-This workflow ensures you always have a stable version ready for investor presentations while allowing ongoing development.
+This project is licensed under the MIT License - see the LICENSE file for details.

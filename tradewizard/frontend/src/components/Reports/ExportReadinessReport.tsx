@@ -118,47 +118,57 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
       certifications: string[],
       businessDetails: any
     ) => {
-      // Call the MCP server endpoint
-      const response = await fetch('/api/mcp/tools', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tool: 'generateExportReadinessReport',
-          params: {
-            businessName,
-            productCategories,
-            targetMarkets: [targetMarket],
-            certifications,
-            businessDetails
+      try {
+        // Call the MCP server endpoint with the full URL to our MCP server
+        const response = await fetch('http://localhost:3001/api/mcp/tools', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tool: 'generateExportReadinessReport',
+            params: {
+              businessName,
+              productCategories,
+              targetMarkets: [targetMarket],
+              certifications,
+              businessDetails
+            }
+          }),
+        });
+        
+        if (!response.ok) {
+          // Handle different HTTP error codes
+          if (response.status === 401 || response.status === 403) {
+            throw new Error('Authentication error. Please log in again.');
+          } else if (response.status === 404) {
+            throw new Error('Export readiness data not found for the selected market.');
+          } else if (response.status === 429) {
+            throw new Error('Too many requests. Please try again later.');
+          } else if (response.status >= 500) {
+            throw new Error('Server error. Please try again later.');
+          } else {
+            throw new Error(`Failed to fetch export readiness report: ${response.statusText}`);
           }
-        }),
-      });
-      
-      if (!response.ok) {
-        // Handle different HTTP error codes
-        if (response.status === 401 || response.status === 403) {
-          throw new Error('Authentication error. Please log in again.');
-        } else if (response.status === 404) {
-          throw new Error('Export readiness data not found for the selected market.');
-        } else if (response.status === 429) {
-          throw new Error('Too many requests. Please try again later.');
-        } else if (response.status >= 500) {
-          throw new Error('Server error. Please try again later.');
+        }
+        
+        const data = await response.json();
+        
+        // Check if the response contains an error
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        return data;
+      } catch (err) {
+        console.error('Error loading report data:', err);
+        
+        if (err instanceof Error) {
+          setError(err.message);
         } else {
-          throw new Error(`Failed to fetch export readiness report: ${response.statusText}`);
+          setError('Failed to load export readiness report. Please try again later.');
         }
       }
-      
-      const data = await response.json();
-      
-      // Check if the response contains an error
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      return data;
     },
     (businessName, productCategories, targetMarket, certifications, businessDetails) => 
       `export_readiness_${businessName}_${targetMarket}_${productCategories.join('_')}`,
@@ -260,7 +270,11 @@ const ExportReadinessReport: React.FC<ExportReadinessReportProps> = ({
   useEffect(() => {
     // Reload report data when selected market changes
     if (selectedMarket) {
-      loadReportData();
+      // Add error handling to prevent infinite loops
+      loadReportData().catch(err => {
+        console.error('Failed to load report data:', err);
+        // Don't retry automatically to prevent infinite loops
+      });
     }
   }, [selectedMarket, loadReportData]);
   

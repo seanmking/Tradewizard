@@ -420,43 +420,30 @@ const MarketIntelligenceDashboard: React.FC<MarketIntelligenceDashboardProps> = 
   // Create a cached version of the fetch function
   const fetchMarketIntelligenceWithCache = withCache(
     async (market: string, productCategories: string[]) => {
-      const response = await fetch('/api/mcp/tools', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tool: 'getMarketIntelligence',
-          params: {
-            market,
-            productCategories
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        // Handle different HTTP error codes
-        if (response.status === 401 || response.status === 403) {
-          throw new Error('Authentication error. Please log in again.');
-        } else if (response.status === 404) {
-          throw new Error('Market intelligence data not found for the selected market.');
-        } else if (response.status === 429) {
-          throw new Error('Too many requests. Please try again later.');
-        } else if (response.status >= 500) {
-          throw new Error('Server error. Please try again later.');
-        } else {
+      try {
+        const response = await fetch('http://localhost:3001/api/mcp/tools', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tool: 'getMarketIntelligence',
+            params: {
+              market,
+              productCategories
+            }
+          }),
+        });
+        
+        if (!response.ok) {
           throw new Error(`Failed to fetch market intelligence: ${response.statusText}`);
         }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching market intelligence:', error);
+        throw error; // Re-throw to be caught by the caller
       }
-
-      const data = await response.json();
-      
-      // Check if the response contains an error
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      return data;
     },
     (market, productCategories) => `market_intelligence_${market}_${productCategories.join('_')}`,
     { ttl: 1800000 } // 30 minutes cache (in milliseconds)
