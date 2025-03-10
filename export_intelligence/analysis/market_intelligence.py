@@ -14,25 +14,28 @@ logger = logging.getLogger(__name__)
 
 def load_market_intelligence_data():
     """
-    Load market intelligence data from data files.
+    Load market intelligence data from the MCP server.
     
     Returns:
         Dictionary containing structured market intelligence data
     """
     try:
-        # In a real implementation, this would load from a database
-        # For now, use a static file
-        data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
-                                "mock-data", "market_intelligence", "market_data.json")
+        from ..core.mcp_client import MCPClient
         
-        logger.info(f"Loading market intelligence data from {data_path}")
+        # Initialize MCP client
+        mcp_client = MCPClient()
         
-        with open(data_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        # Get market intelligence data from MCP server
+        # This now uses the AI Agent's MCPClient under the hood
+        market_data = mcp_client.get_market_intelligence()
+        
+        # If the response has a data field, extract it
+        if isinstance(market_data, dict) and 'data' in market_data:
+            market_data = market_data['data']
             
-        return data['market_intelligence']
+        return market_data
     except Exception as e:
-        logger.error(f"Error loading market intelligence data: {e}")
+        logger.error(f"Error loading market intelligence data from MCP: {e}")
         # Fallback to minimal structure
         return {
             "markets": {},
